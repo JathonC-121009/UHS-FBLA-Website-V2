@@ -1,0 +1,32 @@
+/* ============================================================================
+   OFFICERS PAGE STYLES — this file owns the look of "/officers" and nothing
+   else. Every rule is scoped under `.route-officers` (set on <body> by
+   Layout), so nothing here leaks to other pages, and you can restyle the
+   shared navbar/footer/hero for this page only:
+       .route-officers nav { background: #000; }
+       .route-officers { --hero-bg: #000; }
+   ========================================================================= */
+
+/* Page-level variable overrides (see src/index.css for the full list) */
+.route-officers {
+  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+}
+
+.route-officers .officers-section { background: var(--white); padding: 4rem 2rem; }
+.route-officers .officers-wrap { max-width: 1080px; margin: 0 auto; }
+.route-officers .officers-intro { margin-bottom: 2.5rem; }
+.route-officers .advisor-block { margin-top: 3rem; }
+.route-officers .advisor-wrap { max-width: 200px; }
+.route-officers .officers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.5rem; }
+.route-officers .officer-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; text-align: center; transition: transform .22s, box-shadow .22s; }
+.route-officers .officer-card:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(10, 46, 127, .12); border-color: var(--cobalt); }
+.route-officers .officer-photo { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--navy), var(--blue)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: rgba(255, 255, 255, .15); overflow: hidden; }
+.route-officers .officer-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.route-officers .officer-info { padding: 1rem .85rem 1.1rem; }
+.route-officers .officer-role { font-size: .68rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--cobalt); background: rgba(34, 106, 221, .1); display: inline-block; padding: .2rem .6rem; border-radius: 4px; }
+.route-officers .officer-name { font-weight: 700; font-size: 1rem; color: var(--navy); margin-top: .4rem; }
+.route-officers .officer-grade { font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+
+/* Advisor gold variant */
+.route-officers .officer-card.advisor .officer-photo { background: linear-gradient(135deg, #7a5a00, var(--gold)); }
+.route-officers .officer-card.advisor .officer-role { color: #7a5a00; background: rgba(244, 171, 25, .15); }

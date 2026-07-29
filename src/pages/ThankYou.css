@@ -1,0 +1,22 @@
+/* ============================================================================
+   THANK YOU PAGE STYLES — this file owns the look of "/thank-you" and nothing
+   else. Every rule is scoped under `.route-thank-you` (set on <body> by
+   Layout), so nothing here leaks to other pages, and you can restyle the
+   shared navbar/footer for this page only:
+       .route-thank-you nav { background: #000; }
+   ========================================================================= */
+
+/* Page-level variable overrides (see src/index.css for the full list) */
+.route-thank-you {
+  /* --body-bg: var(--off-white); */
+}
+
+.route-thank-you .thankyou-section { min-height: 70vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4rem 2rem; }
+.route-thank-you .thankyou-box { max-width: 520px; }
+.route-thank-you .thankyou-box .checkmark { font-size: 3.5rem; margin-bottom: 1.25rem; }
+.route-thank-you .thankyou-box .label { font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--cobalt); margin-bottom: .5rem; }
+.route-thank-you .thankyou-box h1 { font-weight: 700; font-size: 2.2rem; color: var(--navy); margin-bottom: .75rem; }
+.route-thank-you .thankyou-box .divider { width: 48px; height: 4px; background: var(--gold); border-radius: 2px; margin: .75rem auto 1.5rem; }
+.route-thank-you .thankyou-box p { color: var(--muted); font-size: .97rem; line-height: 1.7; margin-bottom: 2rem; }
+.route-thank-you .thankyou-box .btn { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.route-thank-you .thankyou-box .btn:hover { background: var(--blue); transform: translateY(-2px); }

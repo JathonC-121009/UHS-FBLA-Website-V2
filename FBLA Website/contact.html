@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urbana FBLA — Contact</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#0a2e7f;--blue:#1d52bc;--gold:#f4ab19;--cobalt:#226add;--white:#ffffff;--black:#2d2b2b;--off-white:#f7f8fc;--border:#dde3f0;--muted:#5a6485;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',Arial,sans-serif;color:var(--black);background:var(--off-white);font-size:16px;line-height:1.6;}
+    nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:3px solid var(--gold);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:66px;box-shadow:0 2px 16px rgba(10,46,127,.18);}
+    .nav-logo{display:flex;align-items:center;text-decoration:none;}
+    .nav-logo-text{font-weight:700;font-size:1.15rem;color:var(--white);line-height:1.2;}
+    .nav-logo-text span{display:block;font-size:.7rem;font-weight:500;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;}
+    .nav-links{display:flex;gap:.1rem;list-style:none;}
+    .nav-links a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:.82rem;font-weight:500;padding:.45rem .9rem;border-radius:6px;letter-spacing:.06em;text-transform:uppercase;transition:color .18s,background .18s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--gold);background:rgba(244,171,25,.1);}
+    .nav-links a.active{border-bottom:2px solid var(--gold);border-radius:6px 6px 0 0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:.5rem;flex-direction:column;gap:5px;}
+    .menu-btn span{display:block;width:24px;height:2px;background:var(--white);border-radius:2px;}
+    @media(max-width:720px){.menu-btn{display:flex;}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;background:var(--navy);flex-direction:column;padding:.75rem 1rem 1rem;border-bottom:3px solid var(--gold);}.nav-links.open{display:flex;}.nav-links a{font-size:.9rem;padding:.65rem 1rem;}}
+    footer{background:var(--navy);border-top:3px solid var(--gold);color:rgba(255,255,255,.55);text-align:center;padding:2rem;font-size:.82rem;}
+    footer strong{color:var(--gold);}
+    .fi{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;}
+    .fi.on{opacity:1;transform:none;}
+    .page-hero{background:linear-gradient(120deg,var(--navy) 0%,var(--blue) 100%);padding:3.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;}
+    .page-hero::after{content:'';position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;border:48px solid rgba(244,171,25,.1);pointer-events:none;}
+    .page-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+    .page-hero h1{font-weight:700;font-size:clamp(2rem,5vw,3rem);color:var(--white);letter-spacing:-.01em;}
+    .page-hero h1 span{color:var(--gold);}
+    .page-hero p{color:rgba(255,255,255,.65);font-size:1rem;margin-top:.5rem;font-weight:300;}
+    .section-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cobalt);margin-bottom:.5rem;}
+    .section-title{font-weight:700;font-size:clamp(1.6rem,3.5vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.75rem;}
+    .divider{width:48px;height:4px;background:var(--gold);border-radius:2px;margin:1rem 0 1.75rem;}
+    .btn{display:inline-block;padding:.75rem 1.75rem;border-radius:6px;font-family:'DM Sans',Arial,sans-serif;font-size:.88rem;font-weight:600;text-decoration:none;letter-spacing:.05em;text-transform:uppercase;transition:all .2s;cursor:pointer;border:2px solid transparent;}
+    .btn-navy{background:var(--navy);color:var(--white);border-color:var(--navy);}
+    .btn-navy:hover{background:var(--blue);border-color:var(--blue);transform:translateY(-2px);}
+    .btn-gold{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+    .btn-gold:hover{background:#e09a10;transform:translateY(-2px);box-shadow:0 6px 20px rgba(244,171,25,.35);}
+    .form-group{margin-bottom:1.25rem;}
+    .form-group label{display:block;font-size:.78rem;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.4rem;}
+    .form-group input,.form-group textarea,.form-group select{width:100%;padding:.72rem 1rem;border:1.5px solid var(--border);border-radius:7px;font-family:'DM Sans',Arial,sans-serif;font-size:.95rem;color:var(--black);background:var(--off-white);outline:none;transition:border-color .2s,background .2s;}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--blue);background:var(--white);}
+    .form-group textarea{resize:vertical;min-height:120px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    @media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+
+    .contact-section{background:var(--white);padding:4rem 2rem;}
+    .contact-layout{display:grid;grid-template-columns:1fr 1.6fr;gap:4rem;align-items:start;max-width:1080px;margin:0 auto;}
+    @media(max-width:768px){.contact-layout{grid-template-columns:1fr;gap:2.5rem;}}
+    .cinfo-item{display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.75rem;}
+    .cinfo-icon{width:46px;height:46px;min-width:46px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+    .cinfo-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:.3rem;}
+    .cinfo-value{font-weight:600;font-size:.97rem;color:var(--navy);line-height:1.4;}
+    .cinfo-value a{color:var(--cobalt);text-decoration:none;}
+    .cinfo-value a:hover{text-decoration:underline;}
+    .form-card{background:var(--off-white);border:1px solid var(--border);border-radius:14px;padding:2rem;}
+    .form-card h3{font-weight:700;font-size:1.2rem;color:var(--navy);margin-bottom:1.5rem;}
+
+    .join-section{background:var(--navy);padding:4rem 2rem;text-align:center;}
+    .join-section h2{font-weight:700;font-size:clamp(1.5rem,3.5vw,2.2rem);color:var(--white);margin-bottom:.75rem;}
+    .join-section p{color:rgba(255,255,255,.6);max-width:520px;margin:0 auto 2rem;font-size:.97rem;line-height:1.7;}
+    .join-steps{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;max-width:800px;margin:0 auto 2.5rem;}
+    .join-step{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:1.5rem 1.25rem;flex:1;min-width:180px;max-width:220px;text-align:center;}
+    .join-num{font-size:2rem;font-weight:700;color:var(--gold);line-height:1;margin-bottom:.6rem;}
+    .join-stitle{font-weight:600;font-size:.9rem;color:var(--white);margin-bottom:.3rem;}
+    .join-sdesc{font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.5;}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo" style="text-decoration:none;display:flex;align-items:center;">
+      <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,h_124/v1777949175/logo_z9kpxp.png" alt="Maryland FBLA Urbana High School" style="height:62px;width:auto;display:block;">
+    </a>
+    <button class="menu-btn" onclick="document.getElementById('nl').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nl">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="officers.html">Officers</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html" class="active">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="page-hero-label">Get in Touch</p>
+    <h1>Contact <span>Us</span></h1>
+    <p>Questions? We'd love to hear from you.</p>
+  </div>
+
+  <section class="contact-section">
+    <div class="contact-layout">
+
+      <div class="fi">
+        <p class="section-label">Reach Out</p>
+        <h2 class="section-title">Contact Info</h2>
+        <div class="divider"></div>
+
+        <!-- EDIT: Replace all values below with your real contact info -->
+        <div class="cinfo-item">
+          <div class="cinfo-icon">📧</div>
+          <div>
+            <div class="cinfo-label">Email</div>
+            <div class="cinfo-value"><a href="mailto:uhsfbla2@gmail.com">uhsfbla2@gmail.com</a></div>
+          </div>
+        </div>
+        <div class="cinfo-item">
+          <div class="cinfo-icon">📍</div>
+          <div>
+            <div class="cinfo-label">Location</div>
+            <div class="cinfo-value">Urbana High School<br>3471 Campus Dr, Ijamsville, MD</div>
+          </div>
+        </div>
+        <div class="cinfo-item">
+          <div class="cinfo-icon">👨‍🏫</div>
+          <div>
+            <div class="cinfo-label">Faculty Advisor</div>
+            <!-- EDIT: Add advisor's name -->
+            <div class="cinfo-value">Travis Zimmermann<br><a href="mailto:Travis.Zimmerman@fcps.org">Travis.Zimmerman@fcps.org</a></div>
+          </div>
+        </div>
+        
+        <div class="cinfo-item">
+          <div class="cinfo-icon">📸</div>
+          <div>
+            <div class="cinfo-label">Social Media</div>
+            <!-- EDIT: Add your social media handle/link -->
+            <div class="cinfo-value"><a href="https://www.instagram.com/urbanafbla">@urbanafbla</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card fi">
+        <h3>Send a Message</h3>
+        <form name="contact" method="POST" data-netlify="true" action="/thank-you.html">
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" name="first-name" placeholder="Jane" /></div>
+          <div class="form-group"><label>Last Name</label><input type="text" name="last-name" placeholder="Smith" /></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" name="email" placeholder="you@email.com" /></div>
+        <div class="form-group">
+          <label>Subject</label>
+          <select name="subject">
+            <option>I want to join FBLA</option>
+            <option>Question about an event</option>
+            <option>Competition information</option>
+            <option>General question</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Message</label><textarea name="message" placeholder="Write your message here..."></textarea></div>
+        <button type="submit" class="btn btn-navy" style="width:100%;text-align:center;">Send Message →</button>
+        </form>
+        
+      </div>
+
+    </div>
+  </section>
+
+  
+
+  <footer>
+    <p>© 2026 <strong>Urbana FBLA</strong> · Urbana High School · Ijamsville, MD <span class="egg" onclick="this.classList.toggle('show')"></span></p>
+    <p style="margin-top:.35rem;font-size:.75rem;opacity:.4;">Future Business Leaders of America</p>
+  </footer>
+  <script>
+    document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>document.getElementById('nl').classList.remove('open')));
+    const obs=new IntersectionObserver((e)=>{e.forEach((en,i)=>{if(en.isIntersecting)setTimeout(()=>en.target.classList.add('on'),i*80);});},{threshold:.1});
+    document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+  </script>
+
+  <!-- 🥚 -->
+  <style>
+    .egg{display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(244,171,25,.1);cursor:pointer;margin-left:.6rem;vertical-align:middle;transition:background .2s;position:relative;}
+    .egg:hover{background:var(--gold);}
+    .egg::after{content:'jackson was here 👋';position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold);font-family:"DM Sans",Arial,sans-serif;font-size:.75rem;font-weight:600;padding:.35rem .75rem;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;border:1px solid rgba(244,171,25,.3);}
+    .egg:hover::after,.egg.show::after{opacity:1;}
+  </style>
+</body>
+</html>

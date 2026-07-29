@@ -1,0 +1,39 @@
+/* ============================================================================
+   GALLERY PAGE STYLES — this file owns the look of "/gallery" and nothing
+   else. Every rule is scoped under `.route-gallery` (set on <body> by
+   Layout), so nothing here leaks to other pages, and you can restyle the
+   shared navbar/footer/hero for this page only:
+       .route-gallery nav { background: #000; }
+       .route-gallery { --hero-bg: #000; }
+   ========================================================================= */
+
+/* Page-level variable overrides (see src/index.css for the full list) */
+.route-gallery {
+  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+}
+
+.route-gallery .gallery-section { background: var(--white); padding: 4rem 2rem; }
+.route-gallery .gallery-wrap { max-width: 1080px; margin: 0 auto; }
+.route-gallery .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+@media (max-width: 640px) {
+  .route-gallery .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+  .route-gallery .gallery-item.tall { grid-row: span 1; }
+  .route-gallery .gallery-item.wide { grid-column: span 2; }
+}
+.route-gallery .gallery-item { border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, var(--navy), var(--blue)); aspect-ratio: 4/3; position: relative; cursor: pointer; }
+.route-gallery .gallery-item.tall { grid-row: span 2; aspect-ratio: unset; }
+.route-gallery .gallery-item.wide { grid-column: span 2; aspect-ratio: 16/7; }
+.route-gallery .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+.route-gallery .gallery-item:hover img { transform: scale(1.05); }
+.route-gallery .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 46, 127, .75) 0%, transparent 55%); opacity: 0; transition: opacity .28s; display: flex; align-items: flex-end; padding: 1rem 1.1rem; }
+.route-gallery .gallery-item:hover .overlay { opacity: 1; }
+.route-gallery .overlay p { color: var(--white); font-size: .88rem; font-weight: 500; }
+.route-gallery .placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255, 255, 255, .3); font-size: .8rem; gap: .6rem; text-align: center; padding: 1rem; }
+.route-gallery .placeholder svg { opacity: .3; }
+
+/* Lightbox */
+.route-gallery .lightbox { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0, 0, 0, .92); align-items: center; justify-content: center; padding: 2rem; }
+.route-gallery .lightbox.open { display: flex; }
+.route-gallery .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
+.route-gallery .lb-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; opacity: .7; line-height: 1; }
+.route-gallery .lb-close:hover { opacity: 1; }

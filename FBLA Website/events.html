@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urbana FBLA — Events</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#0a2e7f;--blue:#1d52bc;--gold:#f4ab19;--cobalt:#226add;--white:#ffffff;--black:#2d2b2b;--off-white:#f7f8fc;--border:#dde3f0;--muted:#5a6485;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',Arial,sans-serif;color:var(--black);background:var(--off-white);font-size:16px;line-height:1.6;}
+    nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:3px solid var(--gold);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:66px;box-shadow:0 2px 16px rgba(10,46,127,.18);}
+    .nav-logo{display:flex;align-items:center;text-decoration:none;}
+    .nav-logo-text{font-weight:700;font-size:1.15rem;color:var(--white);line-height:1.2;}
+    .nav-logo-text span{display:block;font-size:.7rem;font-weight:500;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;}
+    .nav-links{display:flex;gap:.1rem;list-style:none;}
+    .nav-links a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:.82rem;font-weight:500;padding:.45rem .9rem;border-radius:6px;letter-spacing:.06em;text-transform:uppercase;transition:color .18s,background .18s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--gold);background:rgba(244,171,25,.1);}
+    .nav-links a.active{border-bottom:2px solid var(--gold);border-radius:6px 6px 0 0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:.5rem;flex-direction:column;gap:5px;}
+    .menu-btn span{display:block;width:24px;height:2px;background:var(--white);border-radius:2px;}
+    @media(max-width:720px){.menu-btn{display:flex;}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;background:var(--navy);flex-direction:column;padding:.75rem 1rem 1rem;border-bottom:3px solid var(--gold);}.nav-links.open{display:flex;}.nav-links a{font-size:.9rem;padding:.65rem 1rem;}}
+    footer{background:var(--navy);border-top:3px solid var(--gold);color:rgba(255,255,255,.55);text-align:center;padding:2rem;font-size:.82rem;}
+    footer strong{color:var(--gold);}
+    .fi{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;}
+    .fi.on{opacity:1;transform:none;}
+    .page-hero{background:linear-gradient(120deg,var(--navy) 0%,var(--blue) 100%);padding:3.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;}
+    .page-hero::after{content:'';position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;border:48px solid rgba(244,171,25,.1);pointer-events:none;}
+    .page-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+    .page-hero h1{font-weight:700;font-size:clamp(2rem,5vw,3rem);color:var(--white);letter-spacing:-.01em;}
+    .page-hero h1 span{color:var(--gold);}
+    .page-hero p{color:rgba(255,255,255,.65);font-size:1rem;margin-top:.5rem;font-weight:300;}
+    .section-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cobalt);margin-bottom:.5rem;}
+    .section-title{font-weight:700;font-size:clamp(1.6rem,3.5vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.75rem;}
+    .section-intro{color:var(--muted);font-size:.97rem;line-height:1.7;max-width:600px;}
+    .divider{width:48px;height:4px;background:var(--gold);border-radius:2px;margin:1rem 0 1.75rem;}
+
+    .events-section{background:var(--off-white);padding:4rem 2rem;}
+    .events-wrap{max-width:1080px;margin:0 auto;}
+    .events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem;}
+    .event-card{background:var(--white);border-radius:12px;border:1px solid var(--border);overflow:hidden;transition:transform .22s,box-shadow .22s;}
+    .event-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(10,46,127,.1);}
+    .event-header{background:var(--navy);padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;}
+    .event-date{text-align:center;min-width:52px;}
+    .event-month{font-size:.65rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.6);}
+    .event-day{font-size:2.2rem;font-weight:700;color:var(--gold);line-height:1;}
+    .event-hinfo{flex:1;}
+    .event-badge{display:inline-block;font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .55rem;border-radius:4px;margin-bottom:.3rem;}
+    .t-meeting{background:var(--cobalt);color:white;}
+    .t-competition{background:var(--gold);color:var(--navy);}
+    .t-community{background:#2a9d3f;color:white;}
+    .t-social{background:#9b2fe0;color:white;}
+    .t-deadline{background:#e05c2f;color:white;}
+    .event-htitle{font-weight:600;font-size:.95rem;color:var(--white);line-height:1.3;}
+    .event-body{padding:1.1rem 1.25rem;}
+    .event-detail{font-size:.84rem;color:var(--muted);display:flex;align-items:center;gap:.4rem;margin-bottom:.35rem;}
+    .event-desc{font-size:.88rem;color:var(--black);line-height:1.55;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo" style="text-decoration:none;display:flex;align-items:center;">
+      <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,h_124/v1777949175/logo_z9kpxp.png" alt="Maryland FBLA Urbana High School" style="height:62px;width:auto;display:block;">
+    </a>
+    <button class="menu-btn" onclick="document.getElementById('nl').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nl">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html" class="active">Events</a></li>
+      <li><a href="officers.html">Officers</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="page-hero-label">Stay in the Know</p>
+    <h1>Upcoming <span>Events</span></h1>
+    <p>Meetings, competitions, and chapter activities</p>
+  </div>
+
+  <section class="events-section">
+    <div class="events-wrap">
+      
+      </div>
+
+      <!--
+        HOW TO EDIT EVENTS:
+        - Change the month, day number, badge type class, title, location, time, and description in each card.
+        - Badge classes: t-meeting (blue) | t-competition (gold) | t-community (green) | t-social (purple) | t-deadline (orange)
+        - To ADD an event: copy one full .event-card block and paste it inside .events-grid
+        - To REMOVE an event: delete the entire .event-card block
+      -->
+      <div class="events-grid">
+        <div class="event-card fi">
+          <div class="event-header">
+            <div class="event-date"><div class="event-month">May</div><div class="event-day">TBD</div></div>
+            <div class="event-hinfo">
+              <span class="event-badge t-social">Social</span>
+              <div class="event-htitle">End-of-Year Party</div>
+            </div>
+          </div>
+          <div class="event-body">
+            <div class="event-detail">📍 Urbana District Park</div>
+            <div class="event-detail">🕓 Date TBD</div>
+            <div class="event-desc">Celebrate the year with members, food, and fun. More details coming soon.</div>
+          </div>
+        </div>
+
+        <div class="event-card fi">
+          <div class="event-header">
+            <div class="event-date"><div class="event-month">Jun</div><div class="event-day">29</div></div>
+            <div class="event-hinfo">
+              <span class="event-badge t-competition">Competition</span>
+              <div class="event-htitle">National Leadership Conference</div>
+            </div>
+          </div>
+          <div class="event-body">
+            <div class="event-detail">📍 Henry B. Gonzalez Convention Center, San Antonio, TX</div>
+            <div class="event-detail">🕓 Jun 29 – Jul 2</div>
+            <div class="event-desc">Top competitors from state conferences advance to NLC to compete at the national level.</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </section>
+
+  <footer>
+    <p>© 2026 <strong>Urbana FBLA</strong> · Urbana High School · Ijamsville, MD <span class="egg" onclick="this.classList.toggle('show')"></span></p>
+    <p style="margin-top:.35rem;font-size:.75rem;opacity:.4;">Future Business Leaders of America</p>
+  </footer>
+  <script>
+    document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>document.getElementById('nl').classList.remove('open')));
+    const obs=new IntersectionObserver((e)=>{e.forEach((en,i)=>{if(en.isIntersecting)setTimeout(()=>en.target.classList.add('on'),i*80);});},{threshold:.1});
+    document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+  </script>
+
+  <!-- 🥚 -->
+  <style>
+    .egg{display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(244,171,25,.1);cursor:pointer;margin-left:.6rem;vertical-align:middle;transition:background .2s;position:relative;}
+    .egg:hover{background:var(--gold);}
+    .egg::after{content:'jackson was here 👋';position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold);font-family:"DM Sans",Arial,sans-serif;font-size:.75rem;font-weight:600;padding:.35rem .75rem;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;border:1px solid rgba(244,171,25,.3);}
+    .egg:hover::after,.egg.show::after{opacity:1;}
+  </style>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urbana FBLA — Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#0a2e7f;--blue:#1d52bc;--gold:#f4ab19;--cobalt:#226add;--white:#ffffff;--black:#2d2b2b;--off-white:#f7f8fc;--border:#dde3f0;--muted:#5a6485;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',Arial,sans-serif;color:var(--black);background:var(--off-white);font-size:16px;line-height:1.6;}
+    nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:3px solid var(--gold);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:66px;box-shadow:0 2px 16px rgba(10,46,127,.18);}
+    .nav-logo{display:flex;align-items:center;text-decoration:none;}
+    .nav-logo-text{font-weight:700;font-size:1.15rem;color:var(--white);line-height:1.2;}
+    .nav-logo-text span{display:block;font-size:.7rem;font-weight:500;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;}
+    .nav-links{display:flex;gap:.1rem;list-style:none;}
+    .nav-links a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:.82rem;font-weight:500;padding:.45rem .9rem;border-radius:6px;letter-spacing:.06em;text-transform:uppercase;transition:color .18s,background .18s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--gold);background:rgba(244,171,25,.1);}
+    .nav-links a.active{border-bottom:2px solid var(--gold);border-radius:6px 6px 0 0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:.5rem;flex-direction:column;gap:5px;}
+    .menu-btn span{display:block;width:24px;height:2px;background:var(--white);border-radius:2px;}
+    @media(max-width:720px){.menu-btn{display:flex;}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;background:var(--navy);flex-direction:column;padding:.75rem 1rem 1rem;border-bottom:3px solid var(--gold);}.nav-links.open{display:flex;}.nav-links a{font-size:.9rem;padding:.65rem 1rem;}}
+    footer{background:var(--navy);border-top:3px solid var(--gold);color:rgba(255,255,255,.55);text-align:center;padding:2rem;font-size:.82rem;}
+    footer strong{color:var(--gold);}
+    .fi{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;}
+    .fi.on{opacity:1;transform:none;}
+    .page-hero{background:linear-gradient(120deg,var(--navy) 0%,var(--blue) 100%);padding:3.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;}
+    .page-hero::after{content:'';position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;border:48px solid rgba(244,171,25,.1);pointer-events:none;}
+    .page-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+    .page-hero h1{font-weight:700;font-size:clamp(2rem,5vw,3rem);color:var(--white);letter-spacing:-.01em;}
+    .page-hero h1 span{color:var(--gold);}
+    .page-hero p{color:rgba(255,255,255,.65);font-size:1rem;margin-top:.5rem;font-weight:300;}
+    .section-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cobalt);margin-bottom:.5rem;}
+    .section-title{font-weight:700;font-size:clamp(1.6rem,3.5vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.75rem;}
+    .section-intro{color:var(--muted);font-size:.97rem;line-height:1.7;max-width:600px;}
+    .divider{width:48px;height:4px;background:var(--gold);border-radius:2px;margin:1rem 0 1.75rem;}
+
+    .gallery-section{background:var(--white);padding:4rem 2rem;}
+    .gallery-wrap{max-width:1080px;margin:0 auto;}
+    .gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+    @media(max-width:640px){.gallery-grid{grid-template-columns:repeat(2,1fr);}.gallery-item.tall{grid-row:span 1;}.gallery-item.wide{grid-column:span 2;}}
+    .gallery-item{border-radius:12px;overflow:hidden;background:linear-gradient(135deg,var(--navy),var(--blue));aspect-ratio:4/3;position:relative;cursor:pointer;}
+    .gallery-item.tall{grid-row:span 2;aspect-ratio:unset;}
+    .gallery-item.wide{grid-column:span 2;aspect-ratio:16/7;}
+    .gallery-item img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s ease;}
+    .gallery-item:hover img{transform:scale(1.05);}
+    .overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(10,46,127,.75) 0%,transparent 55%);opacity:0;transition:opacity .28s;display:flex;align-items:flex-end;padding:1rem 1.1rem;}
+    .gallery-item:hover .overlay{opacity:1;}
+    .overlay p{color:var(--white);font-size:.88rem;font-weight:500;}
+    .placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.3);font-size:.8rem;gap:.6rem;text-align:center;padding:1rem;}
+    .placeholder svg{opacity:.3;}
+
+    /* Lightbox */
+    .lightbox{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:2rem;}
+    .lightbox.open{display:flex;}
+    .lightbox img{max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain;}
+    .lb-close{position:absolute;top:1.5rem;right:1.5rem;background:none;border:none;color:white;font-size:2rem;cursor:pointer;opacity:.7;line-height:1;}
+    .lb-close:hover{opacity:1;}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo" style="text-decoration:none;display:flex;align-items:center;">
+      <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,h_124/v1777949175/logo_z9kpxp.png" alt="Maryland FBLA Urbana High School" style="height:62px;width:auto;display:block;">
+    </a>
+    <button class="menu-btn" onclick="document.getElementById('nl').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nl">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="officers.html">Officers</a></li>
+      <li><a href="gallery.html" class="active">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="page-hero-label">Our Moments</p>
+    <h1>Photo <span>Gallery</span></h1>
+    
+  </div>
+
+  <section class="gallery-section">
+    <div class="gallery-wrap">
+      <!--
+          HOW TO ADD PHOTOS:
+          1. Put your image files in the same folder as the HTML files.
+          2. Find a .gallery-item below that still shows a placeholder.
+          3. Delete the entire <div class="placeholder">...</div> inside it.
+          4. Add: <img src="yourfile.jpg" alt="Short description">
+          5. Optionally add: <div class="overlay"><p>Your caption</p></div>
+          Click any photo to view it full size (lightbox).
+        -->
+        
+      </div>
+
+      <div class="gallery-grid fi">
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947577/FBLA-2026-D23-636_anhqwc.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947555/SLC-2026-DAY1-24_whoy5q.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947562/SLC-2026-DAY1-290_tjlyxa.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947566/FBLA-2026-D23-281_kfgi8b.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947567/FBLA-2026-D23-416_m28cmz.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947572/FBLA-2026-D23-470_p7mgwu.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947566/FBLA-2026-D23-148_tvlg05.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947550/SLC-2026-DAY1-7_qjizqp.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947573/FBLA-2026-D23-471_f5a4vg.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947569/FBLA-2026-D23-450_uenn7x.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947574/FBLA-2026-D23-488_epsdmx.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947564/FBLA-2026-D23-128_zcoepp.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947559/SLC-2026-DAY1-107_jdb5kp.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947568/FBLA-2026-D23-441_w4lfun.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947561/SLC-2026-DAY1-205_emyotk.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777946367/SLC-2026-DAY1-346_kxcdd5.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947570/FBLA-2026-D23-455_emp0xu.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947571/FBLA-2026-D23-466_i9mpsw.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item tall" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947565/FBLA-2026-D23-142_tsolkj.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947554/SLC-2026-DAY1-18_rqdeqs.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947552/SLC-2026-DAY1-15_fprhjm.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947558/SLC-2026-DAY1-101_tl3an2.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777946365/SLC-2026-DAY1-303_ggzsbb.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777946366/SLC-2026-DAY1-342_mcraom.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947563/SLC-2026-DAY1-302_hel9l6.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947555/SLC-2026-DAY1-32_zowfjn.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947578/SLC-2026-DAY1-10_pcbwno.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947556/SLC-2026-DAY1-50_ando8h.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947553/SLC-2026-DAY1-17_b1x0au.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947576/FBLA-2026-D23-545_vmpnnt.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947551/SLC-2026-DAY1-8_uxwqfv.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+        <div class="gallery-item" onclick="lb(this)">
+          <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_1200/v1777947575/FBLA-2026-D23-509_sqvnlk.jpg" alt="SLC 2026 — State Leadership Conference" loading="lazy">
+          <div class="overlay"><p>SLC 2026 — State Leadership Conference</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLb()">
+    <button class="lb-close" onclick="closeLb()">✕</button>
+    <img src="" id="lb-img" alt="" onclick="event.stopPropagation()" />
+  </div>
+
+  <footer>
+    <p>© 2026 <strong>Urbana FBLA</strong> · Urbana High School · Ijamsville, MD <span class="egg" onclick="this.classList.toggle('show')"></span></p>
+    <p style="margin-top:.35rem;font-size:.75rem;opacity:.4;">Future Business Leaders of America</p>
+  </footer>
+  <script>
+    document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>document.getElementById('nl').classList.remove('open')));
+    const obs=new IntersectionObserver((e)=>{e.forEach((en,i)=>{if(en.isIntersecting)setTimeout(()=>en.target.classList.add('on'),i*80);});},{threshold:.1});
+    document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+    function lb(card){const img=card.querySelector('img');if(!img)return;document.getElementById('lb-img').src=img.src;document.getElementById('lb-img').alt=img.alt;document.getElementById('lightbox').classList.add('open');}
+    function closeLb(){document.getElementById('lightbox').classList.remove('open');}
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
+  </script>
+
+  <!-- 🥚 -->
+  <style>
+    .egg{display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(244,171,25,.1);cursor:pointer;margin-left:.6rem;vertical-align:middle;transition:background .2s;position:relative;}
+    .egg:hover{background:var(--gold);}
+    .egg::after{content:'jackson was here 👋';position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold);font-family:"DM Sans",Arial,sans-serif;font-size:.75rem;font-weight:600;padding:.35rem .75rem;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;border:1px solid rgba(244,171,25,.3);}
+    .egg:hover::after,.egg.show::after{opacity:1;}
+  </style>
+</body>
+</html>

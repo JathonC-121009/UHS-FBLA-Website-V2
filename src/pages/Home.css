@@ -1,0 +1,59 @@
+/* ============================================================================
+   HOME PAGE STYLES — this file owns the look of "/" and nothing else.
+
+   Every rule is scoped under `.route-home`, which <Layout> puts on <body>
+   while this page is showing. That means:
+     • nothing here can affect another page, and
+     • you can restyle the shared navbar/footer/hero for THIS page only,
+       e.g.  .route-home nav { background: #000; }
+       or override a global variable:  .route-home { --nav-bg: #000; }
+   ========================================================================= */
+
+/* Page-level variable overrides (see src/index.css for the full list) */
+.route-home {
+  /* --nav-bg: var(--navy); */
+}
+
+/* HERO */
+.route-home .hero { position: relative; min-height: 72vh; display: flex; align-items: flex-end; overflow: hidden; }
+.route-home .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+.route-home .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 46, 127, 0.93) 0%, rgba(10, 46, 127, 0.5) 45%, rgba(0, 0, 0, 0.08) 100%); }
+.route-home .hero-content { position: relative; z-index: 1; width: 100%; padding: 3rem 2rem 0; display: flex; flex-direction: column; align-items: center; text-align: center; }
+.route-home .hero-badge { display: inline-block; background: rgba(244, 171, 25, .18); border: 1px solid rgba(244, 171, 25, .45); color: var(--gold); font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; padding: .38rem 1rem; border-radius: 50px; margin-bottom: 1.25rem; }
+.route-home .hero h1 { font-size: clamp(2.4rem, 6vw, 4.5rem); font-weight: 700; color: var(--white); line-height: 1.08; letter-spacing: -.02em; margin-bottom: .9rem; }
+.route-home .hero h1 em { font-style: normal; color: var(--gold); }
+.route-home .hero-sub { font-size: clamp(.95rem, 2vw, 1.1rem); color: rgba(255, 255, 255, .72); max-width: 560px; margin: 0 auto 1.25rem; font-weight: 300; line-height: 1.7; }
+.route-home .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.route-home .stats-strip { position: relative; z-index: 1; width: 100%; margin-top: 3rem; background: rgba(0, 0, 0, .35); backdrop-filter: blur(10px); border-top: 1px solid rgba(244, 171, 25, .25); display: flex; justify-content: center; flex-wrap: wrap; }
+.route-home .stat { padding: 1.1rem 3rem; text-align: center; border-right: 1px solid rgba(255, 255, 255, .08); }
+.route-home .stat:last-child { border-right: none; }
+.route-home .stat-num { display: block; font-size: 1.8rem; font-weight: 700; color: var(--gold); line-height: 1; }
+.route-home .stat-label { display: block; font-size: .68rem; color: rgba(255, 255, 255, .55); text-transform: uppercase; letter-spacing: .12em; font-weight: 500; margin-top: .25rem; }
+@media (max-width: 580px) {
+  .route-home .stat { padding: .85rem 1.2rem; }
+  .route-home .stat-num { font-size: 1.4rem; }
+}
+
+/* ABOUT */
+.route-home .about-section { background: var(--white); padding: 4rem 2rem; }
+.route-home .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; max-width: 1080px; margin: 0 auto; }
+@media (max-width: 768px) {
+  .route-home .about-grid { grid-template-columns: 1fr; gap: 2rem; }
+}
+.route-home .about-text { color: var(--muted); font-size: .97rem; line-height: 1.7; margin-top: 1rem; }
+.route-home .value-list { display: flex; flex-direction: column; gap: 1.25rem; }
+.route-home .value-item { display: flex; gap: 1rem; align-items: flex-start; }
+.route-home .vi-icon { width: 42px; height: 42px; min-width: 42px; background: rgba(10, 46, 127, .07); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.route-home .vi-title { font-weight: 600; font-size: .95rem; color: var(--navy); margin-bottom: .2rem; }
+.route-home .vi-desc { font-size: .86rem; color: var(--muted); line-height: 1.55; }
+
+/* MISSION */
+.route-home .mission { background: var(--off-white); padding: 3.5rem 2rem; text-align: center; border-top: 1px solid var(--border); }
+.route-home .mission blockquote { font-family: var(--serif-font); font-size: clamp(1.05rem, 2.5vw, 1.35rem); color: var(--navy); font-style: italic; max-width: 780px; margin: 0 auto; line-height: 1.7; }
+.route-home .mission cite { display: block; margin-top: 1rem; font-style: normal; font-size: .78rem; font-family: var(--body-font); color: var(--cobalt); font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+
+/* GOALS */
+.route-home .goals-section { background: var(--navy); padding: 4rem 2rem; }
+.route-home .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; max-width: 1080px; margin: 0 auto; }
+.route-home .goal-card { background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); border-radius: 10px; padding: 1.25rem; font-size: .9rem; color: rgba(255, 255, 255, .8); line-height: 1.55; display: flex; gap: .75rem; align-items: flex-start; }
+.route-home .goal-num { font-weight: 700; color: var(--gold); font-size: 1rem; min-width: 1.5rem; }

@@ -1,0 +1,174 @@
+/* ============================================================================
+   GLOBAL STYLES — shared by every page.
+
+   You should almost never need to edit this file. Everything below is driven
+   by CSS variables, and any page stylesheet can override them for itself:
+
+     .route-events { --nav-bg: #123456; --hero-bg: white; }
+
+   That lives in src/pages/Events.css and affects the Events page only. Edit
+   this file only when a change should apply to EVERY page at once.
+   ========================================================================= */
+
+:root {
+  /* --- Brand palette ----------------------------------------------------- */
+  --navy: #0a2e7f;
+  --blue: #1d52bc;
+  --gold: #f4ab19;
+  --cobalt: #226add;
+  --white: #ffffff;
+  --black: #2d2b2b;
+  --off-white: #f7f8fc;
+  --border: #dde3f0;
+  --muted: #5a6485;
+
+  /* --- Page shell -------------------------------------------------------- */
+  --body-bg: var(--off-white);
+  --body-text: var(--black);
+  --body-font: 'DM Sans', Arial, sans-serif;
+  --serif-font: 'Gelasio', Georgia, serif;
+
+  /* --- Navbar ------------------------------------------------------------ */
+  --nav-bg: var(--navy);
+  --nav-height: 66px;
+  --nav-border: 3px solid var(--gold);
+  --nav-shadow: 0 2px 16px rgba(10, 46, 127, .18);
+  --nav-link: rgba(255, 255, 255, .82);
+  --nav-link-hover: var(--gold);
+  --nav-link-hover-bg: rgba(244, 171, 25, .1);
+  --nav-link-underline: var(--gold);
+  --nav-logo-height: 62px;
+
+  /* --- Footer ------------------------------------------------------------ */
+  --footer-bg: var(--navy);
+  --footer-border: 3px solid var(--gold);
+  --footer-text: rgba(255, 255, 255, .55);
+  --footer-accent: var(--gold);
+
+  /* --- Page hero (the banner on inner pages) ----------------------------- */
+  --hero-bg: linear-gradient(120deg, var(--navy) 0%, var(--blue) 100%);
+  --hero-pad: 3.5rem 2rem 3rem;
+  --hero-label-color: var(--gold);
+  --hero-title-color: var(--white);
+  --hero-accent-color: var(--gold);
+  --hero-text-color: rgba(255, 255, 255, .65);
+  --hero-ring-color: rgba(244, 171, 25, .1);
+
+  /* --- Shared section helpers -------------------------------------------- */
+  --label-color: var(--cobalt);
+  --title-color: var(--navy);
+  --intro-color: var(--muted);
+  --divider-color: var(--gold);
+
+  /* --- Buttons ----------------------------------------------------------- */
+  --btn-radius: 6px;
+  --btn-pad: .75rem 1.75rem;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--body-font);
+  color: var(--body-text);
+  background: var(--body-bg);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--nav-bg);
+  border-bottom: var(--nav-border);
+  padding: 0 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  height: var(--nav-height);
+  box-shadow: var(--nav-shadow);
+}
+.nav-logo { display: flex; align-items: center; text-decoration: none; }
+.nav-logo img { height: var(--nav-logo-height); width: auto; display: block; }
+.nav-logo-text { font-weight: 700; font-size: 1.15rem; color: var(--white); line-height: 1.2; }
+.nav-logo-text span { display: block; font-size: .7rem; font-weight: 500; color: var(--gold); letter-spacing: .12em; text-transform: uppercase; }
+.nav-links { display: flex; gap: .1rem; list-style: none; }
+.nav-links a {
+  display: block; color: var(--nav-link); text-decoration: none;
+  font-size: .82rem; font-weight: 500; padding: .45rem .9rem; border-radius: 6px;
+  letter-spacing: .06em; text-transform: uppercase; transition: color .18s, background .18s;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--nav-link-hover); background: var(--nav-link-hover-bg); }
+.nav-links a.active { border-bottom: 2px solid var(--nav-link-underline); border-radius: 6px 6px 0 0; }
+.menu-btn { display: none; background: none; border: none; cursor: pointer; padding: .5rem; flex-direction: column; gap: 5px; }
+.menu-btn span { display: block; width: 24px; height: 2px; background: var(--white); border-radius: 2px; }
+@media (max-width: 720px) {
+  .menu-btn { display: flex; }
+  .nav-links {
+    display: none; position: absolute; top: var(--nav-height); left: 0; right: 0;
+    background: var(--nav-bg); flex-direction: column; padding: .75rem 1rem 1rem;
+    border-bottom: var(--nav-border);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { font-size: .9rem; padding: .65rem 1rem; }
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-block; padding: var(--btn-pad); border-radius: var(--btn-radius);
+  font-family: var(--body-font); font-size: .88rem; font-weight: 600;
+  text-decoration: none; letter-spacing: .05em; text-transform: uppercase;
+  transition: all .2s; cursor: pointer; border: 2px solid transparent;
+}
+.btn-gold { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.btn-gold:hover { background: #e09a10; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(244, 171, 25, .35); }
+.btn-ow { background: transparent; color: var(--white); border-color: rgba(255, 255, 255, .4); }
+.btn-ow:hover { border-color: var(--gold); color: var(--gold); }
+.btn-navy { background: var(--navy); color: var(--white); border-color: var(--navy); }
+.btn-navy:hover { background: var(--blue); border-color: var(--blue); transform: translateY(-2px); }
+.btn-block { width: 100%; text-align: center; }
+
+/* FOOTER */
+footer {
+  background: var(--footer-bg); border-top: var(--footer-border);
+  color: var(--footer-text); text-align: center; padding: 2rem; font-size: .82rem;
+}
+footer strong { color: var(--footer-accent); }
+.footer-sub { margin-top: .35rem; font-size: .75rem; opacity: .4; }
+
+/* FADE-IN */
+.fi { opacity: 0; transform: translateY(20px); transition: opacity .55s ease, transform .55s ease; }
+.fi.on { opacity: 1; transform: none; }
+
+/* SHARED SECTION HELPERS */
+.section-label { font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--label-color); margin-bottom: .5rem; }
+.section-title { font-weight: 700; font-size: clamp(1.6rem, 3.5vw, 2.2rem); color: var(--title-color); line-height: 1.2; margin-bottom: .75rem; }
+.section-intro { color: var(--intro-color); font-size: .97rem; line-height: 1.7; max-width: 600px; }
+.divider { width: 48px; height: 4px; background: var(--divider-color); border-radius: 2px; margin: 1rem 0 1.75rem; }
+
+/* PAGE HERO (inner pages) */
+.page-hero {
+  background: var(--hero-bg);
+  padding: var(--hero-pad); text-align: center; position: relative; overflow: hidden;
+}
+.page-hero::after {
+  content: ''; position: absolute; right: -80px; top: -80px; width: 320px; height: 320px;
+  border-radius: 50%; border: 48px solid var(--hero-ring-color); pointer-events: none;
+}
+.page-hero-label { font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--hero-label-color); margin-bottom: .5rem; }
+.page-hero h1 { font-weight: 700; font-size: clamp(2rem, 5vw, 3rem); color: var(--hero-title-color); letter-spacing: -.01em; }
+.page-hero h1 span { color: var(--hero-accent-color); }
+.page-hero p { color: var(--hero-text-color); font-size: 1rem; margin-top: .5rem; font-weight: 300; }
+
+/* 🥚 */
+.egg {
+  display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+  background: rgba(244, 171, 25, .1); cursor: pointer; margin-left: .6rem;
+  vertical-align: middle; transition: background .2s; position: relative;
+}
+.egg:hover { background: var(--gold); }
+.egg::after {
+  content: 'jackson was here 👋'; position: absolute; bottom: 18px; left: 50%;
+  transform: translateX(-50%); background: var(--navy); color: var(--gold);
+  font-family: var(--body-font); font-size: .75rem; font-weight: 600;
+  padding: .35rem .75rem; border-radius: 6px; white-space: nowrap; opacity: 0;
+  pointer-events: none; transition: opacity .25s; border: 1px solid rgba(244, 171, 25, .3);
+}
+.egg:hover::after, .egg.show::after { opacity: 1; }

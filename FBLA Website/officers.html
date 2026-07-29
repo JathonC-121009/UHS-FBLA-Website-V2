@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Urbana FBLA — Officers</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{--navy:#0a2e7f;--blue:#1d52bc;--gold:#f4ab19;--cobalt:#226add;--white:#ffffff;--black:#2d2b2b;--off-white:#f7f8fc;--border:#dde3f0;--muted:#5a6485;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:'DM Sans',Arial,sans-serif;color:var(--black);background:var(--off-white);font-size:16px;line-height:1.6;}
+    nav{position:sticky;top:0;z-index:100;background:var(--navy);border-bottom:3px solid var(--gold);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:66px;box-shadow:0 2px 16px rgba(10,46,127,.18);}
+    .nav-logo{display:flex;align-items:center;text-decoration:none;}
+    .nav-logo-text{font-weight:700;font-size:1.15rem;color:var(--white);line-height:1.2;}
+    .nav-logo-text span{display:block;font-size:.7rem;font-weight:500;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;}
+    .nav-links{display:flex;gap:.1rem;list-style:none;}
+    .nav-links a{display:block;color:rgba(255,255,255,.82);text-decoration:none;font-size:.82rem;font-weight:500;padding:.45rem .9rem;border-radius:6px;letter-spacing:.06em;text-transform:uppercase;transition:color .18s,background .18s;}
+    .nav-links a:hover,.nav-links a.active{color:var(--gold);background:rgba(244,171,25,.1);}
+    .nav-links a.active{border-bottom:2px solid var(--gold);border-radius:6px 6px 0 0;}
+    .menu-btn{display:none;background:none;border:none;cursor:pointer;padding:.5rem;flex-direction:column;gap:5px;}
+    .menu-btn span{display:block;width:24px;height:2px;background:var(--white);border-radius:2px;}
+    @media(max-width:720px){.menu-btn{display:flex;}.nav-links{display:none;position:absolute;top:66px;left:0;right:0;background:var(--navy);flex-direction:column;padding:.75rem 1rem 1rem;border-bottom:3px solid var(--gold);}.nav-links.open{display:flex;}.nav-links a{font-size:.9rem;padding:.65rem 1rem;}}
+    footer{background:var(--navy);border-top:3px solid var(--gold);color:rgba(255,255,255,.55);text-align:center;padding:2rem;font-size:.82rem;}
+    footer strong{color:var(--gold);}
+    .fi{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease;}
+    .fi.on{opacity:1;transform:none;}
+    .page-hero{background:linear-gradient(120deg,var(--navy) 0%,var(--blue) 100%);padding:3.5rem 2rem 3rem;text-align:center;position:relative;overflow:hidden;}
+    .page-hero::after{content:'';position:absolute;right:-80px;top:-80px;width:320px;height:320px;border-radius:50%;border:48px solid rgba(244,171,25,.1);pointer-events:none;}
+    .page-hero-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;}
+    .page-hero h1{font-weight:700;font-size:clamp(2rem,5vw,3rem);color:var(--white);letter-spacing:-.01em;}
+    .page-hero h1 span{color:var(--gold);}
+    .page-hero p{color:rgba(255,255,255,.65);font-size:1rem;margin-top:.5rem;font-weight:300;}
+    .section-label{font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--cobalt);margin-bottom:.5rem;}
+    .section-title{font-weight:700;font-size:clamp(1.6rem,3.5vw,2.2rem);color:var(--navy);line-height:1.2;margin-bottom:.75rem;}
+    .section-intro{color:var(--muted);font-size:.97rem;line-height:1.7;max-width:600px;}
+    .divider{width:48px;height:4px;background:var(--gold);border-radius:2px;margin:1rem 0 1.75rem;}
+
+    .officers-section{background:var(--white);padding:4rem 2rem;}
+    .officers-wrap{max-width:1080px;margin:0 auto;}
+    .officers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1.5rem;}
+    .officer-card{background:var(--off-white);border:1px solid var(--border);border-radius:14px;overflow:hidden;text-align:center;transition:transform .22s,box-shadow .22s;}
+    .officer-card:hover{transform:translateY(-5px);box-shadow:0 14px 36px rgba(10,46,127,.12);border-color:var(--cobalt);}
+    /*
+      EDIT: To add a real photo, put an <img> tag inside .officer-photo div:
+        <img src="firstname-lastname.jpg" alt="Officer Name">
+    */
+    .officer-photo{width:100%;aspect-ratio:1;background:linear-gradient(135deg,var(--navy),var(--blue));display:flex;align-items:center;justify-content:center;font-size:3.5rem;color:rgba(255,255,255,.15);overflow:hidden;}
+    .officer-photo img{width:100%;height:100%;object-fit:cover;object-position:top;}
+    .officer-info{padding:1rem .85rem 1.1rem;}
+    .officer-role{font-size:.68rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--cobalt);background:rgba(34,106,221,.1);display:inline-block;padding:.2rem .6rem;border-radius:4px;}
+    .officer-name{font-weight:700;font-size:1rem;color:var(--navy);margin-top:.4rem;}
+    .officer-grade{font-size:.8rem;color:var(--muted);margin-top:.2rem;}
+
+    /* Advisor gold variant */
+    .officer-card.advisor .officer-photo{background:linear-gradient(135deg,#7a5a00,var(--gold));}
+    .officer-card.advisor .officer-role{color:#7a5a00;background:rgba(244,171,25,.15);}
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo" style="text-decoration:none;display:flex;align-items:center;">
+      <img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,h_124/v1777949175/logo_z9kpxp.png" alt="Maryland FBLA Urbana High School" style="height:62px;width:auto;display:block;">
+    </a>
+    <button class="menu-btn" onclick="document.getElementById('nl').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nl">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="events.html">Events</a></li>
+      <li><a href="officers.html" class="active">Officers</a></li>
+      <li><a href="gallery.html">Gallery</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <p class="page-hero-label">Leadership Team</p>
+    <h1>Meet Our <span>Officers</span></h1>
+  </div>
+
+  <section class="officers-section">
+    <div class="officers-wrap">
+      <div style="margin-bottom:2.5rem;" class="fi">
+        <p class="section-label">2026–2027 Officers</p>
+        <h2 class="section-title">Your Chapter Leaders</h2>
+        <div class="divider"></div>
+      </div>
+
+      <!--
+        HOW TO EDIT OFFICERS:
+        1. Replace "Your Name Here" with the officer's real name
+        2. Replace "Grade" with their grade (e.g. "11th Grade")
+        3. To add a photo: put <img src="name.jpg" alt="Name"> inside .officer-photo div
+        4. To change a title: edit the text inside .officer-role
+      -->
+      <div class="officers-grid">
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948483/Ryan_Thyparambil_vscw3l.jpg" alt="Ryan Thyparambil" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Executive Officer</div>
+            <div class="officer-name">Ryan Thyparambil</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948468/Alan_Wang_ft68o5.jpg" alt="Alan Wang" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Operations Officer</div>
+            <div class="officer-name">Alan Wang</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948470/Arianie_Dey_vaysdq.jpg" alt="Arianie Dey" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Operations Officer</div>
+            <div class="officer-name">Arianie Dey</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948473/Elaine_Gao_umwfc4.jpg" alt="Elaine Gao" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Financial Officer</div>
+            <div class="officer-name">Elaine Gao</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948477/Jathon_Chen_xnb4hd.jpg" alt="Jathon Chen" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Technology Officer</div>
+            <div class="officer-name">Jathon Chen</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948479/Kayla_Benjamin_u0sfeo.jpg" alt="Kayla Benjamin" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Communications Officer</div>
+            <div class="officer-name">Kayla Benjamin</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948481/Medha_Mullapudi_b3ufmz.jpg" alt="Medha Mullapudi" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Chief Marketing Officer</div>
+            <div class="officer-name">Medha Mullapudi</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948485/Sruthi_Madhusoothanan_awk2bb.jpg" alt="Sruthi Madhusoothanan" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">Regional VP Liaison</div>
+            <div class="officer-name">Sruthi Madhusoothanan</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg" alt="Charis Roussel" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">State President</div>
+            <div class="officer-name">Charis Roussel</div>
+          </div>
+        </div>
+
+        <div class="officer-card fi">
+          <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948475/Hannah_Cho_onkvkd.jpg" alt="Hannah Cho" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+          <div class="officer-info">
+            <div class="officer-role">State Reporter/Historian</div>
+            <div class="officer-name">Hannah Cho</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADVISOR -->
+      <div style="margin-top:3rem;" class="fi">
+        <p class="section-label">Faculty</p>
+        <h2 class="section-title">Chapter Advisor</h2>
+        <div class="divider"></div>
+        <div style="max-width:200px;">
+          <div class="officer-card advisor">
+            <div class="officer-photo"><img src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948570/03_Zimmerman_Travis_UHS_1x1_1_vxlwbn.jpg" alt="Travis Zimmerman" style="width:100%;height:100%;object-fit:cover;object-position:top;"></div>
+            <div class="officer-info">
+              <div class="officer-role">Advisor</div>
+              <!-- EDIT: Add advisor's name and department -->
+              <div class="officer-name">Travis Zimmerman</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 <strong>Urbana FBLA</strong> · Urbana High School · Ijamsville, MD <span class="egg" onclick="this.classList.toggle('show')"></span></p>
+    <p style="margin-top:.35rem;font-size:.75rem;opacity:.4;">Future Business Leaders of America</p>
+  </footer>
+  <script>
+    document.querySelectorAll('.nav-links a').forEach(a=>a.addEventListener('click',()=>document.getElementById('nl').classList.remove('open')));
+    const obs=new IntersectionObserver((e)=>{e.forEach((en,i)=>{if(en.isIntersecting)setTimeout(()=>en.target.classList.add('on'),i*80);});},{threshold:.1});
+    document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+  </script>
+
+  <!-- 🥚 -->
+  <style>
+    .egg{display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(244,171,25,.1);cursor:pointer;margin-left:.6rem;vertical-align:middle;transition:background .2s;position:relative;}
+    .egg:hover{background:var(--gold);}
+    .egg::after{content:'jackson was here 👋';position:absolute;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:var(--gold);font-family:"DM Sans",Arial,sans-serif;font-size:.75rem;font-weight:600;padding:.35rem .75rem;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .25s;border:1px solid rgba(244,171,25,.3);}
+    .egg:hover::after,.egg.show::after{opacity:1;}
+  </style>
+</body>
+</html>
