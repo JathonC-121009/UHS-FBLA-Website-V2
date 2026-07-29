@@ -2,11 +2,13 @@ import {
   signInWithPopup,
   signOut as firebaseSignOut,
   onAuthStateChanged,
-  GoogleAuthProvider,
+  GoogleAuthProvider as FirebaseGoogleAuthProvider,
 } from 'firebase/auth'
 import { auth } from '../firebaseConfig.js'
 
-const googleProvider = new GoogleAuthProvider()
+export { FirebaseGoogleAuthProvider as GoogleAuthProvider }
+
+const googleProvider = new FirebaseGoogleAuthProvider()
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly')
 
 /**
