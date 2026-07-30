@@ -2,7 +2,7 @@ import {
   getDocs, addDoc, updateDoc, doc, collection,
   query, orderBy, where, increment,
 } from 'firebase/firestore'
-import { db } from '../firebaseConfig.js'
+import { db, auth } from '../firebaseConfig.js'
 
 const POSTS_COL = 'posts'
 const REPLIES_COL = 'replies'
@@ -18,6 +18,7 @@ export async function addPost(post) {
   const data = {
     type: post.type,
     author: post.author,
+    authorUid: auth.currentUser?.uid,
     imageUrl: post.imageUrl || null,
     caption: post.caption || null,
     message: post.message || null,
@@ -43,6 +44,7 @@ export async function addReply(postId, reply) {
   const data = {
     postId,
     author: reply.author,
+    authorUid: auth.currentUser?.uid,
     message: reply.message,
     createdAt,
   }
