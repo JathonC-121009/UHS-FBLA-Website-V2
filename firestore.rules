@@ -6,6 +6,12 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isSchoolAccount() {
+      return isSignedIn()
+        && (request.auth.token.email.endsWith('@fcps.org')
+            || request.auth.token.email.endsWith('@my.fcps.org'));
+    }
+
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
@@ -13,33 +19,30 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if true;
 
-      allow create: if isSignedIn()
+      allow create: if isSchoolAccount()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.author is string
         && request.resource.data.author.size() > 0
         && request.resource.data.createdAt is string
         && request.resource.data.type in ['photo', 'question'];
 
-      // Owner editing their own post — ownership/identity fields are locked
-      allow update: if isOwner(resource.data.authorUid)
-        && request.resource.data.authorUid == resource.data.authorUid
-        && request.resource.data.author == resource.data.author
-        && request.resource.data.createdAt == resource.data.createdAt;
+      // Owner may update only caption, message, and/or imageUrl
+      allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['caption', 'message', 'imageUrl']);
 
-      // Any signed-in user may increment replyCount by exactly 1 when adding a reply —
-      // this is the one exception to owner-only updates, needed because addReply()
-      // increments the parent post's replyCount as a side effect.
-      allow update: if isSignedIn()
+      // Any school-domain user may increment replyCount by exactly +1
+      allow update: if isSchoolAccount()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replyCount'])
         && request.resource.data.replyCount == resource.data.replyCount + 1;
 
-      allow delete: if isOwner(resource.data.authorUid);
+      // Replies are NOT cascade-deleted yet; this is a known, deferred gap.
+      allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
     }
 
     match /replies/{replyId} {
       allow read: if true;
 
-      allow create: if isSignedIn()
+      allow create: if isSchoolAccount()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.postId is string
         && request.resource.data.author is string
@@ -48,13 +51,11 @@ service cloud.firestore {
         && request.resource.data.message.size() > 0
         && request.resource.data.createdAt is string;
 
-      allow update: if isOwner(resource.data.authorUid)
-        && request.resource.data.authorUid == resource.data.authorUid
-        && request.resource.data.postId == resource.data.postId
-        && request.resource.data.author == resource.data.author
-        && request.resource.data.createdAt == resource.data.createdAt;
+      // Owner may update only the message field
+      allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message']);
 
-      allow delete: if isOwner(resource.data.authorUid);
+      allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
     }
 
     // Deny everything else by default
