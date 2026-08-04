@@ -4,6 +4,7 @@ import {
   signOutUser,
   onAuthStateChangedListener,
   GoogleAuthProvider,
+  isSchoolAccount,
 } from '../services/authService.js'
 
 export const AuthContext = createContext(null)
@@ -11,34 +12,51 @@ export const AuthContext = createContext(null)
 export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  // String error message shown by the navbar widget, or null when clear.
+  const [authError, setAuthError] = useState(null)
   // accessToken is set only right after signInWithGoogle() resolves.
   // It will be null after a page refresh until a proper refresh flow exists.
   const [accessToken, setAccessToken] = useState(null)
 
   useEffect(() => {
     const unsub = onAuthStateChangedListener((firebaseUser) => {
-      setUser(firebaseUser)
+      // Re-check any signed-in session (not just a fresh click) so a stale
+      // non-school session from before this feature existed gets signed out.
+      if (firebaseUser && !isSchoolAccount(firebaseUser.email)) {
+        setAuthError('Sign-in requires a school Google account.')
+        setAccessToken(null)
+        setUser(null)
+        signOutUser()
+      } else {
+        setUser(firebaseUser)
+      }
       setLoading(false)
     })
     return unsub
   }, [])
 
   const signIn = async () => {
-    const result = await signInWithGoogle()
-    const credential = GoogleAuthProvider.credentialFromResult(result)
-    if (credential?.accessToken) {
-      setAccessToken(credential.accessToken)
+    try {
+      const result = await signInWithGoogle()
+      const credential = GoogleAuthProvider.credentialFromResult(result)
+      if (credential?.accessToken) {
+        setAccessToken(credential.accessToken)
+      }
+      setAuthError(null)
+      return result.user
+    } catch (err) {
+      setAuthError(err?.message || 'Sign-in failed. Please try again.')
     }
-    return result.user
   }
 
   const signOut = async () => {
+    setAuthError(null)
     setAccessToken(null)
     await signOutUser()
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, accessToken, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, accessToken, authError, signIn, signOut }}>
       {children}
     </AuthContext.Provider>
   )

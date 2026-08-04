@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { navPages } from '../pageRegistry.js'
+import AuthWidget from './AuthWidget.jsx'
 
 export default function Navbar() {
   const [open, setOpen] = useState(false)
@@ -30,7 +31,15 @@ export default function Navbar() {
             </NavLink>
           </li>
         ))}
+        {/* Sign-in / account control — shown inside the mobile menu */}
+        <li className="aw-mobile">
+          <AuthWidget />
+        </li>
       </ul>
+      {/* Sign-in / account control — shown in the desktop navbar row */}
+      <div className="aw-desktop">
+        <AuthWidget />
+      </div>
     </nav>
   )
 }

@@ -12,6 +12,14 @@ const googleProvider = new FirebaseGoogleAuthProvider()
 googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly')
 
 /**
+ * Mirrors the domain check in firestore.rules — keep these in sync.
+ */
+export function isSchoolAccount(email) {
+  if (!email) return false
+  return email.endsWith('@fcps.org') || email.endsWith('@my.fcps.org')
+}
+
+/**
  * Sign in with Google popup. Returns the Firebase user object.
  *
  * The Google OAuth access token is only available right after this resolves
@@ -19,9 +27,17 @@ googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly')
  * It is NOT persisted across page reloads by Firebase Auth on its own —
  * a proper token refresh strategy (silent re-auth or server-side exchange)
  * is a future task.
+ *
+ * Non-school-domain accounts are signed back out and rejected.
  */
 export async function signInWithGoogle() {
   const result = await signInWithPopup(auth, googleProvider)
+  if (!isSchoolAccount(result.user.email)) {
+    await firebaseSignOut(auth)
+    const err = new Error('Sign-in requires a school Google account.')
+    err.code = 'WRONG_DOMAIN'
+    throw err
+  }
   return result
 }
 
