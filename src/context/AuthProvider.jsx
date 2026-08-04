@@ -45,7 +45,14 @@ export default function AuthProvider({ children }) {
       setAuthError(null)
       return result.user
     } catch (err) {
-      setAuthError(err?.message || 'Sign-in failed. Please try again.')
+      const code = err?.code
+      if (code === 'WRONG_DOMAIN') {
+        setAuthError(err.message)
+      } else if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
+        // User closed the popup — normal behavior, nothing to surface.
+      } else {
+        setAuthError('Sign-in failed. Please try again.')
+      }
     }
   }
 
