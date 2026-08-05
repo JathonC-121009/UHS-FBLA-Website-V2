@@ -1,0 +1,121 @@
+/* ============================================================================
+   BULLETIN PAGE STYLES — this file owns the look of "/bulletin" and nothing
+   else. Every rule is scoped under `.route-bulletin` (set on <body> by
+   Layout), so nothing here leaks to other pages, and you can restyle the
+   shared navbar/footer/hero for this page only:
+       .route-bulletin nav { background: #000; }
+       .route-bulletin { --hero-bg: #000; }
+   ========================================================================= */
+
+/* Page-level variable overrides (see src/index.css for the full list) */
+.route-bulletin {
+  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+}
+
+.route-bulletin .bulletin-section { background: var(--off-white); padding: 4rem 2rem; }
+.route-bulletin .bulletin-wrap { max-width: 700px; margin: 0 auto; }
+
+/* Shared avatar */
+.route-bulletin .avatar {
+  width: 44px; height: 44px; min-width: 44px; border-radius: 50%;
+  background: var(--navy); color: var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .78rem; font-weight: 700; letter-spacing: .02em;
+}
+
+/* Composer */
+.route-bulletin .composer-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem; margin-bottom: 3rem; box-shadow: 0 4px 18px rgba(10, 46, 127, .06);
+}
+.route-bulletin .composer-head { display: flex; gap: 1rem; align-items: flex-start; }
+.route-bulletin .composer-input {
+  flex: 1; resize: vertical; min-height: 70px; border: 1.5px solid var(--border);
+  border-radius: 10px; background: var(--off-white); padding: .75rem 1rem;
+  font-family: var(--body-font); font-size: .95rem; color: var(--black);
+  outline: none; transition: border-color .2s, background .2s;
+}
+.route-bulletin .composer-input:focus { border-color: var(--blue); background: var(--white); }
+
+.route-bulletin .composer-preview { margin-top: .9rem; margin-left: 60px; }
+.route-bulletin .preview-chip {
+  display: inline-flex; align-items: center; gap: .5rem; background: var(--off-white);
+  border: 1px solid var(--border); border-radius: 8px; padding: .4rem .5rem .4rem .7rem;
+  font-size: .82rem; color: var(--navy); font-weight: 500;
+}
+.route-bulletin .preview-chip-remove {
+  background: none; border: none; cursor: pointer; color: var(--muted); font-size: 1rem;
+  line-height: 1; padding: 0 .15rem; transition: color .2s;
+}
+.route-bulletin .preview-chip-remove:hover { color: #e05c2f; }
+
+.route-bulletin .composer-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 1.1rem; padding-top: 1.1rem; border-top: 1px solid var(--border);
+  margin-left: 60px;
+}
+.route-bulletin .composer-attach { display: flex; gap: .5rem; }
+.route-bulletin .attach-btn {
+  display: inline-flex; align-items: center; gap: .4rem; cursor: pointer;
+  font-size: .82rem; font-weight: 600; color: var(--cobalt);
+  background: rgba(34, 106, 221, .08); border: 1px solid transparent;
+  border-radius: 7px; padding: .5rem .9rem; transition: background .2s, border-color .2s;
+}
+.route-bulletin .attach-btn:hover { background: rgba(34, 106, 221, .14); border-color: rgba(34, 106, 221, .25); }
+
+@media (max-width: 500px) {
+  .route-bulletin .composer-preview,
+  .route-bulletin .composer-footer { margin-left: 0; }
+  .route-bulletin .composer-footer { flex-direction: column; align-items: stretch; gap: .9rem; }
+  .route-bulletin .composer-attach { justify-content: center; }
+}
+
+/* Feed */
+.route-bulletin .bulletin-feed { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; }
+
+.route-bulletin .post-card {
+  background: var(--white); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.5rem; transition: box-shadow .22s, transform .22s;
+}
+.route-bulletin .post-card:hover { box-shadow: 0 12px 32px rgba(10, 46, 127, .09); transform: translateY(-2px); }
+
+.route-bulletin .post-head { display: flex; gap: 1rem; align-items: center; margin-bottom: .9rem; }
+.route-bulletin .post-name { font-weight: 700; font-size: .95rem; color: var(--navy); display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; }
+.route-bulletin .post-role {
+  font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); background: var(--off-white); border: 1px solid var(--border);
+  border-radius: 4px; padding: .15rem .45rem;
+}
+.route-bulletin .post-time { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+
+.route-bulletin .post-text { font-size: .92rem; line-height: 1.65; color: var(--black); margin-bottom: 1rem; }
+
+.route-bulletin .post-media { margin-bottom: 1.1rem; }
+.route-bulletin .post-media-placeholder {
+  aspect-ratio: 16/8; border-radius: 10px; overflow: hidden;
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .5rem; color: rgba(255, 255, 255, .75); font-size: .82rem; font-weight: 500;
+}
+.route-bulletin .post-media-icon { font-size: 1.8rem; }
+.route-bulletin .post-media-play {
+  width: 46px; height: 46px; border-radius: 50%; background: rgba(255, 255, 255, .15);
+  display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--white);
+}
+
+.route-bulletin .post-actions { display: flex; gap: .5rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.route-bulletin .post-action {
+  display: inline-flex; align-items: center; gap: .35rem; cursor: pointer;
+  background: none; border: 1px solid transparent; border-radius: 7px;
+  padding: .5rem .8rem; font-size: .82rem; font-weight: 600; color: var(--muted);
+  transition: background .2s, color .2s;
+}
+.route-bulletin .post-action .count { color: var(--muted); font-weight: 600; }
+.route-bulletin .post-action:hover { background: var(--off-white); color: var(--navy); }
+.route-bulletin .post-action-delete { margin-left: auto; }
+.route-bulletin .post-action-delete:hover { background: rgba(224, 92, 47, .1); color: #e05c2f; }
+
+@media (max-width: 500px) {
+  .route-bulletin .post-actions { gap: .25rem; }
+  .route-bulletin .post-action span:not(.count) { display: none; }
+}
