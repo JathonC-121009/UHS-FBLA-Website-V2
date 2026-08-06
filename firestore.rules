@@ -58,6 +58,19 @@ service cloud.firestore {
       allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
     }
 
+    match /users/{uid} {
+      // Users can only read/write their own profile doc — the doc ID is the uid.
+      allow read: if request.auth.uid == uid;
+
+      allow create: if request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+
+      allow update: if request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+
+      // delete is intentionally not allowed
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;
