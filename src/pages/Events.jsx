@@ -1,12 +1,16 @@
+
 import { useState } from 'react'
 import './Events.css'
 import useCalendar from '../hooks/useCalendar'
+
 
 export const meta = {
   label: 'Events',
   order: 20,
   title: 'Urbana FBLA — Events',
 }
+
+
 
 
 function getDaysInMonth(date) {
@@ -18,6 +22,8 @@ function getDaysInMonth(date) {
 }
 
 
+
+
 function getFirstDayOfMonth(date) {
   return new Date(
     date.getFullYear(),
@@ -25,6 +31,8 @@ function getFirstDayOfMonth(date) {
     1
   ).getDay()
 }
+
+
 
 
 function formatMonth(date) {
@@ -35,12 +43,19 @@ function formatMonth(date) {
 }
 
 
+
+
 export default function Events() {
+
+
 
 
   const [currentDate,setCurrentDate] = useState(new Date())
 
+
   const [animate,setAnimate] = useState(false)
+
+
 
 
   const {
@@ -51,27 +66,43 @@ export default function Events() {
 
 
 
+
+
+
   const today = new Date()
+
+
+
 
 
 
   const changeMonth = (newDate)=>{
 
+
     setAnimate(false)
+
 
     setTimeout(()=>{
 
+
       setCurrentDate(newDate)
+
 
       setAnimate(true)
 
+
     },50)
+
 
   }
 
 
 
+
+
+
   const previousMonth = ()=>{
+
 
     changeMonth(
       new Date(
@@ -81,11 +112,16 @@ export default function Events() {
       )
     )
 
+
   }
 
 
 
+
+
+
   const nextMonth = ()=>{
+
 
     changeMonth(
       new Date(
@@ -95,25 +131,41 @@ export default function Events() {
       )
     )
 
+
   }
+
+
+
 
 
 
   const goToday = ()=>{
 
+
     changeMonth(new Date())
+
 
   }
 
 
 
+
+
+
   const daysInMonth = getDaysInMonth(currentDate)
+
 
   const firstDay = getFirstDayOfMonth(currentDate)
 
 
 
+
+
+
   const calendarDays=[]
+
+
+
 
 
 
@@ -122,9 +174,14 @@ export default function Events() {
   }
 
 
+
+
   for(let i=1;i<=daysInMonth;i++){
     calendarDays.push(i)
   }
+
+
+
 
 
 
@@ -135,71 +192,108 @@ export default function Events() {
 
 
 
+
+
+
+
   const getEventsForDay=(day)=>{
+
 
     if(!day) return []
 
+
     return events.filter(event=>{
+
 
       const eventDate=new Date(event.start)
 
 
+
+
       return (
+
 
         eventDate.getDate()===day &&
 
+
         eventDate.getMonth()===currentDate.getMonth() &&
+
 
         eventDate.getFullYear()===currentDate.getFullYear()
 
+
       )
+
 
     })
 
+
   }
+
+
+
 
 
 
   const isToday=(day)=>{
 
+
     return (
+
 
       day &&
 
+
       today.getDate()===day &&
+
 
       today.getMonth()===currentDate.getMonth() &&
 
+
       today.getFullYear()===currentDate.getFullYear()
 
+
     )
+
 
   }
 
 
 
+
+
+
   return (
+
 
     <>
 
 
+
+
     <section className="events-hero">
 
+
       <div className="events-hero-inner">
+
 
         <div className="events-kicker">
           Stay in the Know
         </div>
 
+
         <h1>
           FBLA Calendar
         </h1>
+
 
         <p>
           Meetings, competitions, and chapter activities.
         </p>
 
+
       </div>
+
 
     </section>
 
@@ -207,20 +301,35 @@ export default function Events() {
 
 
 
+
+
+
+
+
     <section className="events-section">
 
+
       <div className="events-wrap">
+
+
 
 
         <div className="calendar-card">
 
 
+
+
           <div className="calendar-header">
+
+
 
 
             <button onClick={previousMonth}>
               ← Previous
             </button>
+
+
+
 
 
 
@@ -230,20 +339,33 @@ export default function Events() {
 
 
 
+
+
+
             <div className="calendar-controls">
+
 
               <button onClick={goToday}>
                 Today
               </button>
 
+
               <button onClick={nextMonth}>
                 Next →
               </button>
 
+
             </div>
 
 
+
+
           </div>
+
+
+
+
+
 
 
 
@@ -254,6 +376,9 @@ export default function Events() {
               Loading events...
             </div>
           )}
+
+
+
 
 
 
@@ -268,13 +393,24 @@ export default function Events() {
 
 
 
+
+
+
+
+
+
           {!loading && !error && (
+
+
 
 
           <div className={`calendar-body ${animate ? "calendar-enter":""}`}>
 
 
+
+
             <div className="calendar-weekdays">
+
 
             {
               [
@@ -287,14 +423,22 @@ export default function Events() {
                 "Sat"
               ].map(day=>(
 
+
                 <div key={day}>
                   {day}
                 </div>
 
+
               ))
             }
 
+
             </div>
+
+
+
+
+
 
 
 
@@ -303,13 +447,19 @@ export default function Events() {
             <div className="calendar-grid">
 
 
+
+
             {
               calendarDays.map((day,index)=>(
 
 
+
+
                 <div
 
+
                   key={index}
+
 
                   className={`
                     calendar-day
@@ -317,108 +467,157 @@ export default function Events() {
                     ${!day?"empty":""}
                   `}
 
+
                 >
+
+
 
 
                   {
                     day && (
 
+
                     <div className="day-number">
+
 
                       {day}
 
+
                       {
                         isToday(day)&&(
+
 
                         <span className="today-label">
                           Today
                         </span>
 
+
                         )
                       }
 
+
                     </div>
+
 
                     )
                   }
 
 
 
+
+
+
                   {
                     getEventsForDay(day).map(event=>(
+
 
                     <div
                       key={event.id}
                       className="calendar-event"
                     >
 
+
                       {event.title}
+
 
                     </div>
 
+
                     ))
+
 
                   }
 
 
+
+
                 </div>
+
+
 
 
               ))
             }
 
 
+
+
             </div>
+
+
 
 
           </div>
 
+
           )}
 
 
+
+
         </div>
+
+
+
+
 
 
 
 
         <div className="calendar-legend">
 
+
           <div>
             <span className="legend meeting"></span>
             Meetings
           </div>
+
 
           <div>
             <span className="legend competition"></span>
             Competitions
           </div>
 
+
           <div>
             <span className="legend community"></span>
             Community
           </div>
+
 
           <div>
             <span className="legend social"></span>
             Social
           </div>
 
+
           <div>
             <span className="legend deadline"></span>
             Deadlines
           </div>
 
+
         </div>
+
+
 
 
       </div>
 
 
+
+
     </section>
+
+
 
 
     </>
 
+
   )
 
+
 }
+
+
