@@ -71,6 +71,35 @@ service cloud.firestore {
       // delete is intentionally not allowed
     }
 
+    match /contactMessages/{messageId} {
+      // Public contact form: anyone, signed in or not, may send a message.
+      // The field list must stay in sync with src/services/contactService.js.
+      allow create: if request.resource.data.keys().hasOnly(
+            ['firstName', 'lastName', 'email', 'subject', 'message', 'authorUid', 'createdAt', 'handled'])
+        && request.resource.data.firstName is string
+        && request.resource.data.firstName.size() > 0
+        && request.resource.data.firstName.size() <= 80
+        && request.resource.data.lastName is string
+        && request.resource.data.lastName.size() > 0
+        && request.resource.data.lastName.size() <= 80
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() > 0
+        && request.resource.data.subject.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.createdAt is string
+        && request.resource.data.handled == false
+        && request.resource.data.authorUid == (isSignedIn() ? request.auth.uid : null);
+
+      // Messages are read and managed in the Firebase console, never by the
+      // client — a public-writable inbox must not also be publicly readable.
+      allow read, update, delete: if false;
+    }
+
     // Deny everything else by default
     match /{document=**} {
       allow read, write: if false;

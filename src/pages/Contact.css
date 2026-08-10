@@ -12,16 +12,40 @@
   /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
 }
 
-/* Form controls */
-.route-contact .form-group { margin-bottom: 1.25rem; }
-.route-contact .form-group label { display: block; font-size: .78rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .4rem; }
+/* --- Form controls -------------------------------------------------------
+   Floating labels: the label starts sitting inside the field and slides up
+   to a small caption once the field is focused or filled. That needs the
+   label to come AFTER its input in the markup (see Contact.jsx) so the
+   `input:focus + label` sibling selectors work. */
+.route-contact .form-group { position: relative; margin-bottom: 1.35rem; }
 .route-contact .form-group input,
 .route-contact .form-group textarea,
-.route-contact .form-group select { width: 100%; padding: .72rem 1rem; border: 1.5px solid var(--border); border-radius: 7px; font-family: var(--body-font); font-size: .95rem; color: var(--black); background: var(--off-white); outline: none; transition: border-color .2s, background .2s; }
+.route-contact .form-group select { width: 100%; padding: 1.45rem 1rem .55rem; border: 1.5px solid var(--border); border-radius: 9px; font-family: var(--body-font); font-size: .95rem; color: var(--black); background: var(--off-white); outline: none; transition: border-color .2s, background .2s, box-shadow .2s; }
+.route-contact .form-group input:hover,
+.route-contact .form-group textarea:hover,
+.route-contact .form-group select:hover { border-color: #c3cee6; }
 .route-contact .form-group input:focus,
 .route-contact .form-group textarea:focus,
-.route-contact .form-group select:focus { border-color: var(--blue); background: var(--white); }
-.route-contact .form-group textarea { resize: vertical; min-height: 120px; }
+.route-contact .form-group select:focus { border-color: var(--blue); background-color: var(--white); box-shadow: 0 0 0 3.5px rgba(29, 82, 188, .13); }
+.route-contact .form-group textarea { resize: vertical; min-height: 130px; padding-top: 1.6rem; }
+
+/* Resting state — label centered over the field, placeholder hidden so the
+   two don't overlap. The placeholder reappears on focus as a hint. */
+.route-contact .form-group label { position: absolute; left: 1.05rem; top: .95rem; font-size: .95rem; font-weight: 500; color: var(--muted); pointer-events: none; transition: top .17s ease, font-size .17s ease, color .17s ease, letter-spacing .17s ease; }
+.route-contact .form-group input:not(:focus)::placeholder,
+.route-contact .form-group textarea:not(:focus)::placeholder { color: transparent; }
+
+/* Floated state — focused, or holding a value */
+.route-contact .form-group input:focus + label,
+.route-contact .form-group input:not(:placeholder-shown) + label,
+.route-contact .form-group textarea:focus + label,
+.route-contact .form-group textarea:not(:placeholder-shown) + label,
+.route-contact .form-group-select label { top: .42rem; font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .09em; color: var(--cobalt); }
+
+/* The select always holds a value, so its label is permanently floated.
+   appearance:none replaces the OS arrow with a gold chevron of our own. */
+.route-contact .form-group-select select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 2.5rem; background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%), linear-gradient(135deg, var(--gold) 50%, transparent 50%); background-position: calc(100% - 1.25rem) calc(50% + 4px), calc(100% - 1rem) calc(50% + 4px); background-size: 6px 6px, 6px 6px; background-repeat: no-repeat; }
+
 .route-contact .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
 @media (max-width: 500px) {
   .route-contact .form-row { grid-template-columns: 1fr; }
@@ -32,14 +56,31 @@
 @media (max-width: 768px) {
   .route-contact .contact-layout { grid-template-columns: 1fr; gap: 2.5rem; }
 }
-.route-contact .cinfo-item { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.75rem; }
-.route-contact .cinfo-icon { width: 46px; height: 46px; min-width: 46px; background: var(--navy); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+/* Contact-info list — each row lifts slightly and its icon picks up a gold
+   ring on hover, so the block reads as interactive rather than static. */
+.route-contact .cinfo-item { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.4rem; padding: .7rem .8rem; margin-left: -.8rem; border-radius: 11px; transition: background .2s, transform .2s; }
+.route-contact .cinfo-item:hover { background: var(--off-white); transform: translateX(3px); }
+.route-contact .cinfo-icon { width: 46px; height: 46px; min-width: 46px; background: var(--navy); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; box-shadow: 0 0 0 0 rgba(244, 171, 25, 0); transition: box-shadow .22s ease, transform .22s ease; }
+.route-contact .cinfo-item:hover .cinfo-icon { box-shadow: 0 0 0 4px rgba(244, 171, 25, .28); transform: scale(1.04); }
 .route-contact .cinfo-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: .3rem; }
 .route-contact .cinfo-value { font-weight: 600; font-size: .97rem; color: var(--navy); line-height: 1.4; }
-.route-contact .cinfo-value a { color: var(--cobalt); text-decoration: none; }
-.route-contact .cinfo-value a:hover { text-decoration: underline; }
-.route-contact .form-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; }
-.route-contact .form-card h3 { font-weight: 700; font-size: 1.2rem; color: var(--navy); margin-bottom: 1.5rem; }
+.route-contact .cinfo-value a { color: var(--cobalt); text-decoration: none; border-bottom: 1.5px solid transparent; transition: border-color .2s; }
+.route-contact .cinfo-value a:hover { border-bottom-color: var(--cobalt); }
+
+/* Form card — raised off the page, with a gold rule under the heading to tie
+   it to the brand accent used elsewhere on the site. */
+.route-contact .form-card { position: relative; background: var(--white); border: 1px solid var(--border); border-radius: 16px; padding: 2.25rem; box-shadow: 0 14px 40px -18px rgba(10, 46, 127, .35); overflow: hidden; }
+.route-contact .form-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--gold), var(--cobalt)); }
+.route-contact .form-card h3 { font-weight: 700; font-size: 1.25rem; color: var(--navy); margin-bottom: .55rem; }
+.route-contact .form-card h3::after { content: ''; display: block; width: 42px; height: 3px; background: var(--gold); border-radius: 2px; margin-top: .6rem; margin-bottom: 1.6rem; }
+.route-contact .form-card .btn { margin-top: .35rem; transition: transform .18s ease, box-shadow .18s ease; }
+.route-contact .form-card .btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 22px -10px rgba(10, 46, 127, .65); }
+
+/* Validation / send-failure banner above the form fields */
+.route-contact .contact-error { background: #fdecec; border: 1.5px solid #e5a3a3; border-radius: 7px; padding: .7rem 1rem; margin-bottom: 1.25rem; font-size: .88rem; font-weight: 500; color: #9c2b2b; line-height: 1.45; }
+
+/* Submit button while the message is in flight */
+.route-contact .form-card button[type="submit"]:disabled { opacity: .6; cursor: not-allowed; }
 
 .route-contact .join-section { background: var(--navy); padding: 4rem 2rem; text-align: center; }
 .route-contact .join-section h2 { font-weight: 700; font-size: clamp(1.5rem, 3.5vw, 2.2rem); color: var(--white); margin-bottom: .75rem; }
