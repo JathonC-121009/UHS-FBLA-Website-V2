@@ -43,15 +43,23 @@ export default function AuthProvider({ children }) {
   // accessToken is set only right after signInWithGoogle() resolves.
   // It will be null after a page refresh until a proper refresh flow exists.
   const [accessToken, setAccessToken] = useState(null)
+  // The signed-in user's profile doc (users/{uid}); null until fetched.
+  const [profile, setProfile] = useState(null)
 
   // Read-only flag for future UI use (e.g. disabling Bulletin Board actions).
   // It does not gate sign-in itself.
   const isSchoolAccount = !!user && isSchoolDomain(user.email)
 
+  // Role is admin-assigned only (site owner in the Firebase Console; firestore
+  // rules exclude it from self-writes). Absent role = 'member'.
+  const role = profile?.role ?? 'member'
+  const isOfficerOrAdviser = role === 'officer' || role === 'adviser'
+
   const checkProfileSetup = async (fbUser) => {
     if (!fbUser) return
     try {
       const profile = await getUserProfile(fbUser.uid)
+      setProfile(profile)
       setNeedsProfileSetup(!profile)
     } catch {
       // Rules may not be deployed yet — never block sign-in on a read failure.
@@ -67,6 +75,7 @@ export default function AuthProvider({ children }) {
         // (or a leftover session from before this feature) is still routed to Step 2.
         await checkProfileSetup(firebaseUser)
       } else {
+        setProfile(null)
         setNeedsProfileSetup(false)
         setAccessToken(null)
       }
@@ -120,10 +129,11 @@ export default function AuthProvider({ children }) {
   const completeProfileSetup = async (name, gradeLevel) => {
     if (!user) return
     try {
-      await createUserProfile(user.uid, { name, gradeLevel })
+      const created = await createUserProfile(user.uid, { name, gradeLevel })
       await updateDisplayName(name)
       // Reflect the new display name immediately (avatar initials, etc.).
       setUser((prev) => (prev ? { ...prev, displayName: name } : prev))
+      setProfile(created)
       setNeedsProfileSetup(false)
       setAuthError(null)
     } catch (err) {
@@ -135,6 +145,7 @@ export default function AuthProvider({ children }) {
   const signOut = async () => {
     setAuthError(null)
     setAccessToken(null)
+    setProfile(null)
     setNeedsProfileSetup(false)
     await signOutUser()
   }
@@ -147,6 +158,8 @@ export default function AuthProvider({ children }) {
         accessToken,
         authError,
         isSchoolAccount,
+        role,
+        isOfficerOrAdviser,
         needsProfileSetup,
         signIn,
         signUpWithEmail,
