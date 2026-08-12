@@ -1,159 +1,115 @@
+import { useState } from 'react'
+import useAuth from '../hooks/useAuth.js'
+import { usePosts } from '../hooks/usePosts.js'
+import Corkboard from '../components/BulletinBoard/Corkboard.jsx'
+import ThreadModal from '../components/BulletinBoard/ThreadModal.jsx'
+import NewPostModal from '../components/BulletinBoard/NewPostModal.jsx'
+import ArchivedPostsPanel from '../components/BulletinBoard/ArchivedPostsPanel.jsx'
 import './Bulletin.css'
 
 export const meta = {
-  label: 'Bulletin',   // navbar text — delete this line to hide it from the nav
-  order: 90,           // navbar position; lower numbers come first
-  title: 'Urbana FBLA — Bulletin',  // browser tab title
-  // path: 'custom-url',  // optional: override the URL (defaults to the slug)
-  // index: true,         // optional: make this the "/" home page
+  label: 'Bulletin Board',   // navbar text
+  order: 90,                 // navbar position; lower numbers come first
+  title: 'Urbana FBLA — Bulletin Board',  // browser tab title
 }
 
 export default function Bulletin() {
+  const { user, isOfficerOrAdviser, openAuthModal } = useAuth()
+  const { posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount } = usePosts()
+
+  const [openPost, setOpenPost] = useState(null)
+  const [newPostOpen, setNewPostOpen] = useState(false)
+  const [archivedOpen, setArchivedOpen] = useState(false)
+  const [clearing, setClearing] = useState(false)
+
+  // Author-of-own-content or officer/adviser may soft-remove.
+  const canRemove = (post) => !!user && (post.authorUid === user.uid || isOfficerOrAdviser)
+
+  const handleRemovePost = async (post) => {
+    try {
+      await removePost(post.id)
+    } catch {
+      /* rules/snapshot races surface silently — board state stays as-is */
+    }
+  }
+
+  const handleClearBoard = async () => {
+    if (!window.confirm(
+      'Clear the whole board? Every post will be soft-removed and moved to the archive. This cannot be undone.',
+    )) return
+    setClearing(true)
+    try {
+      await clearBoard()
+    } finally {
+      setClearing(false)
+    }
+  }
+
+  const handleNewPost = () => {
+    if (!user) {
+      openAuthModal()
+      return
+    }
+    setNewPostOpen(true)
+  }
+
   return (
     <>
       <div className="page-hero">
-        <p className="page-hero-label">Chapter Bulletin</p>
+        <p className="page-hero-label">Bulletin Board</p>
         <h1>The <span>Board</span></h1>
-        <p>Announcements, updates, and shoutouts from the chapter</p>
+        <p>Pin a photo, ask a question, start a conversation</p>
       </div>
 
       <section className="bulletin-section">
-        <div className="bulletin-wrap">
-
-          {/* Post composer — UI only, no submit behavior */}
-          <div className="composer-card fi">
-            <div className="composer-head">
-              <div className="avatar">You</div>
-              <textarea
-                className="composer-input"
-                placeholder="Share an announcement with the chapter..."
-                rows={3}
-              ></textarea>
-            </div>
-
-            {/* Example attachment preview */}
-            <div className="composer-preview">
-              <div className="preview-chip">
-                <span className="preview-chip-icon">🖼️</span>
-                <span className="preview-chip-name">fbla-banner.jpg</span>
-                <button type="button" className="preview-chip-remove" aria-label="Remove attachment">×</button>
-              </div>
-            </div>
-
-            <div className="composer-footer">
-              <div className="composer-attach">
-                <label className="attach-btn">
-                  📷 <span>Photo</span>
-                  <input type="file" accept="image/*" hidden />
-                </label>
-                <label className="attach-btn">
-                  🎥 <span>Video</span>
-                  <input type="file" accept="video/*" hidden />
-                </label>
-              </div>
-              <button type="button" className="btn btn-navy">Post</button>
-            </div>
+        <div className="bulletin-wrap fi">
+          <div className="bulletin-toolbar">
+            <button type="button" className="btn btn-gold" onClick={handleNewPost}>
+              ＋ New Post
+            </button>
+            <button
+              type="button"
+              className={`btn bulletin-outline${archivedOpen ? ' active' : ''}`}
+              onClick={() => setArchivedOpen((v) => !v)}
+            >
+              Archived Posts
+            </button>
+            {isOfficerOrAdviser && (
+              <button
+                type="button"
+                className="btn btn-navy bulletin-clear"
+                onClick={handleClearBoard}
+                disabled={clearing}
+              >
+                {clearing ? 'Clearing…' : 'Clear Board'}
+              </button>
+            )}
           </div>
 
-          {/* Feed */}
-          <div className="fi">
-            <p className="section-label">The Feed</p>
-            <h2 className="section-title">Recent Posts</h2>
-            <div className="divider"></div>
-          </div>
-
-          <div className="bulletin-feed">
-
-            <div className="post-card fi">
-              <div className="post-head">
-                <div className="avatar">MZ</div>
-                <div className="post-hinfo">
-                  <div className="post-name">Mia Zhang <span className="post-role">Officer</span></div>
-                  <div className="post-time">Posted 2 hours ago</div>
-                </div>
-              </div>
-              <p className="post-text">
-                Huge congrats to everyone who competed at the regional conference this weekend —
-                we brought home 6 medals! 🏆 Keep up the amazing work, Knights.
-              </p>
-              <div className="post-media">
-                <div className="post-media-placeholder">
-                  <span className="post-media-icon">🖼️</span>
-                  <span>Image attached</span>
-                </div>
-              </div>
-              <div className="post-actions">
-                <button type="button" className="post-action">
-                  👍 <span>Like</span> <span className="count">24</span>
-                </button>
-                <button type="button" className="post-action">
-                  💬 <span>Comment</span> <span className="count">6</span>
-                </button>
-                <button type="button" className="post-action post-action-delete">
-                  🗑️ <span>Delete</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="post-card fi">
-              <div className="post-head">
-                <div className="avatar">TZ</div>
-                <div className="post-hinfo">
-                  <div className="post-name">Travis Zimmermann <span className="post-role">Advisor</span></div>
-                  <div className="post-time">Posted yesterday</div>
-                </div>
-              </div>
-              <p className="post-text">
-                Quick recap from this week's meeting — video below. Make sure to check the sign-up sheet
-                for the community service event before Friday!
-              </p>
-              <div className="post-media">
-                <div className="post-media-placeholder post-media-video">
-                  <span className="post-media-play">▶</span>
-                  <span>Video attached</span>
-                </div>
-              </div>
-              <div className="post-actions">
-                <button type="button" className="post-action">
-                  👍 <span>Like</span> <span className="count">15</span>
-                </button>
-                <button type="button" className="post-action">
-                  💬 <span>Comment</span> <span className="count">2</span>
-                </button>
-                <button type="button" className="post-action post-action-delete">
-                  🗑️ <span>Delete</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="post-card fi">
-              <div className="post-head">
-                <div className="avatar">JP</div>
-                <div className="post-hinfo">
-                  <div className="post-name">Jordan Patel <span className="post-role">Member</span></div>
-                  <div className="post-time">Posted 3 days ago</div>
-                </div>
-              </div>
-              <p className="post-text">
-                Reminder: dues for the spring semester are due next Friday. Reach out to any officer
-                if you have questions about payment options!
-              </p>
-              <div className="post-actions">
-                <button type="button" className="post-action">
-                  👍 <span>Like</span> <span className="count">9</span>
-                </button>
-                <button type="button" className="post-action">
-                  💬 <span>Comment</span> <span className="count">1</span>
-                </button>
-                <button type="button" className="post-action post-action-delete">
-                  🗑️ <span>Delete</span>
-                </button>
-              </div>
-            </div>
-
-          </div>
+          <Corkboard
+            posts={posts}
+            loading={loading}
+            error={error}
+            canRemove={canRemove}
+            onOpenPost={setOpenPost}
+            onRemovePost={handleRemovePost}
+          />
         </div>
       </section>
+
+      {openPost && (
+        <ThreadModal post={openPost} onClose={() => setOpenPost(null)} onReplySaved={bumpReplyCount} />
+      )}
+      {newPostOpen && <NewPostModal onCreate={createPost} onClose={() => setNewPostOpen(false)} />}
+      {archivedOpen && (
+        <ArchivedPostsPanel
+          onClose={() => setArchivedOpen(false)}
+          onOpenPost={(post) => {
+            setArchivedOpen(false)
+            setOpenPost(post)
+          }}
+        />
+      )}
     </>
   )
 }

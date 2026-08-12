@@ -1,0 +1,80 @@
+/* AuthModal — the single sign-in (Step 1) / profile-setup (Step 2) dialog.
+   Rendered once from App.jsx, not from AuthWidget (which mounts twice in the
+   navbar). Styles moved verbatim out of AuthWidget.css — no restyle. */
+
+/* Overlay — mirrors the lightbox overlay pattern (fixed, centered) */
+.auth-modal-overlay {
+  position: fixed; inset: 0; z-index: 800;
+  background: rgba(10, 46, 127, .55);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem;
+}
+.auth-modal {
+  position: relative;
+  width: 100%; max-width: 400px;
+  background: var(--off-white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 18px 50px rgba(10, 46, 127, .35);
+  padding: 2rem 2rem 1.75rem;
+  text-align: left;
+  max-height: 90vh; overflow-y: auto;
+}
+.auth-modal h3 { font-weight: 700; font-size: 1.2rem; color: var(--navy); margin-bottom: .25rem; }
+.auth-modal-sub { color: var(--muted); font-size: .85rem; margin-bottom: 1.5rem; }
+.auth-modal-close {
+  position: absolute; top: .9rem; right: .9rem;
+  background: none; border: none; color: var(--muted);
+  font-size: 1.1rem; line-height: 1; cursor: pointer; transition: color .18s;
+}
+.auth-modal-close:hover { color: var(--navy); }
+
+/* Form controls — same styling language as the Contact page's form-card */
+.auth-form-group { margin-bottom: 1rem; }
+.auth-form-group label {
+  display: block; font-size: .78rem; font-weight: 600; color: var(--navy);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: .4rem;
+}
+.auth-form-group input,
+.auth-form-group select {
+  width: 100%; padding: .72rem 1rem;
+  border: 1.5px solid var(--border); border-radius: 7px;
+  font-family: var(--body-font); font-size: .95rem; color: var(--black);
+  background: var(--off-white); outline: none;
+  transition: border-color .2s, background .2s;
+}
+.auth-form-group input:focus,
+.auth-form-group select:focus { border-color: var(--blue); background: var(--white); }
+
+/* Divider between the Google button and the email/password form */
+.auth-divider {
+  display: flex; align-items: center; gap: .75rem;
+  margin: 1.1rem 0;
+  color: var(--muted); font-size: .75rem;
+  text-transform: uppercase; letter-spacing: .12em;
+}
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Sign In / Create Account toggle */
+.auth-mode-toggle { display: flex; gap: .5rem; margin-bottom: 1.25rem; }
+.auth-mode-toggle button {
+  flex: 1; padding: .55rem .5rem;
+  font-family: var(--body-font); font-size: .8rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .05em;
+  background: var(--off-white); color: var(--muted);
+  border: 1.5px solid var(--border); border-radius: 7px; cursor: pointer;
+  transition: all .18s;
+}
+.auth-mode-toggle button:hover { border-color: var(--blue); color: var(--navy); }
+.auth-mode-toggle button.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+
+/* Error banner — gold warning tone, same treatment as the home hero-badge */
+.auth-error {
+  margin: 0 0 1rem;
+  background: rgba(244, 171, 25, .12);
+  border: 1px solid rgba(244, 171, 25, .45);
+  border-radius: 10px;
+  padding: .6rem .9rem;
+  font-size: .8rem; line-height: 1.45; color: var(--navy);
+  display: flex; align-items: flex-start; gap: .55rem;
+}

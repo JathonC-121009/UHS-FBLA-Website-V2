@@ -46,6 +46,12 @@ export default function AuthProvider({ children }) {
   // The signed-in user's profile doc (users/{uid}); null until fetched.
   const [profile, setProfile] = useState(null)
 
+  // Sign-in modal visibility. Lives here (not in AuthWidget) so any page —
+  // e.g. the Bulletin Board — can open the same Step 1 → Step 2 flow.
+  const [authModalOpen, setAuthModalOpen] = useState(false)
+  const openAuthModal = () => setAuthModalOpen(true)
+  const closeAuthModal = () => setAuthModalOpen(false)
+
   // Read-only flag for future UI use (e.g. disabling Bulletin Board actions).
   // It does not gate sign-in itself.
   const isSchoolAccount = !!user && isSchoolDomain(user.email)
@@ -157,6 +163,9 @@ export default function AuthProvider({ children }) {
         loading,
         accessToken,
         authError,
+        authModalOpen,
+        openAuthModal,
+        closeAuthModal,
         isSchoolAccount,
         role,
         isOfficerOrAdviser,

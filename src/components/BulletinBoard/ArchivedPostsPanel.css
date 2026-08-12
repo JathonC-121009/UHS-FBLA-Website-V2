@@ -1,0 +1,26 @@
+/* Archived posts panel — desaturated notes + Archived tag + pager. */
+
+.archived-card { max-width: 760px; }
+.archived-sub { color: var(--muted); font-size: .88rem; margin-bottom: 1.2rem; }
+
+.archived-list {
+  display: flex; flex-wrap: wrap; gap: 1.4rem 1.2rem;
+  padding: 1rem 0 1.6rem;
+}
+.archived-note { position: relative; }
+.archived-note .pin-note { filter: grayscale(.6) opacity(.82); }
+
+.archived-tag {
+  position: absolute; top: -8px; left: -8px;
+  background: var(--navy); color: var(--gold);
+  font-size: .62rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .22rem .5rem; border-radius: 4px; z-index: 3;
+}
+
+.archived-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1rem; border-top: 1px solid var(--border); padding-top: 1.2rem;
+}
+.archived-page { color: var(--muted); font-size: .88rem; font-weight: 600; }
+.archived-nav .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }

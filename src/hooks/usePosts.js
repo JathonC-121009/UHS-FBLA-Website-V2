@@ -40,7 +40,15 @@ export function usePosts() {
     setPosts([])
   }, [])
 
-  return { posts, loading, error, createPost, removePost, clearBoard }
+  // Client-side display patch only: bumps a post's reply count badge after a
+  // reply actually saved (the service already incremented it in Firestore).
+  const bumpReplyCount = useCallback((postId) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, replyCount: (p.replyCount ?? 0) + 1 } : p)),
+    )
+  }, [])
+
+  return { posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount }
 }
 
 export function usePostThread(postId) {
@@ -67,6 +75,7 @@ export function usePostThread(postId) {
   const reply = useCallback(async (replyData) => {
     const saved = await addReplySvc(postId, replyData)
     setReplies((prev) => [...prev, saved])
+    return saved // resolves only if the reply saved; callers bump badges on success
   }, [postId])
 
   const removeReply = useCallback(async (replyId) => {
