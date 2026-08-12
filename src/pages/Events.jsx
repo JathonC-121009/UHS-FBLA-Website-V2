@@ -1,60 +1,271 @@
+import { useState } from 'react'
 import './Events.css'
+import useCalendar from '../hooks/useCalendar'
 
-// Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
   label: 'Events',
   order: 20,
   title: 'Urbana FBLA — Events',
 }
 
+function getDaysInMonth(date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth() + 1,
+    0,
+  ).getDate()
+}
+
+function getFirstDayOfMonth(date) {
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    1,
+  ).getDay()
+}
+
+function formatMonth(date) {
+  return date.toLocaleString('default', {
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 export default function Events() {
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [animate, setAnimate] = useState(false)
+
+  const {
+    events,
+    loading,
+    error,
+  } = useCalendar()
+
+  const today = new Date()
+
+  const changeMonth = (newDate) => {
+    setAnimate(false)
+
+    setTimeout(() => {
+      setCurrentDate(newDate)
+      setAnimate(true)
+    }, 50)
+  }
+
+  const previousMonth = () => {
+    changeMonth(
+      new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() - 1,
+        1,
+      ),
+    )
+  }
+
+  const nextMonth = () => {
+    changeMonth(
+      new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        1,
+      ),
+    )
+  }
+
+  const goToday = () => {
+    changeMonth(new Date())
+  }
+
+  const daysInMonth = getDaysInMonth(currentDate)
+  const firstDay = getFirstDayOfMonth(currentDate)
+
+  const calendarDays = []
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarDays.push(null)
+  }
+
+  for (let i = 1; i <= daysInMonth; i++) {
+    calendarDays.push(i)
+  }
+
+  while (calendarDays.length < 42) {
+    calendarDays.push(null)
+  }
+
+  const getEventsForDay = (day) => {
+    if (!day) return []
+
+    return events.filter((event) => {
+      const eventDate = new Date(event.start)
+
+      return (
+        eventDate.getDate() === day &&
+        eventDate.getMonth() === currentDate.getMonth() &&
+        eventDate.getFullYear() === currentDate.getFullYear()
+      )
+    })
+  }
+
+  const isToday = (day) => {
+    return (
+      day &&
+      today.getDate() === day &&
+      today.getMonth() === currentDate.getMonth() &&
+      today.getFullYear() === currentDate.getFullYear()
+    )
+  }
+
   return (
     <>
-      <div className="page-hero">
+      {/* Shared hero — completely controlled by index.css.
+          Do NOT add .fi here; the hero should appear immediately. */}
+      <section className="page-hero">
         <p className="page-hero-label">Stay in the Know</p>
-        <h1>Upcoming <span>Events</span></h1>
-        <p>Meetings, competitions, and chapter activities</p>
-      </div>
+
+        <h1>
+          FBLA <span>Calendar</span>
+        </h1>
+
+        <p>
+          Meetings, competitions, and chapter activities.
+        </p>
+      </section>
 
       <section className="events-section">
         <div className="events-wrap">
-          <div className="events-grid">
-            <div className="event-card fi">
-              <div className="event-header">
-                <div className="event-date">
-                  <div className="event-month">May</div>
-                  <div className="event-day">TBD</div>
-                </div>
-                <div className="event-hinfo">
-                  <span className="event-badge t-social">Social</span>
-                  <div className="event-htitle">End-of-Year Party</div>
-                </div>
+
+          <div className="calendar-card">
+
+            <div className="calendar-header">
+
+              <button type="button" onClick={previousMonth}>
+                ← Previous
+              </button>
+
+              <div className="calendar-title">
+                {formatMonth(currentDate)}
               </div>
-              <div className="event-body">
-                <div className="event-detail">📍 Urbana District Park</div>
-                <div className="event-detail">🕓 Date TBD</div>
-                <div className="event-desc">Celebrate the year with members, food, and fun. More details coming soon.</div>
+
+              <div className="calendar-controls">
+
+                <button type="button" onClick={goToday}>
+                  Today
+                </button>
+
+                <button type="button" onClick={nextMonth}>
+                  Next →
+                </button>
+
               </div>
+
             </div>
 
-            <div className="event-card fi">
-              <div className="event-header">
-                <div className="event-date">
-                  <div className="event-month">Jun</div>
-                  <div className="event-day">29</div>
-                </div>
-                <div className="event-hinfo">
-                  <span className="event-badge t-competition">Competition</span>
-                  <div className="event-htitle">National Leadership Conference</div>
-                </div>
+            {loading && (
+              <div className="calendar-message">
+                Loading events...
               </div>
-              <div className="event-body">
-                <div className="event-detail">📍 Henry B. Gonzalez Convention Center, San Antonio, TX</div>
-                <div className="event-detail">🕓 Jun 29 – Jul 2</div>
-                <div className="event-desc">Top competitors from state conferences advance to NLC to compete at the national level.</div>
+            )}
+
+            {error && (
+              <div className="calendar-message error">
+                Unable to load calendar events.
               </div>
-            </div>
+            )}
+
+            {!loading && !error && (
+              <div
+                className={`calendar-body ${
+                  animate ? 'calendar-enter' : ''
+                }`}
+              >
+
+                <div className="calendar-weekdays">
+                  {[
+                    'Sun',
+                    'Mon',
+                    'Tue',
+                    'Wed',
+                    'Thu',
+                    'Fri',
+                    'Sat',
+                  ].map((day) => (
+                    <div key={day}>
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="calendar-grid">
+                  {calendarDays.map((day, index) => (
+                    <div
+                      key={index}
+                      className={[
+                        'calendar-day',
+                        isToday(day) ? 'today' : '',
+                        !day ? 'empty' : '',
+                      ].join(' ')}
+                    >
+
+                      {day && (
+                        <div className="day-number">
+                          {day}
+
+                          {isToday(day) && (
+                            <span className="today-label">
+                              Today
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {getEventsForDay(day).map((event) => (
+                        <div
+                          key={event.id}
+                          className="calendar-event"
+                        >
+                          {event.title}
+                        </div>
+                      ))}
+
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            )}
+
           </div>
+
+          <div className="calendar-legend">
+
+            <div>
+              <span className="legend meeting"></span>
+              Meetings
+            </div>
+
+            <div>
+              <span className="legend competition"></span>
+              Competitions
+            </div>
+
+            <div>
+              <span className="legend community"></span>
+              Community
+            </div>
+
+            <div>
+              <span className="legend social"></span>
+              Social
+            </div>
+
+            <div>
+              <span className="legend deadline"></span>
+              Deadlines
+            </div>
+
+          </div>
+
         </div>
       </section>
     </>
