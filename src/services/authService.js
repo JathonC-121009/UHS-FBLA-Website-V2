@@ -1,8 +1,5 @@
 import {
   signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  updateProfile,
   signOut as firebaseSignOut,
   onAuthStateChanged,
   GoogleAuthProvider as FirebaseGoogleAuthProvider,
@@ -12,12 +9,17 @@ import { auth } from '../firebaseConfig.js'
 export { FirebaseGoogleAuthProvider as GoogleAuthProvider }
 
 const googleProvider = new FirebaseGoogleAuthProvider()
-googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly')
+// Base sign-in must only request default non-sensitive scopes (openid/email/profile).
+// Attaching a sensitive scope like calendar.readonly to the provider used for every
+// sign-in triggers Google's unverified-app warning and a 100-test-user cap for ALL
+// users, not just those using Calendar. Calendar access will be requested later as a
+// separate incremental authorization scoped specifically to the Calendar feature,
+// not on the base provider.
 
 /**
  * Mirrors the domain check in firestore.rules — keep these in sync.
- * Used for the read-only isSchoolAccount flag exposed via auth context;
- * it no longer gates who can sign in.
+ * Used for the read-only isSchoolAccount flag exposed via auth context,
+ * and to gate Google sign-in in AuthProvider (school domains only).
  */
 export function isSchoolAccount(email) {
   if (!email) return false
@@ -25,9 +27,10 @@ export function isSchoolAccount(email) {
 }
 
 /**
- * Sign in with Google popup. Any Google account is accepted — school-domain
- * gating now lives in the Firestore rules layer and a UI-facing flag, not
- * here. Returns the Firebase UserCredential.
+ * Sign in with Google popup. Any Google account is accepted at the Firebase
+ * level — school-domain enforcement now happens IN AuthProvider.signIn
+ * (immediate sign-out + error on rejected domains) and in the Firestore
+ * rules layer for writes. Returns the Firebase UserCredential.
  *
  * The Google OAuth access token is only available right after this resolves
  * via GoogleAuthProvider.credentialFromResult(result).accessToken.
@@ -40,41 +43,10 @@ export async function signInWithGoogle() {
   return result
 }
 
-/**
- * Create a new email/password account. Firebase's built-in errors
- * (auth/email-already-in-use, auth/weak-password, ...) propagate to the
- * caller, which maps them to friendly messages.
- */
-export async function signUpWithEmail(email, password) {
-  return createUserWithEmailAndPassword(auth, email, password)
-}
-
-/**
- * Sign in an existing email/password account. Firebase's built-in errors
- * (auth/wrong-password, auth/user-not-found, ...) propagate to the caller.
- */
-export async function signInWithEmail(email, password) {
-  return signInWithEmailAndPassword(auth, email, password)
-}
-
-/**
- * Set the current user's display name. Keeps existing code that reads
- * user.displayName (avatar initials, post author) working without changes.
- */
-export async function updateDisplayName(name) {
-  if (!auth.currentUser) throw new Error('Not signed in — cannot update display name')
-  await updateProfile(auth.currentUser, { displayName: name })
-}
-
 export async function signOutUser() {
   await firebaseSignOut(auth)
 }
 
 export function onAuthStateChangedListener(callback) {
   return onAuthStateChanged(auth, callback)
-}
-
-export function getDisplayName(user) {
-  if (!user) return null
-  return user.displayName || user.email?.split('@')[0] || 'Unknown'
 }

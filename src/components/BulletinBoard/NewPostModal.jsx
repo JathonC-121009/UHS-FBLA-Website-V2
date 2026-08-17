@@ -3,8 +3,9 @@ import './Modal.css'
 import './NewPostModal.css'
 
 /**
- * "+ New Post" form. No name field — the author is always derived from the
- * signed-in user at the page level, not asked here.
+ * "+ New Post" form. No name field — the author is attached by Bulletin.jsx's
+ * onCreate handler (profile.name → Auth displayName → AUTHOR_FALLBACK), never
+ * asked here.
  */
 export default function NewPostModal({ onCreate, onClose }) {
   const [type, setType] = useState('photo') // 'photo' | 'question'

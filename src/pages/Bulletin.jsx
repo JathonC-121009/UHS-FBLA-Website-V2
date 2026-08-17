@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import useAuth from '../hooks/useAuth.js'
 import { usePosts } from '../hooks/usePosts.js'
+import { AUTHOR_FALLBACK } from '../components/BulletinBoard/bulletinUtils.js'
 import Corkboard from '../components/BulletinBoard/Corkboard.jsx'
 import ThreadModal from '../components/BulletinBoard/ThreadModal.jsx'
 import NewPostModal from '../components/BulletinBoard/NewPostModal.jsx'
@@ -14,7 +15,7 @@ export const meta = {
 }
 
 export default function Bulletin() {
-  const { user, isOfficerOrAdviser, openAuthModal } = useAuth()
+  const { user, profile, isOfficerOrAdviser, openAuthModal } = useAuth()
   const { posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount } = usePosts()
 
   const [openPost, setOpenPost] = useState(null)
@@ -51,6 +52,16 @@ export default function Bulletin() {
       return
     }
     setNewPostOpen(true)
+  }
+
+  // NewPostModal submits its payload through onCreate — attach the author here
+  // (profile.displayName → Auth displayName → shared fallback) so postsService
+  // just writes whatever string it's handed, like addReply already does.
+  const handleCreatePost = async (post) => {
+    await createPost({
+      ...post,
+      author: profile?.displayName || user?.displayName || AUTHOR_FALLBACK,
+    })
   }
 
   return (
@@ -100,7 +111,7 @@ export default function Bulletin() {
       {openPost && (
         <ThreadModal post={openPost} onClose={() => setOpenPost(null)} onReplySaved={bumpReplyCount} />
       )}
-      {newPostOpen && <NewPostModal onCreate={createPost} onClose={() => setNewPostOpen(false)} />}
+      {newPostOpen && <NewPostModal onCreate={handleCreatePost} onClose={() => setNewPostOpen(false)} />}
       {archivedOpen && (
         <ArchivedPostsPanel
           onClose={() => setArchivedOpen(false)}

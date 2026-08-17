@@ -3,6 +3,7 @@ import {
   query, orderBy, where, increment, limit, startAfter, writeBatch,
 } from 'firebase/firestore'
 import { db, auth } from '../firebaseConfig.js'
+import { AUTHOR_FALLBACK } from '../components/BulletinBoard/bulletinUtils.js'
 
 const POSTS_COL = 'posts'
 const REPLIES_COL = 'replies'
@@ -26,7 +27,9 @@ export async function addPost(post) {
   const createdAt = new Date().toISOString()
   const data = {
     type: post.type,
-    author: post.author,
+    // Defensive fallback: the UI layer attaches the real author, but Firestore
+    // rejects `undefined` outright — never let a missing author reach addDoc.
+    author: post.author || AUTHOR_FALLBACK,
     authorUid: auth.currentUser?.uid,
     imageUrl: post.imageUrl || null,
     caption: post.caption || null,

@@ -94,14 +94,18 @@ service cloud.firestore {
       // Users can only read/write their own profile doc — the doc ID is the uid.
       allow read: if request.auth.uid == uid;
 
+      // Account creation is Google-only and school-domain-gated in the app
+      // (see AuthProvider.signIn); this rule is the rules-layer backstop:
+      // only school-domain accounts can mint a profile doc at all.
       // `role` is intentionally absent from BOTH hasOnly() lists below:
       // it is admin-assigned only (site owner in the Firebase Console) and
       // must never be writable by the user themselves through the app.
       allow create: if request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+        && isSchoolAccount()
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'createdAt']);
 
       allow update: if request.auth.uid == uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'email', 'createdAt']);
 
       // delete is intentionally not allowed
     }

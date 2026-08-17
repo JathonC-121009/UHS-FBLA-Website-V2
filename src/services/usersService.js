@@ -15,13 +15,18 @@ export async function getUserProfile(uid) {
 }
 
 /**
- * Create (or overwrite) a user's profile document.
- * The doc ID is the uid, not an auto-generated ID — uses setDoc, not addDoc.
+ * Create a user's profile document on first sign-in (Google-only auth:
+ * displayName and email both come straight from the Google account — nothing
+ * is user-editable). The doc ID is the uid, not an auto-generated ID.
+ *
+ * Callers must only invoke this when no profile doc exists yet — an existing
+ * doc (e.g. an admin-assigned `role`) must never be overwritten by this write;
+ * see ensureUserProfile in AuthProvider.jsx for the existence check.
  */
-export async function createUserProfile(uid, { name, gradeLevel }) {
+export async function createUserProfile(uid, { displayName, email }) {
   const data = {
-    name,
-    gradeLevel,
+    displayName,
+    email,
     createdAt: new Date().toISOString(),
   }
   await setDoc(doc(db, USERS_COL, uid), data)
