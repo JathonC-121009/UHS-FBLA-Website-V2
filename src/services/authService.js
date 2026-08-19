@@ -12,7 +12,9 @@ import { auth } from '../firebaseConfig.js'
 export { FirebaseGoogleAuthProvider as GoogleAuthProvider }
 
 const googleProvider = new FirebaseGoogleAuthProvider()
-googleProvider.addScope('https://www.googleapis.com/auth/calendar.readonly')
+// Calendar events are fetched via a public, API-key-restricted endpoint
+// (see calendarService.js) — this app never requests calendar OAuth
+// scopes from users, so no scope is added here.
 
 /**
  * Mirrors the domain check in firestore.rules — keep these in sync.

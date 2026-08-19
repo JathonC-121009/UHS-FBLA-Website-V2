@@ -16,21 +16,21 @@ function normalizeEvent(item) {
   }
 }
 
+const CALENDAR_API_KEY = import.meta.env.VITE_GOOGLE_CALENDAR_API_KEY
+const CALENDAR_ID = import.meta.env.VITE_GOOGLE_CALENDAR_ID
+
 /**
- * Fetches events from the authenticated user's primary Google Calendar.
- * @param {string} accessToken - OAuth 2.0 access token from Firebase sign-in
+ * Fetches upcoming events from the public UHS FBLA Google Calendar using a
+ * restricted API key (no per-user OAuth / access token required).
  * @param {object} options - { timeMin, timeMax } Date objects for the range
  * @returns {Promise<Array>} Normalized event objects
  */
-export async function getUpcomingEvents(accessToken, options = {}) {
-  if (!accessToken) {
-    throw new Error('No access token available — user must sign in with Google first')
-  }
-
+export async function getUpcomingEvents(options = {}) {
   const timeMin = options.timeMin || new Date()
   const timeMax = options.timeMax || new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
 
   const params = new URLSearchParams({
+    key: CALENDAR_API_KEY,
     timeMin: timeMin.toISOString(),
     timeMax: timeMax.toISOString(),
     singleEvents: 'true',
@@ -38,8 +38,7 @@ export async function getUpcomingEvents(accessToken, options = {}) {
   })
 
   const res = await fetch(
-    `https://www.googleapis.com/calendar/v3/calendars/primary/events?${params}`,
-    { headers: { Authorization: `Bearer ${accessToken}` } },
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(CALENDAR_ID)}/events?${params}`,
   )
 
   if (!res.ok) {
