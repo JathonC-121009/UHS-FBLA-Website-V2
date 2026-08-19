@@ -9,12 +9,9 @@ import { auth } from '../firebaseConfig.js'
 export { FirebaseGoogleAuthProvider as GoogleAuthProvider }
 
 const googleProvider = new FirebaseGoogleAuthProvider()
-// Base sign-in must only request default non-sensitive scopes (openid/email/profile).
-// Attaching a sensitive scope like calendar.readonly to the provider used for every
-// sign-in triggers Google's unverified-app warning and a 100-test-user cap for ALL
-// users, not just those using Calendar. Calendar access will be requested later as a
-// separate incremental authorization scoped specifically to the Calendar feature,
-// not on the base provider.
+// Calendar events are fetched via a public, API-key-restricted endpoint
+// (see calendarService.js) — this app never requests calendar OAuth
+// scopes from users, so no scope is added here.
 
 /**
  * Mirrors the domain check in firestore.rules — keep these in sync.
