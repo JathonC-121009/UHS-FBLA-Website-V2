@@ -15,6 +15,11 @@
 .route-officers .officers-section { background: var(--white); padding: 4rem 2rem; }
 .route-officers .officers-wrap { max-width: 1080px; margin: 0 auto; }
 .route-officers .officers-intro { margin-bottom: 2.5rem; }
+.route-officers .state-block { margin-top: 3rem; }
+.route-officers .state-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; align-items: start; max-width: 420px; }
+.route-officers .state-grid .officer-card { background: var(--off-white); border-color: var(--border); }
+.route-officers .state-grid .officer-card .officer-photo { background: linear-gradient(135deg, var(--navy), var(--blue)); }
+.route-officers .state-grid .officer-card .officer-role { color: var(--cobalt); background: rgba(34, 106, 221, .1); }
 .route-officers .advisor-block { margin-top: 3rem; }
 .route-officers .advisor-wrap { max-width: 200px; }
 .route-officers .officers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.5rem; }
