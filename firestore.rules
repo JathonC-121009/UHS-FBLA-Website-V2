@@ -16,6 +16,15 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // Moderator = signed-in user whose own users/{uid} profile doc has role
+    // 'officer' or 'adviser'. Role is assigned ONLY by the site owner in the
+    // Firebase Console (admin access bypasses rules) — it is never settable
+    // through client code (see the users/{uid} hasOnly() lists below).
+    function isModerator() {
+      return isSignedIn()
+        && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['officer', 'adviser']);
+    }
+
     match /posts/{postId} {
       allow read: if true;
 
@@ -35,8 +44,19 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replyCount'])
         && request.resource.data.replyCount == resource.data.replyCount + 1;
 
-      // Replies are NOT cascade-deleted yet; this is a known, deferred gap.
-      allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
+      // Soft-remove only: the post's own author, OR a moderator (officer/advisor
+      // per their users/{uid} role), may set exactly the {removed, removedAt}
+      // fields. This is a separate branch from the content-edit rule above —
+      // the author can still edit their content AND remove their own post.
+      allow update: if isSchoolAccount()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
+        && (isOwner(resource.data.authorUid) || isModerator());
+
+      // Hard delete is intentionally disabled — soft-remove via {removed,
+      // removedAt} is the ONLY removal mechanism, for both authors and
+      // officers/advisers, so removed content stays visible in the Archived
+      // Posts view instead of being destroyed. (Falls through to the catch-all
+      // deny below.)
     }
 
     match /replies/{replyId} {
@@ -55,7 +75,35 @@ service cloud.firestore {
       allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message']);
 
-      allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
+      // Soft-remove only: the reply's own author, OR a moderator, may set
+      // exactly the {removed, removedAt} fields.
+      allow update: if isSchoolAccount()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
+        && (isOwner(resource.data.authorUid) || isModerator());
+
+      // Hard delete is intentionally disabled — soft-remove via {removed,
+      // removedAt} is the ONLY removal mechanism, for both authors and
+      // officers/advisers, so removed content stays visible in the Archived
+      // Posts view instead of being destroyed. (Falls through to the catch-all
+      // deny below. A removed parent post does NOT cascade to replies; removed
+      // replies are just hidden, which resolves the old cascade gap by making
+      // it moot.)
+    }
+
+    match /users/{uid} {
+      // Users can only read/write their own profile doc — the doc ID is the uid.
+      allow read: if request.auth.uid == uid;
+
+      // `role` is intentionally absent from BOTH hasOnly() lists below:
+      // it is admin-assigned only (site owner in the Firebase Console) and
+      // must never be writable by the user themselves through the app.
+      allow create: if request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+
+      allow update: if request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+
+      // delete is intentionally not allowed
     }
 
     // Deny everything else by default
