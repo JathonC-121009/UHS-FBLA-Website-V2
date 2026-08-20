@@ -4,7 +4,7 @@ import './NewPostModal.css'
 
 /**
  * "+ New Post" form. No name field — the author is attached by Bulletin.jsx's
- * onCreate handler (profile.name → Auth displayName → AUTHOR_FALLBACK), never
+ * onCreate handler (profile?.displayName → Auth displayName → AUTHOR_FALLBACK), never
  * asked here.
  */
 export default function NewPostModal({ onCreate, onClose }) {
