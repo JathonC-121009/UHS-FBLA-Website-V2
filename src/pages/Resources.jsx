@@ -152,7 +152,7 @@ export default function Resources() {
                 <div className="resources-connect">
                   <h2 className="section-title">FBLA Connect</h2>
                   <p className="section-intro">Official FBLA community and announcements.</p>
-                  <a className="btn btn-gold" href="https://drive.google.com" target="_blank" rel="noreferrer">FBLA Connect</a>
+                  <a className="btn btn-gold" href="https://connect.fbla.org/" target="_blank" rel="noreferrer">FBLA Connect</a>
                 </div>
               )}
 
