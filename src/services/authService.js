@@ -14,20 +14,9 @@ const googleProvider = new FirebaseGoogleAuthProvider()
 // scopes from users, so no scope is added here.
 
 /**
- * Mirrors the domain check in firestore.rules — keep these in sync.
- * Used for the read-only isSchoolAccount flag exposed via auth context,
- * and to gate Google sign-in in AuthProvider (school domains only).
- */
-export function isSchoolAccount(email) {
-  if (!email) return false
-  return email.endsWith('@fcps.org') || email.endsWith('@my.fcps.org')
-}
-
-/**
- * Sign in with Google popup. Any Google account is accepted at the Firebase
- * level — school-domain enforcement now happens IN AuthProvider.signIn
- * (immediate sign-out + error on rejected domains) and in the Firestore
- * rules layer for writes. Returns the Firebase UserCredential.
+ * Sign in with Google popup. Any Google account is accepted — Firebase Auth
+ * handles authentication, and Firestore rules enforce authorization.
+ * Returns the Firebase UserCredential.
  *
  * The Google OAuth access token is only available right after this resolves
  * via GoogleAuthProvider.credentialFromResult(result).accessToken.

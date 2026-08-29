@@ -1,5 +1,5 @@
 import {
-  getDocs, addDoc, updateDoc, doc, collection,
+  getDocs, getDoc, addDoc, updateDoc, doc, collection,
   query, orderBy, where, increment, limit, startAfter, writeBatch,
 } from 'firebase/firestore'
 import { db, auth } from '../firebaseConfig.js'
@@ -7,6 +7,13 @@ import { AUTHOR_FALLBACK } from '../components/BulletinBoard/bulletinUtils.js'
 
 const POSTS_COL = 'posts'
 const REPLIES_COL = 'replies'
+
+async function isModerator(uid) {
+  const snap = await getDoc(doc(db, 'users', uid))
+  if (!snap.exists()) return false
+  const role = snap.data().role
+  return role === 'officer' || role === 'adviser'
+}
 
 // NOTE on removal filtering: Firestore query predicates (== / !=) only match
 // documents where the field EXISTS with that value. Posts created before the
@@ -24,16 +31,25 @@ export async function getPosts() {
 }
 
 export async function addPost(post) {
+  if (post.type === 'photo') {
+    throw new Error('Photo posts are not currently allowed')
+  }
+
   const createdAt = new Date().toISOString()
+  const authorUid = auth.currentUser?.uid
+
+  const moderator = await isModerator(authorUid)
+
   const data = {
     type: post.type,
     // Defensive fallback: the UI layer attaches the real author, but Firestore
     // rejects `undefined` outright — never let a missing author reach addDoc.
     author: post.author || AUTHOR_FALLBACK,
-    authorUid: auth.currentUser?.uid,
+    authorUid,
     imageUrl: post.imageUrl || null,
     caption: post.caption || null,
     message: post.message || null,
+    status: moderator ? 'visible' : 'pending',
     replyCount: 0,
     createdAt,
   }
@@ -55,11 +71,16 @@ export async function getReplies(postId) {
 
 export async function addReply(postId, reply) {
   const createdAt = new Date().toISOString()
+  const authorUid = auth.currentUser?.uid
+
+  const moderator = await isModerator(authorUid)
+
   const data = {
     postId,
     author: reply.author,
-    authorUid: auth.currentUser?.uid,
+    authorUid,
     message: reply.message,
+    status: moderator ? 'visible' : 'pending',
     createdAt,
   }
   const ref = await addDoc(collection(db, REPLIES_COL), data)
@@ -146,4 +167,36 @@ export async function getArchivedPosts({ pageSize = 30, cursor = null } = {}) {
     lastVisibleCursor: pageDocs.length ? pageDocs[pageDocs.length - 1] : null,
     hasMore,
   }
+}
+
+export async function getPendingPosts() {
+  const q = query(
+    collection(db, POSTS_COL),
+    where('status', '==', 'pending'),
+    orderBy('createdAt', 'desc'),
+  )
+  const snap = await getDocs(q)
+  return snap.docs
+    .filter((d) => !d.data().removed)
+    .map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function getPendingReplies() {
+  const q = query(
+    collection(db, REPLIES_COL),
+    where('status', '==', 'pending'),
+    orderBy('createdAt', 'desc'),
+  )
+  const snap = await getDocs(q)
+  return snap.docs
+    .filter((d) => !d.data().removed)
+    .map((d) => ({ id: d.id, ...d.data() }))
+}
+
+export async function approvePost(postId) {
+  await updateDoc(doc(db, POSTS_COL, postId), { status: 'visible' })
+}
+
+export async function approveReply(postId, replyId) {
+  await updateDoc(doc(db, REPLIES_COL, replyId), { status: 'visible' })
 }

@@ -6,12 +6,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isSchoolAccount() {
-      return isSignedIn()
-        && (request.auth.token.email.endsWith('@fcps.org')
-            || request.auth.token.email.endsWith('@my.fcps.org'));
-    }
-
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
@@ -26,21 +20,31 @@ service cloud.firestore {
     }
 
     match /posts/{postId} {
-      allow read: if true;
+      // Visible posts are publicly readable. Pending posts are readable only
+      // by the post's own author or a moderator (officer/adviser).
+      allow read: if resource.data.status == 'visible'
+        || isOwner(resource.data.authorUid)
+        || isModerator();
 
-      allow create: if isSchoolAccount()
+      // Only signed-in users may create posts; photo posts are rejected.
+      // Status must match the author's role: moderators set 'visible',
+      // everyone else must set 'pending'.
+      allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.author is string
         && request.resource.data.author.size() > 0
         && request.resource.data.createdAt is string
-        && request.resource.data.type in ['photo', 'question'];
+        && request.resource.data.type == 'question'
+        && request.resource.data.status in ['pending', 'visible']
+        && ((isModerator() && request.resource.data.status == 'visible')
+            || (!isModerator() && request.resource.data.status == 'pending'));
 
       // Owner may update only caption, message, and/or imageUrl
-      allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
+      allow update: if isOwner(resource.data.authorUid) && isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['caption', 'message', 'imageUrl']);
 
-      // Any school-domain user may increment replyCount by exactly +1
-      allow update: if isSchoolAccount()
+      // Any signed-in user may increment replyCount by exactly +1
+      allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replyCount'])
         && request.resource.data.replyCount == resource.data.replyCount + 1;
 
@@ -48,9 +52,14 @@ service cloud.firestore {
       // per their users/{uid} role), may set exactly the {removed, removedAt}
       // fields. This is a separate branch from the content-edit rule above —
       // the author can still edit their content AND remove their own post.
-      allow update: if isSchoolAccount()
+      allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
         && (isOwner(resource.data.authorUid) || isModerator());
+
+      // Moderator may flip a pending post to visible
+      allow update: if isModerator()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'visible';
 
       // Hard delete is intentionally disabled — soft-remove via {removed,
       // removedAt} is the ONLY removal mechanism, for both authors and
@@ -60,26 +69,39 @@ service cloud.firestore {
     }
 
     match /replies/{replyId} {
-      allow read: if true;
+      // Visible replies are publicly readable. Pending replies are readable
+      // only by the reply's own author or a moderator.
+      allow read: if resource.data.status == 'visible'
+        || isOwner(resource.data.authorUid)
+        || isModerator();
 
-      allow create: if isSchoolAccount()
+      // Signed-in users may create replies; status must match the author's role.
+      allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.postId is string
         && request.resource.data.author is string
         && request.resource.data.author.size() > 0
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
-        && request.resource.data.createdAt is string;
+        && request.resource.data.createdAt is string
+        && request.resource.data.status in ['pending', 'visible']
+        && ((isModerator() && request.resource.data.status == 'visible')
+            || (!isModerator() && request.resource.data.status == 'pending'));
 
       // Owner may update only the message field
-      allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
+      allow update: if isOwner(resource.data.authorUid) && isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message']);
 
       // Soft-remove only: the reply's own author, OR a moderator, may set
       // exactly the {removed, removedAt} fields.
-      allow update: if isSchoolAccount()
+      allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
         && (isOwner(resource.data.authorUid) || isModerator());
+
+      // Moderator may flip a pending reply to visible
+      allow update: if isModerator()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'visible';
 
       // Hard delete is intentionally disabled — soft-remove via {removed,
       // removedAt} is the ONLY removal mechanism, for both authors and
@@ -94,14 +116,12 @@ service cloud.firestore {
       // Users can only read/write their own profile doc — the doc ID is the uid.
       allow read: if request.auth.uid == uid;
 
-      // Account creation is Google-only and school-domain-gated in the app
-      // (see AuthProvider.signIn); this rule is the rules-layer backstop:
-      // only school-domain accounts can mint a profile doc at all.
-      // `role` is intentionally absent from BOTH hasOnly() lists below:
-      // it is admin-assigned only (site owner in the Firebase Console) and
-      // must never be writable by the user themselves through the app.
+      // Account creation is Google-only in the app (see AuthProvider);
+      // any signed-in user may mint a profile doc. `role` is intentionally
+      // absent from BOTH hasOnly() lists below: it is admin-assigned only
+      // (site owner in the Firebase Console) and must never be writable by
+      // the user themselves through the app.
       allow create: if request.auth.uid == uid
-        && isSchoolAccount()
         && request.resource.data.keys().hasOnly(['displayName', 'email', 'createdAt']);
 
       allow update: if request.auth.uid == uid

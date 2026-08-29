@@ -4,7 +4,6 @@ import {
   signOutUser,
   onAuthStateChangedListener,
   GoogleAuthProvider,
-  isSchoolAccount as isSchoolDomain,
 } from '../services/authService.js'
 import { getUserProfile, createUserProfile } from '../services/usersService.js'
 
@@ -40,17 +39,13 @@ export default function AuthProvider({ children }) {
   const openAuthModal = () => setAuthModalOpen(true)
   const closeAuthModal = () => setAuthModalOpen(false)
 
-  // Read-only flag for future UI use (e.g. disabling Bulletin Board actions).
-  // It does not gate sign-in itself.
-  const isSchoolAccount = !!user && isSchoolDomain(user.email)
-
   // Role is admin-assigned only (site owner in the Firebase Console; firestore
   // rules exclude it from self-writes). Absent role = 'member'.
   const role = profile?.role ?? 'member'
   const isOfficerOrAdviser = role === 'officer' || role === 'adviser'
 
   /**
-   * Google-only, school-domain-gated profile bootstrap.
+   * Google-only profile bootstrap.
    *
    * Called after every successful Google sign-in AND on every auth-state
    * change (page reload included). Idempotent: if a profile doc already
@@ -69,7 +64,7 @@ export default function AuthProvider({ children }) {
       }
       // Always refresh the in-memory profile — role may have been assigned
       // in the console since the last read, and the doc is now guaranteed
-      // to exist for school-domain accounts.
+      // to exist for signed-in users.
       const fresh = await getUserProfile(fbUser.uid)
       setProfile(fresh)
     } catch {
@@ -95,14 +90,6 @@ export default function AuthProvider({ children }) {
   const signIn = async () => {
     try {
       const result = await signInWithGoogle()
-
-      // School-domain gate AT sign-in time: reject non-school Google accounts
-      // immediately and sign them back out, so they never hold a session.
-      if (!isSchoolDomain(result.user.email)) {
-        await signOutUser()
-        setAuthError('This is not an approved domain.')
-        return undefined
-      }
 
       const credential = GoogleAuthProvider.credentialFromResult(result)
       if (credential?.accessToken) {
@@ -134,7 +121,6 @@ export default function AuthProvider({ children }) {
         authModalOpen,
         openAuthModal,
         closeAuthModal,
-        isSchoolAccount,
         role,
         isOfficerOrAdviser,
         profile,
