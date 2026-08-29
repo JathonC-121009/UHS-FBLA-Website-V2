@@ -5,6 +5,12 @@ dist/
 .env.*
 !.env.example
 
+# Firebase
+functions/node_modules/
+functions/*.json
+functions/.env*
+.firebaserc
+
 .vscode/
 .idea/
 coverage/
