@@ -136,6 +136,7 @@ export default function Resources() {
                       <a key={evt.name} className="resource-card" href={evt.url || 'https://drive.google.com'} target="_blank" rel="noreferrer">
                         <div className="rc-body">
                           <h3 className="rc-title">{evt.name}</h3>
+                          <hr className="rc-divider" />
                           <p className="rc-desc">{typeMessages[evt.type]}</p>
                         </div>
                       </a>

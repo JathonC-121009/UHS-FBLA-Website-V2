@@ -1,0 +1,233 @@
+/* ============================================================================
+   POINTS PAGE STYLES — scoped under .route-points
+   ========================================================================= */
+
+.route-points { }
+
+.route-points .points-section { 
+  background: var(--off-white); 
+  padding: 3.5rem 2rem; 
+}
+
+.route-points .points-wrap { 
+  max-width: 900px; 
+  margin: 0 auto; 
+}
+
+/* State Messages */
+.route-points .loading-state,
+.route-points .error-state,
+.route-points .empty-state {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1rem;
+  border-radius: 12px;
+}
+
+.route-points .loading-state {
+  color: var(--muted);
+  background: var(--off-white);
+}
+
+.route-points .error-state {
+  color: #d32f2f;
+  background: rgba(211, 47, 47, 0.08);
+  border: 1px solid #d32f2f;
+}
+
+.route-points .empty-state {
+  color: var(--muted);
+  background: var(--off-white);
+}
+
+/* Leaderboard Header with Search and Switcher */
+.route-points .leaderboard-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.route-points .leaderboard-title {
+  font-size: clamp(1.8rem, 3.8vw, 2.2rem);
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+}
+
+.route-points .header-search {
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--navy);
+  font-size: 0.95rem;
+  min-width: 280px;
+  transition: border-color 0.2s, outline 0.2s;
+}
+
+.route-points .header-search:focus {
+  outline: 2px solid rgba(244, 171, 25, 0.4);
+  border-color: var(--gold);
+}
+
+.route-points .header-search::placeholder {
+  color: var(--muted);
+}
+
+.route-points .switcher-group {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--white);
+  padding: 0.3rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.route-points .switcher-btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  background: transparent;
+  color: var(--navy);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s, color 0.2s;
+}
+
+.route-points .switcher-btn:hover {
+  background: rgba(244, 171, 25, 0.1);
+}
+
+.route-points .switcher-btn.active {
+  background: var(--gold);
+  color: var(--white);
+}
+
+/* Leaderboard */
+.route-points .leaderboard {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 3rem;
+}
+
+.route-points .leaderboard-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+
+.route-points .leaderboard-row:last-child {
+  border-bottom: none;
+}
+
+.route-points .leaderboard-row.header-row {
+  background: var(--navy);
+  color: var(--white);
+  font-weight: 700;
+  border-bottom: none;
+  padding: 1.2rem 1.5rem;
+}
+
+.route-points .rank-col {
+  font-weight: 600;
+  color: var(--navy);
+  text-align: center;
+}
+
+.route-points .leaderboard-row.header-row .rank-col {
+  color: var(--white);
+}
+
+.route-points .name-col {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.route-points .leaderboard-row.header-row .name-col {
+  color: var(--white);
+}
+
+.route-points .points-col {
+  text-align: right;
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.route-points .leaderboard-row.header-row .points-col {
+  color: var(--white);
+}
+
+/* Medal Highlights */
+.route-points .leaderboard-row.medal-gold {
+  background: rgba(244, 171, 25, 0.12);
+}
+
+.route-points .leaderboard-row.medal-silver {
+  background: rgba(192, 192, 192, 0.12);
+}
+
+.route-points .leaderboard-row.medal-bronze {
+  background: rgba(205, 127, 50, 0.12);
+}
+
+/* Search Section */
+.route-points .no-results {
+  margin-top: 2rem;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Page hero styles */
+.route-points .page-hero {
+  text-align: center;
+  padding: 2.4rem 2rem;
+}
+
+.route-points .page-hero p {
+  color: var(--hero-text-color);
+  margin-top: 0.35rem;
+}
+
+.route-points .page-hero h1 {
+  font-size: clamp(2.8rem, 6.5vw, 4.4rem);
+  line-height: 1.03;
+  color: var(--hero-title-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .route-points .leaderboard-header {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .route-points .header-search {
+    min-width: auto;
+  }
+
+  .route-points .leaderboard-row {
+    grid-template-columns: 50px 1fr 80px;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .route-points .points-search {
+    max-width: 100%;
+  }
+
+  .route-points .search-section {
+    padding: 1.5rem;
+  }
+}
