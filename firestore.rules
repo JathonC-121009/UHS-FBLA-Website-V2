@@ -15,8 +15,8 @@ service cloud.firestore {
     // Firebase Console (admin access bypasses rules) — it is never settable
     // through client code (see the users/{uid} hasOnly() lists below).
     function isModerator() {
-      return isSignedIn()
-        && (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['officer', 'adviser']);
+      let role = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      return isSignedIn() && role != null && role in ['officer', 'adviser'];
     }
 
     match /posts/{postId} {
