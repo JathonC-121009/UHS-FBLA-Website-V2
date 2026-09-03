@@ -23,9 +23,40 @@ async function isModerator(uid) {
 // field counts as not removed).
 
 export async function getPosts() {
-  const q = query(collection(db, POSTS_COL), orderBy('createdAt', 'desc'))
-  const snap = await getDocs(q)
-  return snap.docs
+  const currentUid = auth.currentUser?.uid
+  const moderator = currentUid ? await isModerator(currentUid) : false
+
+  let docs
+  if (moderator) {
+    const q = query(collection(db, POSTS_COL), orderBy('createdAt', 'desc'))
+    const snap = await getDocs(q)
+    docs = snap.docs
+  } else {
+    const visibleQ = query(
+      collection(db, POSTS_COL),
+      where('status', '==', 'visible'),
+      orderBy('createdAt', 'desc'),
+    )
+    const visibleSnap = await getDocs(visibleQ)
+    const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
+
+    if (currentUid) {
+      const ownPendingQ = query(
+        collection(db, POSTS_COL),
+        where('authorUid', '==', currentUid),
+        where('status', '==', 'pending'),
+        orderBy('createdAt', 'desc'),
+      )
+      const ownPendingSnap = await getDocs(ownPendingQ)
+      ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
+    }
+
+    docs = [...byId.values()].sort((a, b) =>
+      (b.data().createdAt || '').localeCompare(a.data().createdAt || ''),
+    )
+  }
+
+  return docs
     .filter((d) => !d.data().removed)
     .map((d) => ({ id: d.id, ...d.data() }))
 }
