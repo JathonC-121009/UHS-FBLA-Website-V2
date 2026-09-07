@@ -89,13 +89,46 @@ export async function addPost(post) {
 }
 
 export async function getReplies(postId) {
-  const q = query(
-    collection(db, REPLIES_COL),
-    where('postId', '==', postId),
-    orderBy('createdAt', 'asc'),
-  )
-  const snap = await getDocs(q)
-  return snap.docs
+  const currentUid = auth.currentUser?.uid
+  const moderator = currentUid ? await isModerator(currentUid) : false
+
+  let docs
+  if (moderator) {
+    const q = query(
+      collection(db, REPLIES_COL),
+      where('postId', '==', postId),
+      orderBy('createdAt', 'asc'),
+    )
+    const snap = await getDocs(q)
+    docs = snap.docs
+  } else {
+    const visibleQ = query(
+      collection(db, REPLIES_COL),
+      where('postId', '==', postId),
+      where('status', '==', 'visible'),
+      orderBy('createdAt', 'asc'),
+    )
+    const visibleSnap = await getDocs(visibleQ)
+    const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
+
+    if (currentUid) {
+      const ownPendingQ = query(
+        collection(db, REPLIES_COL),
+        where('postId', '==', postId),
+        where('authorUid', '==', currentUid),
+        where('status', '==', 'pending'),
+        orderBy('createdAt', 'asc'),
+      )
+      const ownPendingSnap = await getDocs(ownPendingQ)
+      ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
+    }
+
+    docs = [...byId.values()].sort((a, b) =>
+      (a.data().createdAt || '').localeCompare(b.data().createdAt || ''),
+    )
+  }
+
+  return docs
     .filter((d) => !d.data().removed)
     .map((d) => ({ id: d.id, ...d.data() }))
 }
@@ -182,15 +215,63 @@ export async function clearBoard() {
  * one-click index URL in a live error until it is created.
  */
 export async function getArchivedPosts({ pageSize = 30, cursor = null } = {}) {
-  const base = query(
-    collection(db, POSTS_COL),
-    where('removed', '==', true),
-    orderBy('removedAt', 'desc'),
-    limit(pageSize + 1),
-  )
-  const q = cursor ? query(base, startAfter(cursor)) : base
-  const snap = await getDocs(q)
-  const docs = snap.docs
+  const currentUid = auth.currentUser?.uid
+  const moderator = currentUid ? await isModerator(currentUid) : false
+
+  let allDocs
+  if (moderator) {
+    const base = query(
+      collection(db, POSTS_COL),
+      where('removed', '==', true),
+      orderBy('removedAt', 'desc'),
+      limit(pageSize + 1),
+    )
+    const q = cursor ? query(base, startAfter(cursor)) : base
+    const snap = await getDocs(q)
+    allDocs = snap.docs
+  } else {
+    // Fetch visible and own-pending archived posts, merge in memory.
+    // NOTE: cursor-based pagination doesn't work across two merged queries
+    // (Firestore cursors are bound to a specific query). Using in-memory
+    // pagination instead — acceptable for a small chapter board.
+    const fetchLimit = cursor ? pageSize + 1 : pageSize * 3
+
+    const visibleQ = query(
+      collection(db, POSTS_COL),
+      where('removed', '==', true),
+      where('status', '==', 'visible'),
+      orderBy('removedAt', 'desc'),
+      limit(fetchLimit),
+    )
+    const visibleSnap = await getDocs(visibleQ)
+    const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
+
+    if (currentUid) {
+      const ownPendingQ = query(
+        collection(db, POSTS_COL),
+        where('removed', '==', true),
+        where('authorUid', '==', currentUid),
+        where('status', '==', 'pending'),
+        orderBy('removedAt', 'desc'),
+        limit(fetchLimit),
+      )
+      const ownPendingSnap = await getDocs(ownPendingQ)
+      ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
+    }
+
+    const merged = [...byId.values()].sort((a, b) =>
+      (b.data().removedAt || '').localeCompare(a.data().removedAt || ''),
+    )
+
+    if (cursor) {
+      const idx = merged.findIndex((d) => d.id === cursor.id)
+      allDocs = idx === -1 ? [] : merged.slice(idx + 1, idx + 1 + pageSize + 1)
+    } else {
+      allDocs = merged.slice(0, pageSize + 1)
+    }
+  }
+
+  const docs = allDocs
   const hasMore = docs.length > pageSize
   const pageDocs = hasMore ? docs.slice(0, pageSize) : docs
   return {

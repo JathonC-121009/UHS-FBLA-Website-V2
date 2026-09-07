@@ -17,7 +17,7 @@ service cloud.firestore {
     function isModerator() {
       return isSignedIn()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
-        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['officer', 'adviser'];
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', null) in ['officer', 'adviser'];
     }
 
     match /posts/{postId} {
