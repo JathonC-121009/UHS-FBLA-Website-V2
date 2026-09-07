@@ -71,6 +71,16 @@
   z-index: 2;
 }
 
+/* -- Status pill (author / officer / adviser only) ---------------------- */
+.pin-status {
+  position: absolute; top: .45rem; left: .45rem;
+  font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+  padding: .15rem .5rem; border-radius: 20px; z-index: 3; white-space: nowrap;
+}
+.pin-status--public { background: var(--gold); color: var(--navy); }
+.pin-status--pending { background: var(--off-white); color: var(--muted); border: 1px solid var(--border); }
+.pin-status--flagged { background: var(--off-white); color: var(--navy); border: 1px solid var(--navy); }
+
 /* -- Remove affordance (author / officer / adviser only) --------------- */
 .pin-remove {
   position: absolute; top: .45rem; right: .45rem;

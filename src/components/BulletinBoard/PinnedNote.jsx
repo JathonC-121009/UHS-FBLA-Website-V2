@@ -28,6 +28,12 @@ export default function PinnedNote({ post, canRemove = false, onOpen, onRemove }
     >
       <span className="pin-pushpin" aria-hidden="true" />
 
+      {canRemove && (
+        <span className={`pin-status ${post.status === 'visible' ? 'pin-status--public' : post.autoFlagged ? 'pin-status--flagged' : 'pin-status--pending'}`}>
+          {post.status === 'visible' ? 'Public' : post.autoFlagged ? 'Under review' : 'Pending review'}
+        </span>
+      )}
+
       {!isSticky && (post.imageUrl ? (
         <div className="pin-photo">
           <img src={post.imageUrl} alt={post.caption || 'Photo post'} loading="lazy" />
