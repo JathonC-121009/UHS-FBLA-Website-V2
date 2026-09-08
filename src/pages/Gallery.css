@@ -11,22 +11,32 @@
 .route-gallery {
   /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
 
-  /* Gallery-only knobs — tweak these instead of hunting through the rules. */
-  --tile-radius: 14px;
-  --tile-min: 230px;
-  --tile-gap: 1.1rem;
+  /* Gallery-only knobs — tweak these instead of hunting through the rules.
+     --tile-min is the one that decides how big the photos read: the grid fits
+     as many whole columns of at least this width as it can, so raising it
+     drops a column and every remaining photo grows. 340px over a 1240px wrap
+     lands on three ~400px tiles, roughly 1.6x the old four-up layout. */
+  --tile-radius: 16px;
+  --tile-min: 340px;
+  --tile-gap: 1.4rem;
   --scrim: linear-gradient(to top, rgba(10, 46, 127, .94) 0%, rgba(10, 46, 127, .72) 38%, rgba(10, 46, 127, 0) 78%);
 }
 
 .route-gallery .gallery-section { background: var(--white); padding: 4rem 2rem 4.5rem; }
-.route-gallery .gallery-wrap { max-width: 1080px; margin: 0 auto; }
+.route-gallery .gallery-wrap { max-width: 1240px; margin: 0 auto; }
 .route-gallery .gallery-intro { margin-bottom: 1.75rem; }
+.route-gallery .gallery-empty {
+  padding: 3rem 0; text-align: center;
+  color: var(--muted); font-size: .95rem;
+}
 
 /* --- Filter bar ---------------------------------------------------------- */
 .route-gallery .gallery-filters {
   display: flex; flex-wrap: wrap; gap: .5rem;
   margin-bottom: 2rem; padding-bottom: 1.5rem;
+  min-height: 2.6rem;
   border-bottom: 1px solid var(--border);
+  animation: gallery-tile-in .45s ease both;
 }
 .route-gallery .gallery-filter {
   display: inline-flex; align-items: center; gap: .5rem;
@@ -90,11 +100,24 @@
   to   { opacity: 1; translate: 0 0; }
 }
 
+/* Placeholder tiles while the photo list is loading. */
+.route-gallery .gallery-item.skeleton {
+  cursor: default; pointer-events: none;
+  background: linear-gradient(100deg, var(--off-white) 20%, var(--border) 40%, var(--off-white) 60%);
+  background-size: 300% 100%;
+  animation: gallery-tile-in .5s ease both, gallery-shimmer 1.4s linear infinite;
+  animation-delay: var(--stagger, 0ms), 0ms;
+}
+@keyframes gallery-shimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -150% 0; }
+}
+
 /* --- Hover caption ------------------------------------------------------- */
 .route-gallery .gallery-caption {
   position: absolute; inset: 0; display: flex;
   flex-direction: column; justify-content: flex-end; align-items: flex-start;
-  gap: .15rem; padding: 1rem 1.05rem;
+  gap: .2rem; padding: 1.15rem 1.25rem;
   background: var(--scrim); text-align: left;
   opacity: 0; transition: opacity .28s ease;
 }
@@ -102,12 +125,12 @@
 .route-gallery .gallery-item:focus-visible .gallery-caption { opacity: 1; }
 
 .route-gallery .gallery-caption-event {
-  font-size: .62rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
   color: var(--gold); line-height: 1.4;
   transform: translateY(8px); transition: transform .32s ease .04s;
 }
 .route-gallery .gallery-caption-label {
-  font-size: .92rem; font-weight: 600; color: var(--white); line-height: 1.35;
+  font-size: 1.05rem; font-weight: 600; color: var(--white); line-height: 1.35;
   transform: translateY(8px); transition: transform .32s ease .08s;
 }
 .route-gallery .gallery-item:hover .gallery-caption-event,
@@ -119,7 +142,7 @@
 .route-gallery .gallery-zoom {
   position: absolute; top: .7rem; right: .7rem;
   display: flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; border-radius: 50%;
+  width: 36px; height: 36px; border-radius: 50%;
   color: var(--navy); background: var(--gold);
   opacity: 0; transform: scale(.7);
   transition: opacity .25s ease, transform .25s ease;
@@ -134,12 +157,24 @@
   .route-gallery .gallery-caption-label { transform: none; }
 }
 
+/* Each step trades tile width for a column so photos never get cramped:
+   ~400px three-up on desktop, ~325px three-up on laptops, two-up below that,
+   and a single full-width photo on small phones. */
+@media (max-width: 1140px) { .route-gallery { --tile-min: 280px; } }
+@media (max-width: 880px)  { .route-gallery { --tile-min: 250px; --tile-gap: 1.1rem; } }
+
 @media (max-width: 640px) {
-  .route-gallery { --tile-min: 150px; --tile-gap: .7rem; }
+  .route-gallery { --tile-min: 220px; --tile-gap: .8rem; }
   .route-gallery .gallery-section { padding: 3rem 1.25rem 3.5rem; }
-  .route-gallery .gallery-caption { padding: .7rem .75rem; }
-  .route-gallery .gallery-caption-label { font-size: .8rem; }
+  .route-gallery .gallery-caption { padding: .8rem .85rem; }
+  .route-gallery .gallery-caption-label { font-size: .88rem; }
   .route-gallery .gallery-zoom { display: none; }
+}
+
+@media (max-width: 460px) {
+  /* One photo per row: two 190px tiles read smaller than the phone can show. */
+  .route-gallery .gallery-grid { grid-template-columns: 1fr; }
+  .route-gallery .gallery-item.tall { grid-row: auto; aspect-ratio: 3 / 4; }
 }
 
 /* --- Lightbox ------------------------------------------------------------ */
@@ -211,6 +246,8 @@
 /* --- Motion preferences -------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   .route-gallery .gallery-item,
+  .route-gallery .gallery-item.skeleton,
+  .route-gallery .gallery-filters,
   .route-gallery .lightbox,
   .route-gallery .lb-figure { animation: none; }
   .route-gallery .gallery-item,

@@ -9,24 +9,61 @@ export const meta = {
 }
 
 /* ---------------------------------------------------------------------------
-   PHOTOS — sourced from the Cloudinary `gallery` folder (cloud: dmgisz0pf).
+   WHERE THE PHOTOS COME FROM
 
-   This account uses Cloudinary's dynamic folders, so the folder lives in
-   `asset_folder` and NOT in the public_id — a `prefix=Gallery` query returns
-   nothing. List the whole cloud and filter client-side instead:
+   Nothing in this file lists individual photos. The page asks Cloudinary for
+   the contents of the `gallery` folder at load time, so adding, removing or
+   re-foldering images in the Cloudinary Media Library updates the site on the
+   next refresh — no code change, no redeploy.
 
-       curl -s -u "<api_key>:<api_secret>" \
-         "https://api.cloudinary.com/v1_1/dmgisz0pf/resources/image?type=upload&max_results=500" \
-         | python3 -c "import json,sys; [print(f\"  {{ src: 'v{r['version']}/{r['public_id']}.{r['format']}', w: {r['width']}, h: {r['height']} }},\") for r in json.load(sys.stdin)['resources'] if r.get('asset_folder') == 'Gallery']"
+   Each image's caption is the subfolder it sits in:
 
-   w/h are required: they decide which photos get a tall tile, and they reserve
-   each tile's space so the grid doesn't reflow as images load. Nothing else on
-   this page needs to change — captions, the filter bar and the lightbox are all
-   derived from these filenames by the parser below.
+       gallery/SLC 2026 Day 1/IMG_0042.jpg   ->  "SLC 2026 Day 1"
+       gallery/Fall Kickoff/IMG_0107.jpg     ->  "Fall Kickoff"
+
+   Those subfolders also become the filter chips above the grid, in the order
+   of their most recent upload, so a brand-new album lands first.
+
+   ── ONE-TIME CLOUDINARY SETUP (needed once, then never again) ──────────────
+
+   A browser can't call Cloudinary's Admin API — that needs an API secret,
+   which can't live in frontend code. The public, key-free equivalent is the
+   client-side resource list, and it works by tag:
+
+       https://res.cloudinary.com/<cloud>/image/list/<tag>.json
+
+   As of this writing that URL returns 401 for this cloud, because listing is
+   switched off by default. Two things to do in the Cloudinary console:
+
+     1. Settings -> Security -> "Restricted media types":
+        UNCHECK "Resource list". (This only exposes public_id/size/folder for
+        assets carrying the tag below — the images are already public.)
+
+     2. Tag everything in the gallery folder with `gallery` (the GALLERY_TAG
+        below). In the Media Library: open the folder, Select All, "Add tag".
+        To keep it automatic for future uploads, put `gallery` in the Tags
+        field of the upload preset you use, and new photos self-register.
+
+   Until step 1 is done the page quietly falls back to FALLBACK_PHOTOS below
+   and logs a one-line explanation to the console, so the gallery is never
+   empty while the switch is being flipped.
    ------------------------------------------------------------------------ */
 const CLOUD_NAME = 'dmgisz0pf'
 
-const PHOTOS = [
+// Only assets under this folder are shown, and only this tag is fetched.
+const GALLERY_FOLDER = 'gallery'
+const GALLERY_TAG = 'gallery'
+
+const LIST_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${GALLERY_TAG}.json`
+
+/* ---------------------------------------------------------------------------
+   FALLBACK — the last known contents of the gallery folder, baked in so the
+   page still renders if Cloudinary is unreachable or resource listing is off.
+   This list is a safety net, NOT the source of truth: it does not need to be
+   kept up to date, and captions here come from the filename parser rather than
+   from folders. Delete it once the live list has been running happily.
+   ------------------------------------------------------------------------ */
+const FALLBACK_PHOTOS = [
   { src: 'v1777947550/SLC-2026-DAY1-7_qjizqp.jpg', w: 2000, h: 1333 },
   { src: 'v1777947564/FBLA-2026-D23-128_zcoepp.jpg', w: 2000, h: 1333 },
   { src: 'v1777947551/SLC-2026-DAY1-8_uxwqfv.jpg', w: 2000, h: 1333 },
@@ -63,19 +100,54 @@ const PHOTOS = [
   { src: 'v1777946367/SLC-2026-DAY1-346_kxcdd5.jpg', w: 1333, h: 2000 },
 ]
 
-/* ---------------------------------------------------------------------------
-   CAPTIONS — every caption is parsed from the image filename, so new uploads
-   caption themselves. `SLC-2026-DAY1-24` becomes "SLC 2026 — Day 1".
+/* --- Reading a folder off a Cloudinary resource --------------------------- */
 
-   ALBUMS below only overrides the parser where a filename is too cryptic to
-   read (e.g. "D23"). Add a key here whenever a new shoot needs a nicer name;
-   anything not listed still falls back to the generic parser.
-   ------------------------------------------------------------------------ */
-const ALBUMS = {
-  'SLC-2026-DAY1': { label: 'SLC 2026 — Day 1', event: 'State Leadership Conference' },
-  // "D23" is days 2-3 of the same conference; the photographer just switched
-  // naming conventions partway through the week.
-  'FBLA-2026-D23': { label: 'SLC 2026 — Days 2–3', event: 'State Leadership Conference' },
+// This cloud uses dynamic folders, so the path lives in `asset_folder` and not
+// in the public_id. Older/fixed-folder clouds put it in `folder`, or inline in
+// the public_id. Check all three so the page keeps working either way.
+function folderOf(resource) {
+  const raw =
+    resource.asset_folder ||
+    resource.folder ||
+    (resource.public_id.includes('/')
+      ? resource.public_id.slice(0, resource.public_id.lastIndexOf('/'))
+      : '')
+
+  return String(raw).replace(/^\/+|\/+$/g, '')
+}
+
+// "Only use the things inside the gallery folder." A resource whose folder we
+// genuinely can't read is kept — it carried the gallery tag, which is the only
+// signal available in that case.
+function inGalleryFolder(folder) {
+  if (!folder) return true
+  const lower = folder.toLowerCase()
+  return lower === GALLERY_FOLDER || lower.startsWith(`${GALLERY_FOLDER}/`)
+}
+
+// "gallery/Fall Kickoff" -> ["Fall Kickoff"]   "gallery/2026/SLC" -> ["2026", "SLC"]
+// Photos dropped loose in gallery/ itself return [] and fall through to the
+// caption fallbacks below.
+function albumSegments(folder) {
+  const parts = folder.split('/').filter(Boolean)
+  if (parts[0] && parts[0].toLowerCase() === GALLERY_FOLDER) parts.shift()
+  return parts
+}
+
+/* --- Caption fallbacks, for photos with no readable subfolder ------------- */
+
+// A hand-written caption typed into the asset's Context/Metadata panel.
+function contextCaption(resource) {
+  const context = resource.context || {}
+  const custom = context.custom || context
+  return custom.album || custom.caption || custom.alt || ''
+}
+
+// Any tag other than the marker one — tagging a photo "Fall Kickoff" captions
+// it that way even if the folder never reaches us.
+function tagCaption(resource) {
+  const tags = Array.isArray(resource.tags) ? resource.tags : []
+  return tags.find((tag) => tag.toLowerCase() !== GALLERY_TAG) || ''
 }
 
 // Cloudinary appends a random 6-character suffix to uploaded public IDs.
@@ -93,11 +165,6 @@ function frameOf(id) {
   return match ? match[1] : null
 }
 
-// Everything before the frame number is the album: "SLC-2026-DAY1-24" -> "SLC-2026-DAY1"
-function albumKeyOf(id) {
-  return id.replace(/-\d+$/, '').toUpperCase()
-}
-
 // Acronyms stay shouted (SLC, FBLA, NLC), years stay bare, words get cased.
 function titleToken(token) {
   if (/^\d{4}$/.test(token)) return token
@@ -105,23 +172,43 @@ function titleToken(token) {
   return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase()
 }
 
-function deriveAlbum(key) {
-  if (ALBUMS[key]) return { key, ...ALBUMS[key] }
-
-  const parts = key.split(/[-_]/)
+// Last resort: read the shoot out of the filename. "SLC-2026-DAY1-24" becomes
+// "SLC 2026 — Day 1". Only reached for photos that are neither in a subfolder
+// nor tagged nor captioned.
+function captionFromFilename(id) {
+  const parts = id.replace(/-\d+$/, '').split(/[-_]/)
   const dayIndex = parts.findIndex((part) => /^DAY\d+$/i.test(part))
   const head = (dayIndex === -1 ? parts : parts.slice(0, dayIndex)).map(titleToken).join(' ')
   const day = dayIndex === -1 ? '' : ` — Day ${parts[dayIndex].replace(/\D/g, '')}`
-
-  return { key, label: head + day, event: head }
+  return `${head}${day}`.trim() || 'Urbana FBLA'
 }
+
+/* --- Resource -> photo ---------------------------------------------------- */
 
 const cloudinary = (path, transform) =>
   `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transform}/${path}`
 
-const GALLERY = PHOTOS.map(({ src, w, h }) => {
+// `album` is what the caption, the filter chips and the lightbox all read from.
+// `event` is the small gold line above the caption: the folders *between*
+// gallery/ and the photo's own folder, so "gallery/2026/SLC" reads
+// "2026 / SLC". A one-level-deep folder simply has no event line.
+function albumFor(resource, id) {
+  const segments = albumSegments(folderOf(resource))
+
+  if (segments.length) {
+    return {
+      key: segments.join('/').toLowerCase(),
+      label: segments[segments.length - 1],
+      event: segments.slice(0, -1).join(' / '),
+    }
+  }
+
+  const label = contextCaption(resource) || tagCaption(resource) || captionFromFilename(id)
+  return { key: label.toLowerCase(), label, event: '' }
+}
+
+function buildPhoto({ src, w, h, album, sortKey }) {
   const id = publicIdOf(src)
-  const album = deriveAlbum(albumKeyOf(id))
   const frame = frameOf(id)
   // Portraits get a double-height tile, so they read as shot instead of being
   // squeezed into a landscape box.
@@ -132,32 +219,124 @@ const GALLERY = PHOTOS.map(({ src, w, h }) => {
     album,
     frame,
     portrait,
+    sortKey,
     // g_auto crops around the subject rather than the dead centre, and the
-    // requested shape matches the tile so the browser never rescales.
-    thumb: cloudinary(src, `f_auto,q_auto,c_fill,g_auto,w_720,h_${portrait ? 1080 : 540}`),
-    full: cloudinary(src, 'f_auto,q_auto,w_1600'),
+    // requested shape matches the tile so the browser never rescales. The
+    // dimensions are ~2x the on-screen tile so the grid stays sharp on retina.
+    thumb: cloudinary(src, `f_auto,q_auto,c_fill,g_auto,w_900,h_${portrait ? 1350 : 675}`),
+    full: cloudinary(src, 'f_auto,q_auto,w_1800'),
     alt: frame ? `${album.label}, photo ${frame}` : album.label,
   }
+}
+
+// A Cloudinary list entry -> a photo, or null if it isn't a gallery image.
+function photoFromResource(resource) {
+  if (!resource || !resource.public_id || !resource.format || !resource.version) return null
+  if (!inGalleryFolder(folderOf(resource))) return null
+
+  const src = `v${resource.version}/${resource.public_id}.${resource.format}`
+  const id = publicIdOf(src)
+
+  return buildPhoto({
+    src,
+    w: Number(resource.width) || 0,
+    h: Number(resource.height) || 0,
+    album: albumFor(resource, id),
+    sortKey: Date.parse(resource.created_at) || 0,
+  })
+}
+
+// Newest album first, newest photo first inside it, so a fresh upload shows up
+// at the top of the page on its own without anyone reordering anything.
+function groupByAlbum(photos) {
+  const albums = new Map()
+
+  photos.forEach((photo) => {
+    const bucket = albums.get(photo.album.key)
+    if (bucket) bucket.push(photo)
+    else albums.set(photo.album.key, [photo])
+  })
+
+  return [...albums.values()]
+    .map((bucket) => bucket.slice().sort((a, b) => b.sortKey - a.sortKey))
+    .sort((a, b) => b[0].sortKey - a[0].sortKey || a[0].album.label.localeCompare(b[0].album.label))
+    .flat()
+}
+
+// The baked-in list has no folders or timestamps, so it keeps its written order.
+const FALLBACK_GALLERY = FALLBACK_PHOTOS.map(({ src, w, h }, i) => {
+  const id = publicIdOf(src)
+  const label = captionFromFilename(id)
+  return buildPhoto({
+    src,
+    w,
+    h,
+    album: { key: label.toLowerCase(), label, event: '' },
+    sortKey: FALLBACK_PHOTOS.length - i,
+  })
 })
 
-// One filter chip per album, in the order the albums first appear above.
-const FILTERS = [
-  { key: 'all', label: 'All Photos', count: GALLERY.length },
-  ...GALLERY.reduce((albums, photo) => {
-    const existing = albums.find((a) => a.key === photo.album.key)
-    if (existing) existing.count += 1
-    else albums.push({ key: photo.album.key, label: photo.album.label, count: 1 })
-    return albums
-  }, []),
-]
+/* --- The page ------------------------------------------------------------- */
+
+// Enough tiles to fill the first screen while the list request is in flight.
+const SKELETONS = Array.from({ length: 6 }, (_, i) => i)
 
 export default function Gallery() {
+  const [photos, setPhotos] = useState([])
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [index, setIndex] = useState(-1)
 
+  useEffect(() => {
+    let cancelled = false
+
+    fetch(LIST_URL)
+      .then((res) => {
+        if (!res.ok) throw new Error(`Cloudinary resource list returned ${res.status}`)
+        return res.json()
+      })
+      .then((data) => {
+        const live = (data.resources || []).map(photoFromResource).filter(Boolean)
+        if (!live.length) throw new Error(`no images tagged "${GALLERY_TAG}"`)
+        if (!cancelled) setPhotos(groupByAlbum(live))
+      })
+      .catch((err) => {
+        if (cancelled) return
+        // Not fatal: the page renders the baked-in list instead. The message is
+        // here so the fix is obvious to whoever opens the console next.
+        console.warn(
+          `[gallery] Live Cloudinary list unavailable (${err.message}); showing the ` +
+            'built-in fallback. Enable Settings → Security → Restricted media types → ' +
+            `"Resource list" and tag the gallery folder "${GALLERY_TAG}".`
+        )
+        setPhotos(FALLBACK_GALLERY)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  // One chip per subfolder, in the order the albums appear in the grid.
+  const filters = useMemo(
+    () => [
+      { key: 'all', label: 'All Photos', count: photos.length },
+      ...photos.reduce((albums, photo) => {
+        const existing = albums.find((a) => a.key === photo.album.key)
+        if (existing) existing.count += 1
+        else albums.push({ key: photo.album.key, label: photo.album.label, count: 1 })
+        return albums
+      }, []),
+    ],
+    [photos]
+  )
+
   const visible = useMemo(
-    () => (filter === 'all' ? GALLERY : GALLERY.filter((photo) => photo.album.key === filter)),
-    [filter]
+    () => (filter === 'all' ? photos : photos.filter((photo) => photo.album.key === filter)),
+    [filter, photos]
   )
 
   const current = index >= 0 ? visible[index] : null
@@ -214,14 +393,16 @@ export default function Gallery() {
             <h2 className="section-title">Moments From the Year</h2>
             <div className="divider"></div>
             <p className="section-intro">
-              Three days at the Maryland FBLA State Leadership Conference, from
-              competition rounds to the awards stage. Hover any photo for its
-              caption, or select one to open the full-size view.
+              Every album we&apos;ve shot this year, straight from the chapter photo
+              library. Hover any photo for its caption, or select one to open the
+              full-size view.
             </p>
           </div>
 
-          <div className="gallery-filters fi" role="group" aria-label="Filter photos by event">
-            {FILTERS.map((option) => (
+          {/* Deliberately not a `.fi` element: the chips arrive after the shared
+              fade-in observer has already run, so this animates on its own. */}
+          <div className="gallery-filters" role="group" aria-label="Filter photos by album">
+            {filters.map((option) => (
               <button
                 key={option.key}
                 type="button"
@@ -235,31 +416,46 @@ export default function Gallery() {
             ))}
           </div>
 
-          <div className="gallery-grid">
-            {visible.map((photo, i) => (
-              // Keying on the filter replays the stagger animation when it changes.
-              <button
-                type="button"
-                className={`gallery-item${photo.portrait ? ' tall' : ''}`}
-                key={`${filter}-${photo.id}`}
-                style={{ '--stagger': `${Math.min(i, 12) * 40}ms` }}
-                onClick={() => setIndex(i)}
-                aria-label={`Open ${photo.alt}`}
-              >
-                <img src={photo.thumb} alt={photo.alt} loading="lazy" decoding="async" />
-                <span className="gallery-caption">
-                  <span className="gallery-caption-event">{photo.album.event}</span>
-                  <span className="gallery-caption-label">{photo.album.label}</span>
-                </span>
-                <span className="gallery-zoom" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                    <circle cx="11" cy="11" r="7" />
-                    <path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5" />
-                  </svg>
-                </span>
-              </button>
-            ))}
+          <div className="gallery-grid" aria-busy={loading}>
+            {loading
+              ? SKELETONS.map((i) => (
+                  <div
+                    className="gallery-item skeleton"
+                    key={`skeleton-${i}`}
+                    style={{ '--stagger': `${i * 60}ms` }}
+                    aria-hidden="true"
+                  />
+                ))
+              : visible.map((photo, i) => (
+                  // Keying on the filter replays the stagger animation when it changes.
+                  <button
+                    type="button"
+                    className={`gallery-item${photo.portrait ? ' tall' : ''}`}
+                    key={`${filter}-${photo.id}`}
+                    style={{ '--stagger': `${Math.min(i, 12) * 40}ms` }}
+                    onClick={() => setIndex(i)}
+                    aria-label={`Open ${photo.alt}`}
+                  >
+                    <img src={photo.thumb} alt={photo.alt} loading="lazy" decoding="async" />
+                    <span className="gallery-caption">
+                      {photo.album.event && (
+                        <span className="gallery-caption-event">{photo.album.event}</span>
+                      )}
+                      <span className="gallery-caption-label">{photo.album.label}</span>
+                    </span>
+                    <span className="gallery-zoom" aria-hidden="true">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                        <circle cx="11" cy="11" r="7" />
+                        <path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5" />
+                      </svg>
+                    </span>
+                  </button>
+                ))}
           </div>
+
+          {!loading && !visible.length && (
+            <p className="gallery-empty">No photos in this album yet — check back soon.</p>
+          )}
         </div>
       </section>
 
@@ -285,7 +481,9 @@ export default function Gallery() {
           <figure className="lb-figure" onClick={(e) => e.stopPropagation()}>
             <img src={current.full} alt={current.alt} />
             <figcaption className="lb-caption">
-              <span className="lb-caption-event">{current.album.event}</span>
+              {current.album.event && (
+                <span className="lb-caption-event">{current.album.event}</span>
+              )}
               <span className="lb-caption-label">{current.album.label}</span>
               <span className="lb-counter">{index + 1} / {visible.length}</span>
             </figcaption>
