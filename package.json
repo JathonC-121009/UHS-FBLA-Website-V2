@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy:rules": "npx --yes --package firebase-tools firebase deploy --only firestore:rules"
   },
   "dependencies": {
     "firebase": "^12.17.0",

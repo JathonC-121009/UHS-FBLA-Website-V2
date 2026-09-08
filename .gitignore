@@ -16,3 +16,7 @@ pnpm-debug.log*
 
 .DS_Store
 .vite/
+
+# Firebase CLI cache
+.firebase/
+firebase-debug.log*
