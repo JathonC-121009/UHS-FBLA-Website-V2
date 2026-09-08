@@ -15,6 +15,8 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
 
+  const isOwnerOrModerator = !!user && (post.authorUid === user.uid || isOfficerOrAdviser)
+
   useEffect(() => {
     const onKey = (e) => {
       if (e.key === 'Escape') onClose()
@@ -71,6 +73,11 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
         <div className="thread-head">
           <span className="thread-author">{post.author || AUTHOR_FALLBACK}</span>
           <span className="thread-time">{timeAgo(post.createdAt)}</span>
+          {isOwnerOrModerator && (
+            <span className={`thread-status ${post.status === 'visible' ? 'thread-status--public' : post.autoFlagged ? 'thread-status--flagged' : 'thread-status--pending'}`}>
+              {post.status === 'visible' ? 'Public' : post.autoFlagged ? 'Under review' : 'Pending review'}
+            </span>
+          )}
         </div>
         {post.caption && <p className="thread-caption">{post.caption}</p>}
 

@@ -7,7 +7,7 @@ dist/
 
 # Firebase
 functions/node_modules/
-functions/*.json
+functions/uhs-fbla-website-0a59ee529c56.json
 functions/.env*
 .firebaserc
 

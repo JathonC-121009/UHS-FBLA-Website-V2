@@ -7,8 +7,7 @@
         "node_modules",
         ".git",
         "firebase-debug.log",
-        "firebase-debug.*.log",
-        "*.json"
+        "firebase-debug.*.log"
       ]
     }
   ],
