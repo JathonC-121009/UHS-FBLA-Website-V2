@@ -217,10 +217,6 @@ export default function Events() {
       }
 
       return (
-        eventDate.getDate() === day &&
-        eventDate.getMonth() === currentDate.getMonth() &&
-        eventDate.getFullYear() ===
-          currentDate.getFullYear()
         eventDay === day &&
         eventMonth === currentDate.getMonth() &&
         eventYear === currentDate.getFullYear()
