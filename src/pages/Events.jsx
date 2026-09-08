@@ -97,12 +97,24 @@ export default function Events() {
     if (!day) return []
 
     return events.filter((event) => {
-      const eventDate = new Date(event.start)
+      let eventYear, eventMonth, eventDay
+
+      if (event.isAllDay) {
+        const [y, m, d] = event.start.split('-').map(Number)
+        eventYear = y
+        eventMonth = m - 1
+        eventDay = d
+      } else {
+        const eventDate = new Date(event.start)
+        eventYear = eventDate.getFullYear()
+        eventMonth = eventDate.getMonth()
+        eventDay = eventDate.getDate()
+      }
 
       return (
-        eventDate.getDate() === day &&
-        eventDate.getMonth() === currentDate.getMonth() &&
-        eventDate.getFullYear() === currentDate.getFullYear()
+        eventDay === day &&
+        eventMonth === currentDate.getMonth() &&
+        eventYear === currentDate.getFullYear()
       )
     })
   }
