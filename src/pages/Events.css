@@ -33,17 +33,15 @@ Everything below is specific to the Events calendar.
   overflow: hidden;
   border: 1px solid var(--border);
   box-shadow:
-    0 20px 45px rgba(10, 46, 127, .12);
-
-  /* Initial entrance animation */
-  animation: calendarCardEntrance .65s cubic-bezier(.22, 1, .36, 1) both;
-  animation-delay: .12s;
+    0 20px 45px rgba(10, 46, 127, 0.12);
+  animation: calendarCardEntrance 0.65s cubic-bezier(.22, 1, .36, 1) both;
+  animation-delay: 0.12s;
 }
 
 @keyframes calendarCardEntrance {
   from {
     opacity: 0;
-    transform: translateY(24px) scale(.985);
+    transform: translateY(24px) scale(0.985);
   }
 
   to {
@@ -80,27 +78,28 @@ Everything below is specific to the Events calendar.
 .route-events .calendar-controls button {
   background: transparent;
   color: var(--white);
-  border: 1px solid rgba(255, 255, 255, .35);
 
-  padding: .55rem .9rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  padding: 0.55rem 0.9rem;
   border-radius: 8px;
 
   font-family: var(--body-font);
-  font-size: .82rem;
+  font-size: 0.82rem;
   font-weight: 600;
 
   cursor: pointer;
 
   transition:
-    background .2s ease,
-    border-color .2s ease,
-    transform .2s ease;
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .route-events .calendar-header > button:hover,
 .route-events .calendar-controls button:hover {
-  background: rgba(255, 255, 255, .15);
-  border-color: rgba(255, 255, 255, .6);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.6);
   transform: translateY(-1px);
 }
 
@@ -111,7 +110,7 @@ Everything below is specific to the Events calendar.
 
 .route-events .calendar-controls {
   display: flex;
-  gap: .5rem;
+  gap: 0.5rem;
 }
 
 /* =========================================================
@@ -119,66 +118,62 @@ Everything below is specific to the Events calendar.
 ========================================================= */
 
 .route-events .calendar-enter {
-  animation: calendarFade .35s ease-out;
+  animation: calendarFade 0.35s ease-out;
 }
 
 .route-events .calendar-enter .calendar-day {
-  animation: calendarDayReveal .42s cubic-bezier(.22, 1, .36, 1) both;
+  animation: calendarDayReveal 0.42s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 /* Stagger each calendar cell */
-.route-events .calendar-enter .calendar-day:nth-child(1)  { animation-delay: .00s; }
-.route-events .calendar-enter .calendar-day:nth-child(2)  { animation-delay: .015s; }
-.route-events .calendar-enter .calendar-day:nth-child(3)  { animation-delay: .03s; }
-.route-events .calendar-enter .calendar-day:nth-child(4)  { animation-delay: .045s; }
-.route-events .calendar-enter .calendar-day:nth-child(5)  { animation-delay: .06s; }
-.route-events .calendar-enter .calendar-day:nth-child(6)  { animation-delay: .075s; }
-.route-events .calendar-enter .calendar-day:nth-child(7)  { animation-delay: .09s; }
 
-.route-events .calendar-enter .calendar-day:nth-child(8)  { animation-delay: .105s; }
-.route-events .calendar-enter .calendar-day:nth-child(9)  { animation-delay: .12s; }
-.route-events .calendar-enter .calendar-day:nth-child(10) { animation-delay: .135s; }
-.route-events .calendar-enter .calendar-day:nth-child(11) { animation-delay: .15s; }
-.route-events .calendar-enter .calendar-day:nth-child(12) { animation-delay: .165s; }
-.route-events .calendar-enter .calendar-day:nth-child(13) { animation-delay: .18s; }
-.route-events .calendar-enter .calendar-day:nth-child(14) { animation-delay: .195s; }
-
-.route-events .calendar-enter .calendar-day:nth-child(15) { animation-delay: .21s; }
-.route-events .calendar-enter .calendar-day:nth-child(16) { animation-delay: .225s; }
-.route-events .calendar-enter .calendar-day:nth-child(17) { animation-delay: .24s; }
-.route-events .calendar-enter .calendar-day:nth-child(18) { animation-delay: .255s; }
-.route-events .calendar-enter .calendar-day:nth-child(19) { animation-delay: .27s; }
-.route-events .calendar-enter .calendar-day:nth-child(20) { animation-delay: .285s; }
-.route-events .calendar-enter .calendar-day:nth-child(21) { animation-delay: .30s; }
-
-.route-events .calendar-enter .calendar-day:nth-child(22) { animation-delay: .315s; }
-.route-events .calendar-enter .calendar-day:nth-child(23) { animation-delay: .33s; }
-.route-events .calendar-enter .calendar-day:nth-child(24) { animation-delay: .345s; }
-.route-events .calendar-enter .calendar-day:nth-child(25) { animation-delay: .36s; }
-.route-events .calendar-enter .calendar-day:nth-child(26) { animation-delay: .375s; }
-.route-events .calendar-enter .calendar-day:nth-child(27) { animation-delay: .39s; }
-.route-events .calendar-enter .calendar-day:nth-child(28) { animation-delay: .405s; }
-
-.route-events .calendar-enter .calendar-day:nth-child(29) { animation-delay: .42s; }
-.route-events .calendar-enter .calendar-day:nth-child(30) { animation-delay: .435s; }
-.route-events .calendar-enter .calendar-day:nth-child(31) { animation-delay: .45s; }
-.route-events .calendar-enter .calendar-day:nth-child(32) { animation-delay: .465s; }
-.route-events .calendar-enter .calendar-day:nth-child(33) { animation-delay: .48s; }
-.route-events .calendar-enter .calendar-day:nth-child(34) { animation-delay: .495s; }
-.route-events .calendar-enter .calendar-day:nth-child(35) { animation-delay: .51s; }
-
-.route-events .calendar-enter .calendar-day:nth-child(36) { animation-delay: .525s; }
-.route-events .calendar-enter .calendar-day:nth-child(37) { animation-delay: .54s; }
-.route-events .calendar-enter .calendar-day:nth-child(38) { animation-delay: .555s; }
-.route-events .calendar-enter .calendar-day:nth-child(39) { animation-delay: .57s; }
-.route-events .calendar-enter .calendar-day:nth-child(40) { animation-delay: .585s; }
-.route-events .calendar-enter .calendar-day:nth-child(41) { animation-delay: .60s; }
-.route-events .calendar-enter .calendar-day:nth-child(42) { animation-delay: .615s; }
+.route-events .calendar-enter .calendar-day:nth-child(1)  { animation-delay: 0s; }
+.route-events .calendar-enter .calendar-day:nth-child(2)  { animation-delay: 0.015s; }
+.route-events .calendar-enter .calendar-day:nth-child(3)  { animation-delay: 0.03s; }
+.route-events .calendar-enter .calendar-day:nth-child(4)  { animation-delay: 0.045s; }
+.route-events .calendar-enter .calendar-day:nth-child(5)  { animation-delay: 0.06s; }
+.route-events .calendar-enter .calendar-day:nth-child(6)  { animation-delay: 0.075s; }
+.route-events .calendar-enter .calendar-day:nth-child(7)  { animation-delay: 0.09s; }
+.route-events .calendar-enter .calendar-day:nth-child(8)  { animation-delay: 0.105s; }
+.route-events .calendar-enter .calendar-day:nth-child(9)  { animation-delay: 0.12s; }
+.route-events .calendar-enter .calendar-day:nth-child(10) { animation-delay: 0.135s; }
+.route-events .calendar-enter .calendar-day:nth-child(11) { animation-delay: 0.15s; }
+.route-events .calendar-enter .calendar-day:nth-child(12) { animation-delay: 0.165s; }
+.route-events .calendar-enter .calendar-day:nth-child(13) { animation-delay: 0.18s; }
+.route-events .calendar-enter .calendar-day:nth-child(14) { animation-delay: 0.195s; }
+.route-events .calendar-enter .calendar-day:nth-child(15) { animation-delay: 0.21s; }
+.route-events .calendar-enter .calendar-day:nth-child(16) { animation-delay: 0.225s; }
+.route-events .calendar-enter .calendar-day:nth-child(17) { animation-delay: 0.24s; }
+.route-events .calendar-enter .calendar-day:nth-child(18) { animation-delay: 0.255s; }
+.route-events .calendar-enter .calendar-day:nth-child(19) { animation-delay: 0.27s; }
+.route-events .calendar-enter .calendar-day:nth-child(20) { animation-delay: 0.285s; }
+.route-events .calendar-enter .calendar-day:nth-child(21) { animation-delay: 0.30s; }
+.route-events .calendar-enter .calendar-day:nth-child(22) { animation-delay: 0.315s; }
+.route-events .calendar-enter .calendar-day:nth-child(23) { animation-delay: 0.33s; }
+.route-events .calendar-enter .calendar-day:nth-child(24) { animation-delay: 0.345s; }
+.route-events .calendar-enter .calendar-day:nth-child(25) { animation-delay: 0.36s; }
+.route-events .calendar-enter .calendar-day:nth-child(26) { animation-delay: 0.375s; }
+.route-events .calendar-enter .calendar-day:nth-child(27) { animation-delay: 0.39s; }
+.route-events .calendar-enter .calendar-day:nth-child(28) { animation-delay: 0.405s; }
+.route-events .calendar-enter .calendar-day:nth-child(29) { animation-delay: 0.42s; }
+.route-events .calendar-enter .calendar-day:nth-child(30) { animation-delay: 0.435s; }
+.route-events .calendar-enter .calendar-day:nth-child(31) { animation-delay: 0.45s; }
+.route-events .calendar-enter .calendar-day:nth-child(32) { animation-delay: 0.465s; }
+.route-events .calendar-enter .calendar-day:nth-child(33) { animation-delay: 0.48s; }
+.route-events .calendar-enter .calendar-day:nth-child(34) { animation-delay: 0.495s; }
+.route-events .calendar-enter .calendar-day:nth-child(35) { animation-delay: 0.51s; }
+.route-events .calendar-enter .calendar-day:nth-child(36) { animation-delay: 0.525s; }
+.route-events .calendar-enter .calendar-day:nth-child(37) { animation-delay: 0.54s; }
+.route-events .calendar-enter .calendar-day:nth-child(38) { animation-delay: 0.555s; }
+.route-events .calendar-enter .calendar-day:nth-child(39) { animation-delay: 0.57s; }
+.route-events .calendar-enter .calendar-day:nth-child(40) { animation-delay: 0.585s; }
+.route-events .calendar-enter .calendar-day:nth-child(41) { animation-delay: 0.60s; }
+.route-events .calendar-enter .calendar-day:nth-child(42) { animation-delay: 0.615s; }
 
 @keyframes calendarDayReveal {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(.98);
+    transform: translateY(10px) scale(0.98);
   }
 
   to {
@@ -189,7 +184,7 @@ Everything below is specific to the Events calendar.
 
 @keyframes calendarFade {
   from {
-    opacity: .4;
+    opacity: 0.4;
   }
 
   to {
@@ -208,11 +203,12 @@ Everything below is specific to the Events calendar.
 }
 
 .route-events .calendar-weekdays div {
-  padding: .7rem;
+  padding: 0.7rem;
   text-align: center;
-  font-size: .75rem;
+
+  font-size: 0.75rem;
   font-weight: 800;
-  letter-spacing: .1em;
+  letter-spacing: 0.1em;
 }
 
 /* =========================================================
@@ -222,16 +218,22 @@ Everything below is specific to the Events calendar.
 .route-events .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  align-items: stretch;
 }
 
 .route-events .calendar-day {
-  height: 105px;
-  padding: .6rem;
+  min-height: 123px;
+  min-width: 0;
+
+  padding: 0.6rem;
+
+  box-sizing: border-box;
+  overflow: hidden;
 
   border-right: 1px solid var(--border);
   border-top: 1px solid var(--border);
 
-  transition: background .2s ease;
+  transition: background 0.2s ease;
 }
 
 .route-events .calendar-day:hover {
@@ -250,30 +252,38 @@ Everything below is specific to the Events calendar.
   background: #f8f9fc;
 }
 
+.route-events .calendar-day:has(.calendar-event:hover),
+.route-events .calendar-day:has(.calendar-more:hover) {
+  background: #fafcff;
+}
+
 /* =========================================================
    TODAY
 ========================================================= */
 
 .route-events .calendar-day.today {
-  background: rgba(255, 193, 7, .12);
+  background: rgba(255, 193, 7, 0.12);
   box-shadow: inset 0 0 0 3px var(--gold);
   position: relative;
 }
 
 .route-events .day-number {
   font-weight: 800;
+
   display: flex;
-  gap: .4rem;
+  gap: 0.4rem;
   align-items: center;
 }
 
 .route-events .today-label {
-  font-size: .6rem;
+  font-size: 0.6rem;
   font-weight: 800;
+
   background: var(--gold);
   color: var(--navy);
+
   border-radius: 20px;
-  padding: .15rem .4rem;
+  padding: 0.15rem 0.4rem;
 }
 
 /* =========================================================
@@ -281,16 +291,30 @@ Everything below is specific to the Events calendar.
 ========================================================= */
 
 .route-events .calendar-event {
-  margin-top: .35rem;
+  display: block;
 
-  background: var(--gold);
-  color: var(--navy);
+  margin-top: 0.3rem;
 
-  padding: .3rem .45rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+
+  height: 24px;
+  line-height: 24px;
+
+  box-sizing: border-box;
+
+  padding: 0 0.45rem;
+
+  border: none;
   border-radius: 6px;
 
-  font-size: .7rem;
+  font-family: var(--body-font);
+  font-size: 0.7rem;
   font-weight: 700;
+  text-align: left;
+
+  appearance: none;
 
   overflow: hidden;
   text-overflow: ellipsis;
@@ -299,13 +323,107 @@ Everything below is specific to the Events calendar.
   cursor: pointer;
 
   transition:
-    transform .2s ease,
-    box-shadow .2s ease;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .route-events .calendar-event:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(10, 46, 127, .12);
+  box-shadow: 0 4px 10px rgba(10, 46, 127, 0.12);
+}
+
+.route-events .calendar-event:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   EVENT CATEGORY COLORS
+========================================================= */
+
+/* Meetings — blue */
+
+.route-events .calendar-event.meeting {
+  background: var(--cobalt);
+  color: var(--white);
+}
+
+/* Competitions — gold */
+
+.route-events .calendar-event.competition {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+/* Workshops — green */
+
+.route-events .calendar-event.workshop {
+  background: #2a9d3f;
+  color: var(--white);
+}
+
+/* Social — purple */
+
+.route-events .calendar-event.social {
+  background: #9b2fe0;
+  color: var(--white);
+}
+
+/* Deadlines — orange/red */
+
+.route-events .calendar-event.deadline {
+  background: #e05c2f;
+  color: var(--white);
+}
+
+/* =========================================================
+   MORE EVENTS INDICATOR
+========================================================= */
+
+.route-events .calendar-more {
+  display: block;
+
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0;
+
+  border: none;
+  background: transparent;
+
+  height: 18px;
+  line-height: 18px;
+
+  font-family: var(--body-font);
+  font-size: 0.65rem;
+  font-weight: 800;
+
+  color: var(--muted);
+  text-align: left;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  cursor: pointer;
+}
+
+.route-events .calendar-more:hover {
+  color: var(--navy);
+  text-decoration: underline;
+}
+
+.route-events .calendar-more:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Expanded day */
+
+.route-events .calendar-day.expanded {
+  height: auto;
+  min-height: 123px;
+  overflow: hidden;
 }
 
 /* =========================================================
@@ -316,43 +434,393 @@ Everything below is specific to the Events calendar.
   display: flex;
   flex-wrap: wrap;
   gap: 1.5rem;
+
   margin-top: 1.5rem;
+
+  position: sticky;
+  bottom: 1rem;
+
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+
+  padding: 0.9rem 1.25rem;
+
+  border: 1px solid var(--border);
+  border-radius: 12px;
+
+  box-shadow: 0 8px 24px rgba(10, 46, 127, 0.08);
+
+  z-index: 5;
 }
 
 .route-events .calendar-legend div {
   display: flex;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
 
-  font-size: .9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+
   color: var(--muted);
 }
 
 .route-events .legend {
   width: 12px;
   height: 12px;
+
   border-radius: 50%;
+
   flex-shrink: 0;
 }
 
-.route-events .meeting {
+.route-events .legend.meeting {
   background: var(--cobalt);
 }
 
-.route-events .competition {
+.route-events .legend.competition {
   background: var(--gold);
 }
 
-.route-events .community {
+.route-events .legend.workshop {
   background: #2a9d3f;
 }
 
-.route-events .social {
+.route-events .legend.social {
   background: #9b2fe0;
 }
 
-.route-events .deadline {
+.route-events .legend.deadline {
   background: #e05c2f;
+}
+
+/* =========================================================
+   EVENT DETAIL MODAL
+========================================================= */
+
+.route-events .event-modal-backdrop {
+  position: fixed;
+  inset: 0;
+
+  z-index: 1000;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 1.5rem;
+
+  background: rgba(10, 24, 55, 0.42);
+
+  backdrop-filter: blur(5px);
+
+  animation: eventModalFadeIn 0.18s ease-out;
+}
+
+@keyframes eventModalFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   EVENT DETAIL CARD
+========================================================= */
+
+.route-events .event-detail-card {
+  position: relative;
+
+  width: min(560px, 100%);
+  max-height: min(700px, 90vh);
+
+  overflow-y: auto;
+
+  background: var(--white);
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  padding: 2rem;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 30px 80px rgba(10, 46, 127, 0.25);
+
+  animation:
+    eventDetailExpand
+    0.28s cubic-bezier(.22, 1, .36, 1);
+
+  overflow-x: hidden;
+}
+
+
+
+/* =========================================================
+   COLORED CATEGORY STRIP
+========================================================= */
+
+.route-events .event-detail-card::before {
+  content: '';
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 6px;
+
+  border-radius: 18px 18px 0 0;
+}
+
+/* Meeting */
+
+.route-events .event-detail-card.meeting::before {
+  background: var(--cobalt);
+}
+
+/* Competition */
+
+.route-events .event-detail-card.competition::before {
+  background: var(--gold);
+}
+
+/* Workshop */
+
+.route-events .event-detail-card.workshop::before {
+  background: #2a9d3f;
+}
+
+/* Social */
+
+.route-events .event-detail-card.social::before {
+  background: #9b2fe0;
+}
+
+/* Deadline */
+
+.route-events .event-detail-card.deadline::before {
+  background: #e05c2f;
+}
+
+@keyframes eventDetailExpand {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* =========================================================
+   CLOSE BUTTON
+========================================================= */
+
+.route-events .event-detail-close {
+  position: absolute;
+
+  top: 0.9rem;
+  right: 0.9rem;
+
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+  border-radius: 50%;
+
+  background: #f3f5f8;
+  color: var(--muted);
+
+  font-size: 1.4rem;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  z-index: 2;
+}
+
+.route-events .event-detail-close:hover {
+  background: #e8ebf0;
+  color: var(--navy);
+  transform: rotate(4deg);
+}
+
+.route-events .event-detail-close:active {
+  transform: scale(0.98);
+}
+
+.route-events .event-detail-close:focus-visible {
+  outline: 2px solid var(--navy);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   DETAIL CATEGORY BADGE
+========================================================= */
+
+.route-events .event-detail-category {
+  display: inline-block;
+
+  margin-bottom: 0.8rem;
+
+  padding: 0.35rem 0.7rem;
+
+  border-radius: 999px;
+
+  font-size: 0.68rem;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Meeting */
+
+.route-events .event-detail-category.meeting {
+  background: rgba(10, 46, 127, 0.1);
+  color: var(--cobalt);
+}
+
+/* Competition */
+
+.route-events .event-detail-category.competition {
+  background: rgba(255, 193, 7, 0.18);
+  color: #7a5b00;
+}
+
+/* Workshop */
+
+.route-events .event-detail-category.workshop {
+  background: rgba(42, 157, 63, 0.12);
+  color: #247c35;
+}
+
+/* Social */
+
+.route-events .event-detail-category.social {
+  background: rgba(155, 47, 224, 0.12);
+  color: #7d20b9;
+}
+
+/* Deadline */
+
+.route-events .event-detail-category.deadline {
+  background: rgba(224, 92, 47, 0.12);
+  color: #b33e1d;
+}
+
+/* =========================================================
+   DETAIL TITLE
+========================================================= */
+
+.route-events .event-detail-card h2 {
+  margin: 0 2.5rem 0.1rem 0;
+
+  color: var(--navy);
+
+  font-size: 1.65rem;
+  line-height: 1.2;
+
+  font-weight: 800;
+}
+
+/* =========================================================
+   DETAIL INFORMATION
+========================================================= */
+
+.route-events .event-detail-info {
+  margin-top: 1.5rem;
+}
+
+.route-events .event-detail-row {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 0.85rem;
+
+  padding: 1rem 0;
+
+  border-top: 1px solid var(--border);
+}
+
+.route-events .event-detail-icon {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  background: #f3f5f8;
+
+  border-radius: 9px;
+
+  font-size: 0.95rem;
+}
+
+.route-events .event-detail-row > div {
+  min-width: 0;
+}
+
+.route-events .event-detail-row strong,
+.route-events .event-detail-description strong {
+  display: block;
+
+  margin-bottom: 0.2rem;
+
+  color: var(--navy);
+
+  font-size: 0.78rem;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.route-events .event-detail-row p,
+.route-events .event-detail-description p {
+  margin: 0;
+
+  color: var(--muted);
+
+  font-size: 0.92rem;
+  line-height: 1.55;
+
+  overflow-wrap: anywhere;
+}
+
+/* =========================================================
+   DESCRIPTION
+========================================================= */
+
+.route-events .event-detail-description {
+  padding-top: 1rem;
+
+  border-top: 1px solid var(--border);
+}
+
+.route-events .event-detail-description p {
+  margin-top: 0.45rem;
+
+  white-space: pre-wrap;
 }
 
 /* =========================================================
@@ -361,7 +829,9 @@ Everything below is specific to the Events calendar.
 
 .route-events .calendar-message {
   padding: 3rem;
+
   text-align: center;
+
   color: var(--muted);
 }
 
@@ -374,8 +844,9 @@ Everything below is specific to the Events calendar.
 ========================================================= */
 
 @media (max-width: 800px) {
+
   .route-events .calendar-day {
-    height: 80px;
+    min-height: 100px;
   }
 
   .route-events .calendar-header {
@@ -402,6 +873,27 @@ Everything below is specific to the Events calendar.
   .route-events .calendar-controls button {
     flex: 1;
   }
+
+  .route-events .calendar-event {
+    height: 20px;
+    line-height: 20px;
+    font-size: 0.62rem;
+  }
+
+  .route-events .calendar-more {
+    height: 15px;
+    line-height: 15px;
+    font-size: 0.58rem;
+  }
+
+  .route-events .event-detail-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+
+  .route-events .event-detail-card h2 {
+    font-size: 1.4rem;
+  }
 }
 
 /* =========================================================
@@ -409,16 +901,57 @@ Everything below is specific to the Events calendar.
 ========================================================= */
 
 @media (max-width: 480px) {
+
   .route-events .calendar-day {
-    height: 70px;
+    min-height: 85px;
+    padding: 0.45rem;
   }
 
   .route-events .calendar-event {
-    font-size: .6rem;
+    font-size: 0.58rem;
+    height: 19px;
+    line-height: 19px;
+  }
+
+  .route-events .calendar-more {
+    font-size: 0.55rem;
+    height: 14px;
+    line-height: 14px;
   }
 
   .route-events .calendar-legend {
     justify-content: center;
+  }
+
+  .route-events .event-modal-backdrop {
+    padding: 0.75rem;
+    align-items: flex-end;
+  }
+
+  .route-events .event-detail-card {
+    width: 100%;
+    max-height: 85vh;
+
+    padding: 1.35rem;
+
+    border-radius: 16px;
+  }
+
+  .route-events .event-detail-card::before {
+    border-radius: 16px 16px 0 0;
+  }
+
+  .route-events .event-detail-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .route-events .event-detail {
+    padding: 0.7rem;
+  }
+
+  .route-events .event-detail-row p,
+  .route-events .event-detail-description p {
+    font-size: 0.82rem;
   }
 }
 
@@ -427,13 +960,20 @@ Everything below is specific to the Events calendar.
 ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+
   .route-events .calendar-enter {
     animation: none;
   }
 
   .route-events .calendar-header > button,
   .route-events .calendar-controls button,
-  .route-events .calendar-event {
+  .route-events .calendar-event,
+  .route-events .event-detail-close {
     transition: none;
+  }
+
+  .route-events .event-modal-backdrop,
+  .route-events .event-detail-card {
+    animation: none;
   }
 }

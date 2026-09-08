@@ -1,5 +1,7 @@
 import { useState } from 'react'
+
 import './Events.css'
+
 import useCalendar from '../hooks/useCalendar'
 
 export const meta = {
@@ -31,9 +33,90 @@ function formatMonth(date) {
   })
 }
 
+function getEventCategory(title) {
+  const match = title.match(
+    /^\[(Meeting|Competition|Workshop|Social|Deadline)\]\s*/i,
+  )
+
+  if (!match) {
+    return 'meeting'
+  }
+
+  return match[1].toLowerCase()
+}
+
+function getCleanEventTitle(title) {
+  return title
+    .replace(
+      /^\[(Meeting|Competition|Workshop|Social|Deadline)\]\s*/i,
+      '',
+    )
+    .trim()
+}
+
+function formatEventTime(event) {
+  if (event.isAllDay) {
+    return 'All day'
+  }
+
+  const startDate = new Date(event.start)
+
+  if (Number.isNaN(startDate.getTime())) {
+    return 'Time unavailable'
+  }
+
+  const timeZone =
+    event.timeZone || 'America/New_York'
+
+  const startTime = startDate.toLocaleTimeString(
+    'en-US',
+    {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone,
+    },
+  )
+
+  const category = getEventCategory(event.title)
+
+  // Deadlines only display the start time.
+  if (category === 'deadline') {
+    return startTime
+  }
+
+  if (!event.end) {
+    return startTime
+  }
+
+  const endDate = new Date(event.end)
+
+  if (Number.isNaN(endDate.getTime())) {
+    return startTime
+  }
+
+  const endTime = endDate.toLocaleTimeString(
+    'en-US',
+    {
+      hour: 'numeric',
+      minute: '2-digit',
+      timeZone,
+    },
+  )
+
+  return `${startTime} – ${endTime}`
+}
+
 export default function Events() {
-  const [currentDate, setCurrentDate] = useState(new Date())
+  const [currentDate, setCurrentDate] =
+    useState(new Date())
+
   const [animate, setAnimate] = useState(false)
+
+  const [expandedDays, setExpandedDays] =
+    useState({})
+
+  const [selectedEvent, setSelectedEvent] =
+    useState(null)
 
   const {
     events,
@@ -45,6 +128,8 @@ export default function Events() {
 
   const changeMonth = (newDate) => {
     setAnimate(false)
+    setExpandedDays({})
+    setSelectedEvent(null)
 
     setTimeout(() => {
       setCurrentDate(newDate)
@@ -76,7 +161,23 @@ export default function Events() {
     changeMonth(new Date())
   }
 
+  const toggleExpanded = (day) => {
+    setExpandedDays((previous) => ({
+      ...previous,
+      [day]: !previous[day],
+    }))
+  }
+
+  const openEvent = (event) => {
+    setSelectedEvent(event)
+  }
+
+  const closeEvent = () => {
+    setSelectedEvent(null)
+  }
+
   const daysInMonth = getDaysInMonth(currentDate)
+
   const firstDay = getFirstDayOfMonth(currentDate)
 
   const calendarDays = []
@@ -89,7 +190,11 @@ export default function Events() {
     calendarDays.push(i)
   }
 
-  while (calendarDays.length < 42) {
+  // Only create enough rows to contain the actual month.
+  const totalCells =
+    Math.ceil(calendarDays.length / 7) * 7
+
+  while (calendarDays.length < totalCells) {
     calendarDays.push(null)
   }
 
@@ -112,6 +217,10 @@ export default function Events() {
       }
 
       return (
+        eventDate.getDate() === day &&
+        eventDate.getMonth() === currentDate.getMonth() &&
+        eventDate.getFullYear() ===
+          currentDate.getFullYear()
         eventDay === day &&
         eventMonth === currentDate.getMonth() &&
         eventYear === currentDate.getFullYear()
@@ -124,34 +233,36 @@ export default function Events() {
       day &&
       today.getDate() === day &&
       today.getMonth() === currentDate.getMonth() &&
-      today.getFullYear() === currentDate.getFullYear()
+      today.getFullYear() ===
+        currentDate.getFullYear()
     )
   }
 
   return (
     <>
-      {/* Shared hero — completely controlled by index.css.
-          Do NOT add .fi here; the hero should appear immediately. */}
       <section className="page-hero">
-        <p className="page-hero-label">Stay in the Know</p>
+        <p className="page-hero-label">
+          Stay in the Know
+        </p>
 
         <h1>
           FBLA <span>Calendar</span>
         </h1>
 
         <p>
-          Meetings, competitions, and chapter activities.
+          Meetings, competitions, and chapter
+          activities.
         </p>
       </section>
 
       <section className="events-section">
         <div className="events-wrap">
-
           <div className="calendar-card">
-
             <div className="calendar-header">
-
-              <button type="button" onClick={previousMonth}>
+              <button
+                type="button"
+                onClick={previousMonth}
+              >
                 ← Previous
               </button>
 
@@ -160,17 +271,20 @@ export default function Events() {
               </div>
 
               <div className="calendar-controls">
-
-                <button type="button" onClick={goToday}>
+                <button
+                  type="button"
+                  onClick={goToday}
+                >
                   Today
                 </button>
 
-                <button type="button" onClick={nextMonth}>
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                >
                   Next →
                 </button>
-
               </div>
-
             </div>
 
             {loading && (
@@ -188,10 +302,11 @@ export default function Events() {
             {!loading && !error && (
               <div
                 className={`calendar-body ${
-                  animate ? 'calendar-enter' : ''
+                  animate
+                    ? 'calendar-enter'
+                    : ''
                 }`}
               >
-
                 <div className="calendar-weekdays">
                   {[
                     'Sun',
@@ -209,77 +324,227 @@ export default function Events() {
                 </div>
 
                 <div className="calendar-grid">
-                  {calendarDays.map((day, index) => (
-                    <div
-                      key={index}
-                      className={[
-                        'calendar-day',
-                        isToday(day) ? 'today' : '',
-                        !day ? 'empty' : '',
-                      ].join(' ')}
-                    >
+                  {calendarDays.map(
+                    (day, index) => {
+                      const dayEvents =
+                        getEventsForDay(day)
 
-                      {day && (
-                        <div className="day-number">
-                          {day}
+                      const isExpanded =
+                        expandedDays[day]
 
-                          {isToday(day) && (
-                            <span className="today-label">
-                              Today
-                            </span>
+                      const visibleEvents =
+                        isExpanded
+                          ? dayEvents
+                          : dayEvents.slice(0, 2)
+
+                      const hiddenCount =
+                        dayEvents.length - 2
+
+                      return (
+                        <div
+                          key={index}
+                          className={[
+                            'calendar-day',
+                            isToday(day)
+                              ? 'today'
+                              : '',
+                            !day
+                              ? 'empty'
+                              : '',
+                            isExpanded
+                              ? 'expanded'
+                              : '',
+                          ].join(' ')}
+                        >
+                          {day && (
+                            <div className="day-number">
+                              {day}
+
+                              {isToday(day) && (
+                                <span className="today-label">
+                                  Today
+                                </span>
+                              )}
+                            </div>
+                          )}
+
+                          {visibleEvents.map(
+                            (event) => {
+                              const category =
+                                getEventCategory(
+                                  event.title,
+                                )
+
+                              const cleanTitle =
+                                getCleanEventTitle(
+                                  event.title,
+                                )
+
+                              return (
+                                <button
+                                  key={event.id}
+                                  type="button"
+                                  className={`calendar-event ${category}`}
+                                  title={
+                                    cleanTitle
+                                  }
+                                  onClick={() =>
+                                    openEvent(
+                                      event,
+                                    )
+                                  }
+                                >
+                                  {cleanTitle}
+                                </button>
+                              )
+                            },
+                          )}
+
+                          {dayEvents.length >
+                            2 && (
+                            <button
+                              type="button"
+                              className="calendar-more"
+                              onClick={() =>
+                                toggleExpanded(
+                                  day,
+                                )
+                              }
+                            >
+                              {isExpanded
+                                ? '− Show less'
+                                : `+ ${hiddenCount} more`}
+                            </button>
                           )}
                         </div>
-                      )}
-
-                      {getEventsForDay(day).map((event) => (
-                        <div
-                          key={event.id}
-                          className="calendar-event"
-                        >
-                          {event.title}
-                        </div>
-                      ))}
-
-                    </div>
-                  ))}
+                      )
+                    },
+                  )}
                 </div>
-
               </div>
             )}
-
           </div>
 
           <div className="calendar-legend">
-
             <div>
-              <span className="legend meeting"></span>
+              <span className="legend meeting" />
               Meetings
             </div>
 
             <div>
-              <span className="legend competition"></span>
+              <span className="legend competition" />
               Competitions
             </div>
 
             <div>
-              <span className="legend community"></span>
-              Community
+              <span className="legend workshop" />
+              Workshops
             </div>
 
             <div>
-              <span className="legend social"></span>
+              <span className="legend social" />
               Social
             </div>
 
             <div>
-              <span className="legend deadline"></span>
+              <span className="legend deadline" />
               Deadlines
             </div>
-
           </div>
-
         </div>
       </section>
+
+      {selectedEvent && (
+        <div
+          className="event-modal-backdrop"
+          onClick={closeEvent}
+        >
+          <div
+            className={`event-detail-card ${getEventCategory(
+              selectedEvent.title,
+            )}`}
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+          >
+
+            <button
+              type="button"
+              className="event-detail-close"
+              onClick={closeEvent}
+              aria-label="Close event details"
+            >
+              ×
+            </button>
+
+            <div
+              className={`event-detail-category ${getEventCategory(
+                selectedEvent.title,
+              )}`}
+            >
+              {getEventCategory(
+                selectedEvent.title,
+              )}
+            </div>
+
+            <h2>
+              {getCleanEventTitle(
+                selectedEvent.title,
+              )}
+            </h2>
+
+            <div className="event-detail-info">
+              <div className="event-detail-row">
+                <span className="event-detail-icon">
+                  🕒
+                </span>
+
+                <div>
+                  <strong>
+                    {getEventCategory(
+                      selectedEvent.title,
+                    ) === 'deadline'
+                      ? 'Due'
+                      : 'Time'}
+                  </strong>
+
+                  <p>
+                    {formatEventTime(
+                      selectedEvent,
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {selectedEvent.location && (
+                <div className="event-detail-row">
+                  <span className="event-detail-icon">
+                    📍
+                  </span>
+
+                  <div>
+                    <strong>Location</strong>
+
+                    <p>
+                      {selectedEvent.location}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {selectedEvent.description && (
+                <div className="event-detail-description">
+                  <strong>Description</strong>
+
+                  <p>
+                    {selectedEvent.description}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }
