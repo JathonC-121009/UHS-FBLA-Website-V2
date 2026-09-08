@@ -10,30 +10,252 @@
 /* Page-level variable overrides (see src/index.css for the full list) */
 .route-gallery {
   /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+
+  /* Gallery-only knobs — tweak these instead of hunting through the rules.
+     --tile-min is the one that decides how big the photos read: the grid fits
+     as many whole columns of at least this width as it can, so raising it
+     drops a column and every remaining photo grows. 340px over a 1240px wrap
+     lands on three ~400px tiles, roughly 1.6x the old four-up layout. */
+  --tile-radius: 16px;
+  --tile-min: 340px;
+  --tile-gap: 1.4rem;
+  --scrim: linear-gradient(to top, rgba(10, 46, 127, .94) 0%, rgba(10, 46, 127, .72) 38%, rgba(10, 46, 127, 0) 78%);
 }
 
-.route-gallery .gallery-section { background: var(--white); padding: 4rem 2rem; }
-.route-gallery .gallery-wrap { max-width: 1080px; margin: 0 auto; }
-.route-gallery .gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.route-gallery .gallery-section { background: var(--white); padding: 4rem 2rem 4.5rem; }
+.route-gallery .gallery-wrap { max-width: 1240px; margin: 0 auto; }
+.route-gallery .gallery-intro { margin-bottom: 1.75rem; }
+.route-gallery .gallery-empty {
+  padding: 3rem 0; text-align: center;
+  color: var(--muted); font-size: .95rem;
+}
+
+/* --- Filter bar ---------------------------------------------------------- */
+.route-gallery .gallery-filters {
+  display: flex; flex-wrap: wrap; gap: .5rem;
+  margin-bottom: 2rem; padding-bottom: 1.5rem;
+  min-height: 2.6rem;
+  border-bottom: 1px solid var(--border);
+  animation: gallery-tile-in .45s ease both;
+}
+.route-gallery .gallery-filter {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-family: var(--body-font); font-size: .74rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--navy); background: var(--off-white);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: .5rem 1rem; cursor: pointer;
+  transition: color .2s, background .2s, border-color .2s, transform .2s;
+}
+.route-gallery .gallery-filter:hover { border-color: var(--cobalt); color: var(--cobalt); transform: translateY(-2px); }
+.route-gallery .gallery-filter.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+.route-gallery .gallery-filter-count {
+  font-size: .68rem; line-height: 1; letter-spacing: .04em;
+  color: var(--muted); background: var(--white);
+  border-radius: 999px; padding: .22rem .45rem; min-width: 1.5em; text-align: center;
+}
+.route-gallery .gallery-filter.active .gallery-filter-count { color: var(--navy); background: var(--gold); }
+
+/* --- Grid ---------------------------------------------------------------- */
+/* Landscape tiles are one 4:3 cell; portrait tiles span two rows, which works
+   out to almost exactly 2:3 (their native shape) once the gap is counted.
+   `dense` backfills the single-height holes those tall tiles leave behind. */
+.route-gallery .gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
+  grid-auto-flow: dense;
+  gap: var(--tile-gap);
+}
+
+.route-gallery .gallery-item {
+  /* Each tile is a <button> so the lightbox is reachable by keyboard. */
+  position: relative; display: block; padding: 0; width: 100%;
+  aspect-ratio: 4 / 3; overflow: hidden; cursor: pointer;
+  border: none; border-radius: var(--tile-radius);
+  background: linear-gradient(135deg, var(--navy), var(--blue));
+  box-shadow: 0 2px 10px rgba(10, 46, 127, .07);
+  transition: transform .28s ease, box-shadow .28s ease;
+  animation: gallery-tile-in .5s ease both;
+  animation-delay: var(--stagger, 0ms);
+}
+/* Height comes from the two grid rows, so the aspect-ratio must step aside. */
+.route-gallery .gallery-item.tall { grid-row: span 2; aspect-ratio: auto; }
+
+.route-gallery .gallery-item:hover,
+.route-gallery .gallery-item:focus-visible { transform: translateY(-5px); box-shadow: 0 16px 38px rgba(10, 46, 127, .22); }
+.route-gallery .gallery-item:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+.route-gallery .gallery-item img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .5s ease;
+}
+.route-gallery .gallery-item:hover img,
+.route-gallery .gallery-item:focus-visible img { transform: scale(1.07); }
+
+/* Uses `translate`, not `transform`: an animation with fill-mode `both` keeps
+   winning the cascade for whatever property it animates, which would kill the
+   :hover lift below. The two properties compose instead of fighting. */
+@keyframes gallery-tile-in {
+  from { opacity: 0; translate: 0 18px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+/* Placeholder tiles while the photo list is loading. */
+.route-gallery .gallery-item.skeleton {
+  cursor: default; pointer-events: none;
+  background: linear-gradient(100deg, var(--off-white) 20%, var(--border) 40%, var(--off-white) 60%);
+  background-size: 300% 100%;
+  animation: gallery-tile-in .5s ease both, gallery-shimmer 1.4s linear infinite;
+  animation-delay: var(--stagger, 0ms), 0ms;
+}
+@keyframes gallery-shimmer {
+  from { background-position: 150% 0; }
+  to   { background-position: -150% 0; }
+}
+
+/* --- Hover caption ------------------------------------------------------- */
+.route-gallery .gallery-caption {
+  position: absolute; inset: 0; display: flex;
+  flex-direction: column; justify-content: flex-end; align-items: flex-start;
+  gap: .2rem; padding: 1.15rem 1.25rem;
+  background: var(--scrim); text-align: left;
+  opacity: 0; transition: opacity .28s ease;
+}
+.route-gallery .gallery-item:hover .gallery-caption,
+.route-gallery .gallery-item:focus-visible .gallery-caption { opacity: 1; }
+
+.route-gallery .gallery-caption-event {
+  font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--gold); line-height: 1.4;
+  transform: translateY(8px); transition: transform .32s ease .04s;
+}
+.route-gallery .gallery-caption-label {
+  font-size: 1.05rem; font-weight: 600; color: var(--white); line-height: 1.35;
+  transform: translateY(8px); transition: transform .32s ease .08s;
+}
+.route-gallery .gallery-item:hover .gallery-caption-event,
+.route-gallery .gallery-item:hover .gallery-caption-label,
+.route-gallery .gallery-item:focus-visible .gallery-caption-event,
+.route-gallery .gallery-item:focus-visible .gallery-caption-label { transform: none; }
+
+/* Small "open" affordance in the corner */
+.route-gallery .gallery-zoom {
+  position: absolute; top: .7rem; right: .7rem;
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  color: var(--navy); background: var(--gold);
+  opacity: 0; transform: scale(.7);
+  transition: opacity .25s ease, transform .25s ease;
+}
+.route-gallery .gallery-item:hover .gallery-zoom,
+.route-gallery .gallery-item:focus-visible .gallery-zoom { opacity: 1; transform: none; }
+
+/* Touch devices have no hover, so captions stay visible there. */
+@media (hover: none) {
+  .route-gallery .gallery-caption { opacity: 1; }
+  .route-gallery .gallery-caption-event,
+  .route-gallery .gallery-caption-label { transform: none; }
+}
+
+/* Each step trades tile width for a column so photos never get cramped:
+   ~400px three-up on desktop, ~325px three-up on laptops, two-up below that,
+   and a single full-width photo on small phones. */
+@media (max-width: 1140px) { .route-gallery { --tile-min: 280px; } }
+@media (max-width: 880px)  { .route-gallery { --tile-min: 250px; --tile-gap: 1.1rem; } }
+
 @media (max-width: 640px) {
-  .route-gallery .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-  .route-gallery .gallery-item.tall { grid-row: span 1; }
-  .route-gallery .gallery-item.wide { grid-column: span 2; }
+  .route-gallery { --tile-min: 220px; --tile-gap: .8rem; }
+  .route-gallery .gallery-section { padding: 3rem 1.25rem 3.5rem; }
+  .route-gallery .gallery-caption { padding: .8rem .85rem; }
+  .route-gallery .gallery-caption-label { font-size: .88rem; }
+  .route-gallery .gallery-zoom { display: none; }
 }
-.route-gallery .gallery-item { border-radius: 12px; overflow: hidden; background: linear-gradient(135deg, var(--navy), var(--blue)); aspect-ratio: 4/3; position: relative; cursor: pointer; }
-.route-gallery .gallery-item.tall { grid-row: span 2; aspect-ratio: unset; }
-.route-gallery .gallery-item.wide { grid-column: span 2; aspect-ratio: 16/7; }
-.route-gallery .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
-.route-gallery .gallery-item:hover img { transform: scale(1.05); }
-.route-gallery .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10, 46, 127, .75) 0%, transparent 55%); opacity: 0; transition: opacity .28s; display: flex; align-items: flex-end; padding: 1rem 1.1rem; }
-.route-gallery .gallery-item:hover .overlay { opacity: 1; }
-.route-gallery .overlay p { color: var(--white); font-size: .88rem; font-weight: 500; }
-.route-gallery .placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: rgba(255, 255, 255, .3); font-size: .8rem; gap: .6rem; text-align: center; padding: 1rem; }
-.route-gallery .placeholder svg { opacity: .3; }
 
-/* Lightbox */
-.route-gallery .lightbox { display: none; position: fixed; inset: 0; z-index: 999; background: rgba(0, 0, 0, .92); align-items: center; justify-content: center; padding: 2rem; }
-.route-gallery .lightbox.open { display: flex; }
-.route-gallery .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
-.route-gallery .lb-close { position: absolute; top: 1.5rem; right: 1.5rem; background: none; border: none; color: white; font-size: 2rem; cursor: pointer; opacity: .7; line-height: 1; }
-.route-gallery .lb-close:hover { opacity: 1; }
+@media (max-width: 460px) {
+  /* One photo per row: two 190px tiles read smaller than the phone can show. */
+  .route-gallery .gallery-grid { grid-template-columns: 1fr; }
+  .route-gallery .gallery-item.tall { grid-row: auto; aspect-ratio: 3 / 4; }
+}
+
+/* --- Lightbox ------------------------------------------------------------ */
+.route-gallery .lightbox {
+  position: fixed; inset: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: 2rem clamp(1rem, 6vw, 4.5rem);
+  background: rgba(6, 20, 56, .94);
+  backdrop-filter: blur(6px);
+  animation: gallery-fade-in .25s ease both;
+}
+@keyframes gallery-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.route-gallery .lb-figure {
+  display: flex; flex-direction: column; align-items: center; gap: 1rem;
+  max-width: 100%; animation: gallery-lb-in .3s ease both;
+}
+@keyframes gallery-lb-in { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } }
+
+.route-gallery .lb-figure img {
+  max-width: min(1100px, 100%); max-height: 76vh;
+  border-radius: 10px; object-fit: contain; display: block;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+}
+
+.route-gallery .lb-caption {
+  display: flex; flex-direction: column; align-items: center; gap: .2rem; text-align: center;
+}
+.route-gallery .lb-caption-event {
+  font-size: .64rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+}
+.route-gallery .lb-caption-label { font-size: 1rem; font-weight: 600; color: var(--white); }
+.route-gallery .lb-counter {
+  margin-top: .3rem; font-size: .74rem; font-weight: 600; letter-spacing: .1em;
+  color: rgba(255, 255, 255, .6);
+}
+
+.route-gallery .lb-close,
+.route-gallery .lb-nav {
+  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18);
+  color: var(--white); cursor: pointer; line-height: 1;
+  border-radius: 50%; transition: background .2s, border-color .2s, color .2s;
+}
+.route-gallery .lb-close:hover,
+.route-gallery .lb-nav:hover { background: var(--gold); border-color: var(--gold); color: var(--navy); }
+.route-gallery .lb-close:focus-visible,
+.route-gallery .lb-nav:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+.route-gallery .lb-close {
+  position: absolute; top: 1.5rem; right: 1.5rem;
+  width: 42px; height: 42px; font-size: 1.15rem;
+}
+.route-gallery .lb-nav {
+  flex: 0 0 auto; width: 48px; height: 48px;
+  font-size: 2rem; padding-bottom: .28rem;
+}
+
+@media (max-width: 640px) {
+  .route-gallery .lightbox { padding: 1rem; gap: .25rem; }
+  .route-gallery .lb-figure img { max-height: 62vh; }
+  .route-gallery .lb-nav {
+    position: absolute; bottom: 1.25rem; width: 44px; height: 44px;
+  }
+  .route-gallery .lb-nav.prev { left: 1.25rem; }
+  .route-gallery .lb-nav.next { right: 1.25rem; }
+  .route-gallery .lb-close { top: 1rem; right: 1rem; }
+}
+
+/* --- Motion preferences -------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .route-gallery .gallery-item,
+  .route-gallery .gallery-item.skeleton,
+  .route-gallery .gallery-filters,
+  .route-gallery .lightbox,
+  .route-gallery .lb-figure { animation: none; }
+  .route-gallery .gallery-item,
+  .route-gallery .gallery-item img,
+  .route-gallery .gallery-caption,
+  .route-gallery .gallery-caption-event,
+  .route-gallery .gallery-caption-label,
+  .route-gallery .gallery-zoom { transition-duration: .01ms; }
+  .route-gallery .gallery-item:hover img,
+  .route-gallery .gallery-item:focus-visible img { transform: none; }
+}
