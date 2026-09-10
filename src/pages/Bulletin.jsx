@@ -1,17 +1,20 @@
 import { useState } from 'react'
+import Masthead from '../components/Masthead.jsx'
+import Icon from '../components/Icon.jsx'
 import useAuth from '../hooks/useAuth.js'
 import { usePosts } from '../hooks/usePosts.js'
 import { AUTHOR_FALLBACK } from '../components/BulletinBoard/bulletinUtils.js'
-import Corkboard from '../components/BulletinBoard/Corkboard.jsx'
+import Board from '../components/BulletinBoard/Board.jsx'
 import ThreadModal from '../components/BulletinBoard/ThreadModal.jsx'
 import NewPostModal from '../components/BulletinBoard/NewPostModal.jsx'
 import ArchivedPostsPanel from '../components/BulletinBoard/ArchivedPostsPanel.jsx'
 import './Bulletin.css'
 
+// Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
-  label: 'Bulletin Board',   // navbar text
-  order: 90,                 // navbar position; lower numbers come first
-  title: 'Urbana FBLA — Bulletin Board',  // browser tab title
+  label: 'Board',
+  order: 90,
+  title: 'Urbana FBLA, Bulletin Board',
 }
 
 export default function Bulletin() {
@@ -23,20 +26,20 @@ export default function Bulletin() {
   const [archivedOpen, setArchivedOpen] = useState(false)
   const [clearing, setClearing] = useState(false)
 
-  // Author-of-own-content or officer/adviser may soft-remove.
+  // The author of a post, and any officer or adviser, may soft-remove it.
   const canRemove = (post) => !!user && (post.authorUid === user.uid || isOfficerOrAdviser)
 
   const handleRemovePost = async (post) => {
     try {
       await removePost(post.id)
     } catch {
-      /* rules/snapshot races surface silently — board state stays as-is */
+      /* Rules and snapshot races surface silently; board state stays as-is. */
     }
   }
 
   const handleClearBoard = async () => {
     if (!window.confirm(
-      'Clear the whole board? Every post will be soft-removed and moved to the archive. This cannot be undone.',
+      'Clear the whole board? Every post is soft-removed and moved to the archive. This cannot be undone.',
     )) return
     setClearing(true)
     try {
@@ -54,9 +57,9 @@ export default function Bulletin() {
     setNewPostOpen(true)
   }
 
-  // NewPostModal submits its payload through onCreate — attach the author here
-  // (profile.displayName → Auth displayName → shared fallback) so postsService
-  // just writes whatever string it's handed, like addReply already does.
+  // NewPostModal submits its payload through onCreate, and the author is
+  // attached here (profile display name, then the Auth display name, then the
+  // shared fallback) so postsService just writes the string it is handed.
   const handleCreatePost = async (post) => {
     await createPost({
       ...post,
@@ -66,45 +69,52 @@ export default function Bulletin() {
 
   return (
     <>
-      <div className="page-hero">
-        <p className="page-hero-label">Bulletin Board</p>
-        <h1>The <span>Board</span></h1>
-        <p>Pin a photo, ask a question, start a conversation</p>
-      </div>
+      <Masthead
+        eyebrow="Members"
+        title={<>The chapter <em>board</em></>}
+        lede="Ask a question, post a photo, or answer someone else's. Sign in to post; anyone can read."
+        meta={[
+          { label: 'On the board', value: loading ? 'Loading' : String(posts.length) },
+          { label: 'Posting', value: user ? 'Signed in' : 'Sign in required' },
+        ]}
+      />
 
       <section className="bulletin-section">
-        <div className="bulletin-wrap fi">
-          <div className="bulletin-toolbar">
-            <button type="button" className="btn btn-gold" onClick={handleNewPost}>
-              ＋ New Post
+        <div className="bulletin-wrap">
+          <div className="bulletin-toolbar" data-reveal="fade">
+            <button type="button" className="btn btn-primary" onClick={handleNewPost}>
+              <Icon name="plus" size={14} />
+              New post
             </button>
             <button
               type="button"
-              className={`btn bulletin-outline${archivedOpen ? ' active' : ''}`}
+              className={`btn btn-ghost${archivedOpen ? ' is-active' : ''}`}
               onClick={() => setArchivedOpen((v) => !v)}
             >
-              Archived Posts
+              Archive
             </button>
             {isOfficerOrAdviser && (
               <button
                 type="button"
-                className="btn btn-navy bulletin-clear"
+                className="btn btn-ghost bulletin-clear"
                 onClick={handleClearBoard}
                 disabled={clearing}
               >
-                {clearing ? 'Clearing…' : 'Clear Board'}
+                {clearing ? 'Clearing' : 'Clear board'}
               </button>
             )}
           </div>
 
-          <Corkboard
-            posts={posts}
-            loading={loading}
-            error={error}
-            canRemove={canRemove}
-            onOpenPost={setOpenPost}
-            onRemovePost={handleRemovePost}
-          />
+          <div data-reveal="fade">
+            <Board
+              posts={posts}
+              loading={loading}
+              error={error}
+              canRemove={canRemove}
+              onOpenPost={setOpenPost}
+              onRemovePost={handleRemovePost}
+            />
+          </div>
         </div>
       </section>
 

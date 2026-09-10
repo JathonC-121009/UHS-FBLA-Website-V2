@@ -1,10 +1,11 @@
+import Masthead from '../components/Masthead.jsx'
 import './Officers.css'
 
 // Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
   label: 'Officers',
   order: 40,
-  title: 'Urbana FBLA — Officers',
+  title: 'Urbana FBLA, Officers',
 }
 
 const CHAPTER_OFFICERS = [
@@ -21,83 +22,76 @@ const CHAPTER_OFFICERS = [
 
 const STATE_OFFICERS = [
   { role: 'State President', name: 'Charis Roussel', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
-  { role: 'State Reporter/Historian', name: 'Hannah Cho', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948475/Hannah_Cho_onkvkd.jpg' },
+  { role: 'State Reporter and Historian', name: 'Hannah Cho', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948475/Hannah_Cho_onkvkd.jpg' },
 ]
+
+const ADVISOR = {
+  role: 'Chapter Advisor',
+  name: 'Travis Zimmerman',
+  img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948570/03_Zimmerman_Travis_UHS_1x1_1_vxlwbn.jpg',
+}
+
+function OfficerCard({ officer, index }) {
+  return (
+    <article className="officer edge" data-reveal="scale">
+      <div className="officer-photo">
+        <img src={officer.img} alt={officer.name} loading="lazy" />
+        {index != null && <span className="officer-index">{String(index + 1).padStart(2, '0')}</span>}
+      </div>
+      <h3 className="officer-name">{officer.name}</h3>
+      <p className="officer-role">{officer.role}</p>
+    </article>
+  )
+}
 
 export default function Officers() {
   return (
     <>
-      <div className="page-hero">
-        <p className="page-hero-label">Leadership Team</p>
-        <h1>Meet Our <span>Officers</span></h1>
-      </div>
+      <Masthead
+        eyebrow="Leadership"
+        title={<>Officer <em>team</em></>}
+        lede="Eleven students run the chapter, from competition prep and finances to communications and every event on the calendar."
+        meta={[
+          { label: 'Term', value: '2026 / 2027' },
+          { label: 'Officers', value: '9 chapter, 2 state' },
+        ]}
+      />
 
       <section className="officers-section">
         <div className="officers-wrap">
-          <div className="officers-intro fi">
-            <p className="section-label">2026–2027 Chapter Officers</p>
-            <h2 className="section-title">Chapter Officers</h2>
-            <div className="divider"></div>
-          </div>
+          <header className="block-head">
+            <p className="eyebrow" data-reveal="fade">01 / Chapter</p>
+            <h2 className="section-title" data-reveal>Chapter officers</h2>
+          </header>
 
-          <div className="officers-grid">
-            {CHAPTER_OFFICERS.map((officer) => (
-              <div className="officer-card fi" key={officer.name + officer.role}>
-                <div className="officer-photo">
-                  <img
-                    src={officer.img}
-                    alt={officer.name}
-                  />
-                </div>
-                <div className="officer-info">
-                  <div className="officer-role">{officer.role}</div>
-                  <div className="officer-name">{officer.name}</div>
-                </div>
-              </div>
+          <div className="officers-grid" data-reveal-group>
+            {CHAPTER_OFFICERS.map((officer, i) => (
+              <OfficerCard officer={officer} index={i} key={officer.name + officer.role} />
             ))}
           </div>
 
-          <div className="state-block fi">
-            <p className="section-label">State Leadership</p>
-            <h2 className="section-title">State Officers</h2>
-            <div className="divider"></div>
-            <div className="state-grid">
-              {STATE_OFFICERS.map((officer) => (
-                <div className="officer-card fi" key={officer.name + officer.role}>
-                  <div className="officer-photo">
-                    <img
-                      src={officer.img}
-                      alt={officer.name}
-                    />
-                  </div>
-                  <div className="officer-info">
-                    <div className="officer-role">{officer.role}</div>
-                    <div className="officer-name">{officer.name}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <header className="block-head block-head--spaced">
+            <p className="eyebrow" data-reveal="fade">02 / State</p>
+            <h2 className="section-title" data-reveal>Maryland state officers</h2>
+            <p className="section-intro" data-reveal>
+              Two of our members hold statewide office and represent every FBLA
+              chapter in Maryland.
+            </p>
+          </header>
+
+          <div className="officers-grid officers-grid--narrow" data-reveal-group>
+            {STATE_OFFICERS.map((officer) => (
+              <OfficerCard officer={officer} key={officer.name + officer.role} />
+            ))}
           </div>
 
-          {/* ADVISOR */}
-          <div className="advisor-block fi">
-            <p className="section-label">Faculty</p>
-            <h2 className="section-title">Chapter Advisor</h2>
-            <div className="divider"></div>
-            <div className="advisor-wrap">
-              <div className="officer-card advisor">
-                <div className="officer-photo">
-                  <img
-                    src="https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948570/03_Zimmerman_Travis_UHS_1x1_1_vxlwbn.jpg"
-                    alt="Travis Zimmerman"
-                  />
-                </div>
-                <div className="officer-info">
-                  <div className="officer-role">Advisor</div>
-                  <div className="officer-name">Travis Zimmerman</div>
-                </div>
-              </div>
-            </div>
+          <header className="block-head block-head--spaced">
+            <p className="eyebrow" data-reveal="fade">03 / Faculty</p>
+            <h2 className="section-title" data-reveal>Advisor</h2>
+          </header>
+
+          <div className="officers-grid officers-grid--narrow" data-reveal-group>
+            <OfficerCard officer={ADVISOR} />
           </div>
         </div>
       </section>

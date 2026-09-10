@@ -1,151 +1,173 @@
 /* ============================================================================
-   GALLERY PAGE STYLES — this file owns the look of "/gallery" and nothing
-   else. Every rule is scoped under `.route-gallery` (set on <body> by
-   Layout), so nothing here leaks to other pages, and you can restyle the
-   shared navbar/footer/hero for this page only:
-       .route-gallery nav { background: #000; }
-       .route-gallery { --hero-bg: #000; }
+   GALLERY
+   Scoped under `.route-gallery`. A dense photo grid with no rounded corners
+   or shadows: hairline gutters, a caption scrim on hover, and a lightbox that
+   grows out of the tile you clicked.
    ========================================================================= */
 
-/* Page-level variable overrides (see src/index.css for the full list) */
 .route-gallery {
-  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
-
-  /* Gallery-only knobs — tweak these instead of hunting through the rules.
-     --tile-min is the one that decides how big the photos read: the grid fits
-     as many whole columns of at least this width as it can, so raising it
-     drops a column and every remaining photo grows. 340px over a 1240px wrap
-     lands on three ~400px tiles, roughly 1.6x the old four-up layout. */
-  --tile-radius: 16px;
-  --tile-min: 340px;
-  --tile-gap: 1.4rem;
-  --scrim: linear-gradient(to top, rgba(10, 46, 127, .94) 0%, rgba(10, 46, 127, .72) 38%, rgba(10, 46, 127, 0) 78%);
+  /* --tile-min decides how large the photos read: the grid fits as many whole
+     columns of at least this width as it can, so raising it drops a column and
+     every remaining photo grows. */
+  --tile-min: 320px;
+  --tile-gap: 1px;
+  --scrim: linear-gradient(to top, rgba(11, 13, 17, .92) 0%, rgba(11, 13, 17, .55) 45%, rgba(11, 13, 17, 0) 82%);
 }
 
-.route-gallery .gallery-section { background: var(--white); padding: 4rem 2rem 4.5rem; }
-.route-gallery .gallery-wrap { max-width: 1240px; margin: 0 auto; }
-.route-gallery .gallery-intro { margin-bottom: 1.75rem; }
+.route-gallery .gallery-section {
+  background: var(--surface);
+  padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) clamp(4rem, 9vw, 6.5rem);
+}
+.route-gallery .gallery-wrap { max-width: var(--shell); margin: 0 auto; }
 .route-gallery .gallery-empty {
-  padding: 3rem 0; text-align: center;
-  color: var(--muted); font-size: .95rem;
+  padding: 4rem 0;
+  text-align: center;
+  color: var(--text-muted);
 }
 
-/* --- Filter bar ---------------------------------------------------------- */
+/* --- Filters ------------------------------------------------------------- */
+
 .route-gallery .gallery-filters {
-  display: flex; flex-wrap: wrap; gap: .5rem;
-  margin-bottom: 2rem; padding-bottom: 1.5rem;
-  min-height: 2.6rem;
-  border-bottom: 1px solid var(--border);
-  animation: gallery-tile-in .45s ease both;
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: .15rem;
+  min-height: 3rem;
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--line);
+  animation: tile-in .45s var(--e-out) both;
 }
 .route-gallery .gallery-filter {
-  display: inline-flex; align-items: center; gap: .5rem;
-  font-family: var(--body-font); font-size: .74rem; font-weight: 700;
-  letter-spacing: .1em; text-transform: uppercase;
-  color: var(--navy); background: var(--off-white);
-  border: 1px solid var(--border); border-radius: 999px;
-  padding: .5rem 1rem; cursor: pointer;
-  transition: color .2s, background .2s, border-color .2s, transform .2s;
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .8rem .9rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color var(--t-mid) var(--e-out);
 }
-.route-gallery .gallery-filter:hover { border-color: var(--cobalt); color: var(--cobalt); transform: translateY(-2px); }
-.route-gallery .gallery-filter.active { background: var(--navy); border-color: var(--navy); color: var(--white); }
+.route-gallery .gallery-filter:hover { color: var(--ink-900); }
+.route-gallery .gallery-filter.is-active { color: var(--ink-900); }
 .route-gallery .gallery-filter-count {
-  font-size: .68rem; line-height: 1; letter-spacing: .04em;
-  color: var(--muted); background: var(--white);
-  border-radius: 999px; padding: .22rem .45rem; min-width: 1.5em; text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  transition: color var(--t-mid) var(--e-out);
 }
-.route-gallery .gallery-filter.active .gallery-filter-count { color: var(--navy); background: var(--gold); }
+.route-gallery .gallery-filter.is-active .gallery-filter-count { color: var(--accent); }
+.route-gallery .gallery-indicator { bottom: -1px; }
 
 /* --- Grid ---------------------------------------------------------------- */
-/* Landscape tiles are one 4:3 cell; portrait tiles span two rows, which works
-   out to almost exactly 2:3 (their native shape) once the gap is counted.
-   `dense` backfills the single-height holes those tall tiles leave behind. */
+/* Landscape tiles take one 4:3 cell; portrait tiles span two rows, which lands
+   close to their native 2:3. `dense` backfills the holes tall tiles leave. */
 .route-gallery .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--tile-min), 1fr));
   grid-auto-flow: dense;
   gap: var(--tile-gap);
+  background: var(--line);
+  border: 1px solid var(--line);
 }
 
 .route-gallery .gallery-item {
-  /* Each tile is a <button> so the lightbox is reachable by keyboard. */
-  position: relative; display: block; padding: 0; width: 100%;
-  aspect-ratio: 4 / 3; overflow: hidden; cursor: pointer;
-  border: none; border-radius: var(--tile-radius);
-  background: linear-gradient(135deg, var(--navy), var(--blue));
-  box-shadow: 0 2px 10px rgba(10, 46, 127, .07);
-  transition: transform .28s ease, box-shadow .28s ease;
-  animation: gallery-tile-in .5s ease both;
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--navy-950);
+  animation: tile-in .55s var(--e-out) both;
   animation-delay: var(--stagger, 0ms);
 }
-/* Height comes from the two grid rows, so the aspect-ratio must step aside. */
-.route-gallery .gallery-item.tall { grid-row: span 2; aspect-ratio: auto; }
-
-.route-gallery .gallery-item:hover,
-.route-gallery .gallery-item:focus-visible { transform: translateY(-5px); box-shadow: 0 16px 38px rgba(10, 46, 127, .22); }
-.route-gallery .gallery-item:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.route-gallery .gallery-item.is-tall { grid-row: span 2; aspect-ratio: auto; }
 
 .route-gallery .gallery-item img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  transition: transform .5s ease;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform .8s var(--e-out), filter .6s var(--e-out);
 }
 .route-gallery .gallery-item:hover img,
-.route-gallery .gallery-item:focus-visible img { transform: scale(1.07); }
+.route-gallery .gallery-item:focus-visible img { transform: scale(1.05); }
 
-/* Uses `translate`, not `transform`: an animation with fill-mode `both` keeps
-   winning the cascade for whatever property it animates, which would kill the
-   :hover lift below. The two properties compose instead of fighting. */
-@keyframes gallery-tile-in {
-  from { opacity: 0; translate: 0 18px; }
-  to   { opacity: 1; translate: 0 0; }
+/* Uses `translate` rather than `transform`, so the entrance animation and the
+   image scale never fight over the same property. */
+@keyframes tile-in {
+  from { opacity: 0; translate: 0 16px; }
+  to { opacity: 1; translate: 0 0; }
 }
 
-/* Placeholder tiles while the photo list is loading. */
-.route-gallery .gallery-item.skeleton {
-  cursor: default; pointer-events: none;
-  background: linear-gradient(100deg, var(--off-white) 20%, var(--border) 40%, var(--off-white) 60%);
+.route-gallery .gallery-item.is-skeleton {
+  cursor: default;
+  pointer-events: none;
+  background: linear-gradient(100deg, var(--paper-200) 20%, var(--paper-300) 40%, var(--paper-200) 60%);
   background-size: 300% 100%;
-  animation: gallery-tile-in .5s ease both, gallery-shimmer 1.4s linear infinite;
+  animation: tile-in .5s var(--e-out) both, gallery-shimmer 1.5s linear infinite;
   animation-delay: var(--stagger, 0ms), 0ms;
 }
 @keyframes gallery-shimmer {
   from { background-position: 150% 0; }
-  to   { background-position: -150% 0; }
+  to { background-position: -150% 0; }
 }
 
-/* --- Hover caption ------------------------------------------------------- */
+/* --- Caption ------------------------------------------------------------- */
+
 .route-gallery .gallery-caption {
-  position: absolute; inset: 0; display: flex;
-  flex-direction: column; justify-content: flex-end; align-items: flex-start;
-  gap: .2rem; padding: 1.15rem 1.25rem;
-  background: var(--scrim); text-align: left;
-  opacity: 0; transition: opacity .28s ease;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-start;
+  gap: .25rem;
+  padding: 1.1rem 1.15rem;
+  background: var(--scrim);
+  text-align: left;
+  opacity: 0;
+  transition: opacity var(--t-mid) var(--e-out);
 }
 .route-gallery .gallery-item:hover .gallery-caption,
 .route-gallery .gallery-item:focus-visible .gallery-caption { opacity: 1; }
 
 .route-gallery .gallery-caption-event {
-  font-size: .66rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
-  color: var(--gold); line-height: 1.4;
-  transform: translateY(8px); transition: transform .32s ease .04s;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent-ink);
+  transform: translateY(8px);
+  transition: transform .45s var(--e-out) .03s;
 }
 .route-gallery .gallery-caption-label {
-  font-size: 1.05rem; font-weight: 600; color: var(--white); line-height: 1.35;
-  transform: translateY(8px); transition: transform .32s ease .08s;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.15;
+  color: var(--paper-000);
+  transform: translateY(8px);
+  transition: transform .45s var(--e-out) .07s;
 }
 .route-gallery .gallery-item:hover .gallery-caption-event,
 .route-gallery .gallery-item:hover .gallery-caption-label,
 .route-gallery .gallery-item:focus-visible .gallery-caption-event,
 .route-gallery .gallery-item:focus-visible .gallery-caption-label { transform: none; }
 
-/* Small "open" affordance in the corner */
 .route-gallery .gallery-zoom {
-  position: absolute; top: .7rem; right: .7rem;
-  display: flex; align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: 50%;
-  color: var(--navy); background: var(--gold);
-  opacity: 0; transform: scale(.7);
-  transition: opacity .25s ease, transform .25s ease;
+  position: absolute;
+  top: .75rem;
+  right: .75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  background: var(--accent);
+  color: var(--ink-900);
+  opacity: 0;
+  transform: scale(.8);
+  transition: opacity var(--t-mid) var(--e-out), transform var(--t-mid) var(--e-spring);
 }
 .route-gallery .gallery-item:hover .gallery-zoom,
 .route-gallery .gallery-item:focus-visible .gallery-zoom { opacity: 1; transform: none; }
@@ -157,105 +179,108 @@
   .route-gallery .gallery-caption-label { transform: none; }
 }
 
-/* Each step trades tile width for a column so photos never get cramped:
-   ~400px three-up on desktop, ~325px three-up on laptops, two-up below that,
-   and a single full-width photo on small phones. */
-@media (max-width: 1140px) { .route-gallery { --tile-min: 280px; } }
-@media (max-width: 880px)  { .route-gallery { --tile-min: 250px; --tile-gap: 1.1rem; } }
-
-@media (max-width: 640px) {
-  .route-gallery { --tile-min: 220px; --tile-gap: .8rem; }
-  .route-gallery .gallery-section { padding: 3rem 1.25rem 3.5rem; }
-  .route-gallery .gallery-caption { padding: .8rem .85rem; }
-  .route-gallery .gallery-caption-label { font-size: .88rem; }
-  .route-gallery .gallery-zoom { display: none; }
-}
-
-@media (max-width: 460px) {
-  /* One photo per row: two 190px tiles read smaller than the phone can show. */
-  .route-gallery .gallery-grid { grid-template-columns: 1fr; }
-  .route-gallery .gallery-item.tall { grid-row: auto; aspect-ratio: 3 / 4; }
-}
-
 /* --- Lightbox ------------------------------------------------------------ */
+
 .route-gallery .lightbox {
-  position: fixed; inset: 0; z-index: 999;
-  display: flex; align-items: center; justify-content: center; gap: .5rem;
-  padding: 2rem clamp(1rem, 6vw, 4.5rem);
-  background: rgba(6, 20, 56, .94);
-  backdrop-filter: blur(6px);
-  animation: gallery-fade-in .25s ease both;
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(.5rem, 2vw, 1.5rem);
+  padding: clamp(1rem, 5vw, 3rem);
+  background: rgba(11, 13, 17, .96);
+  animation: overlay-in .28s var(--e-out) both;
 }
-@keyframes gallery-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
 
 .route-gallery .lb-figure {
-  display: flex; flex-direction: column; align-items: center; gap: 1rem;
-  max-width: 100%; animation: gallery-lb-in .3s ease both;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  max-width: 100%;
 }
-@keyframes gallery-lb-in { from { opacity: 0; scale: .97; } to { opacity: 1; scale: 1; } }
-
 .route-gallery .lb-figure img {
-  max-width: min(1100px, 100%); max-height: 76vh;
-  border-radius: 10px; object-fit: contain; display: block;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+  max-width: min(1100px, 100%);
+  max-height: 74vh;
+  object-fit: contain;
+  border: 1px solid var(--line-ink);
 }
 
 .route-gallery .lb-caption {
-  display: flex; flex-direction: column; align-items: center; gap: .2rem; text-align: center;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: .9rem;
+}
+.route-gallery .lb-counter {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--accent-ink);
+}
+.route-gallery .lb-caption-label {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  color: var(--paper-000);
 }
 .route-gallery .lb-caption-event {
-  font-size: .64rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
-}
-.route-gallery .lb-caption-label { font-size: 1rem; font-weight: 600; color: var(--white); }
-.route-gallery .lb-counter {
-  margin-top: .3rem; font-size: .74rem; font-weight: 600; letter-spacing: .1em;
-  color: rgba(255, 255, 255, .6);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, .45);
 }
 
 .route-gallery .lb-close,
 .route-gallery .lb-nav {
-  background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .18);
-  color: var(--white); cursor: pointer; line-height: 1;
-  border-radius: 50%; transition: background .2s, border-color .2s, color .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--line-ink);
+  color: var(--paper-000);
+  transition: background var(--t-mid) var(--e-out), border-color var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
 }
 .route-gallery .lb-close:hover,
-.route-gallery .lb-nav:hover { background: var(--gold); border-color: var(--gold); color: var(--navy); }
-.route-gallery .lb-close:focus-visible,
-.route-gallery .lb-nav:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.route-gallery .lb-nav:hover {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: var(--ink-900);
+}
+.route-gallery .lb-close { position: absolute; top: 1.25rem; right: 1.25rem; width: 42px; height: 42px; }
+.route-gallery .lb-nav { width: 46px; height: 46px; }
 
-.route-gallery .lb-close {
-  position: absolute; top: 1.5rem; right: 1.5rem;
-  width: 42px; height: 42px; font-size: 1.15rem;
-}
-.route-gallery .lb-nav {
-  flex: 0 0 auto; width: 48px; height: 48px;
-  font-size: 2rem; padding-bottom: .28rem;
-}
+/* --- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 1140px) { .route-gallery { --tile-min: 280px; } }
+@media (max-width: 880px) { .route-gallery { --tile-min: 240px; } }
 
 @media (max-width: 640px) {
-  .route-gallery .lightbox { padding: 1rem; gap: .25rem; }
+  .route-gallery { --tile-min: 200px; }
+  .route-gallery .gallery-caption { padding: .75rem .8rem; }
+  .route-gallery .gallery-caption-label { font-size: 1rem; }
+  .route-gallery .gallery-zoom { display: none; }
   .route-gallery .lb-figure img { max-height: 62vh; }
-  .route-gallery .lb-nav {
-    position: absolute; bottom: 1.25rem; width: 44px; height: 44px;
-  }
-  .route-gallery .lb-nav.prev { left: 1.25rem; }
-  .route-gallery .lb-nav.next { right: 1.25rem; }
-  .route-gallery .lb-close { top: 1rem; right: 1rem; }
+  .route-gallery .lb-nav { position: absolute; bottom: 1.25rem; }
+  .route-gallery .lb-nav:first-of-type { left: 1.25rem; }
+  .route-gallery .lb-nav:last-of-type { right: 1.25rem; }
+}
+
+@media (max-width: 460px) {
+  .route-gallery .gallery-grid { grid-template-columns: 1fr; }
+  .route-gallery .gallery-item.is-tall { grid-row: auto; aspect-ratio: 3 / 4; }
 }
 
 /* --- Motion preferences -------------------------------------------------- */
+
 @media (prefers-reduced-motion: reduce) {
   .route-gallery .gallery-item,
-  .route-gallery .gallery-item.skeleton,
+  .route-gallery .gallery-item.is-skeleton,
   .route-gallery .gallery-filters,
-  .route-gallery .lightbox,
-  .route-gallery .lb-figure { animation: none; }
-  .route-gallery .gallery-item,
-  .route-gallery .gallery-item img,
-  .route-gallery .gallery-caption,
-  .route-gallery .gallery-caption-event,
-  .route-gallery .gallery-caption-label,
-  .route-gallery .gallery-zoom { transition-duration: .01ms; }
+  .route-gallery .lightbox { animation: none; }
   .route-gallery .gallery-item:hover img,
   .route-gallery .gallery-item:focus-visible img { transform: none; }
 }

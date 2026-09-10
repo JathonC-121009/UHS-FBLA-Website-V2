@@ -1,0 +1,115 @@
+/* A single note: index card in a hairline frame, held at a slight angle that
+   straightens on hover. Photo and question posts share the same shell. */
+
+.note {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0 0 1.25rem;
+  padding: 1.1rem 1rem .9rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  text-align: left;
+  cursor: pointer;
+  break-inside: avoid;
+  transform: rotate(var(--tilt, 0deg));
+  transition: transform .45s var(--e-out), border-color var(--t-mid) var(--e-out);
+}
+.note:hover,
+.note:focus-visible {
+  transform: rotate(0deg) translateY(-3px);
+  border-color: var(--line-strong);
+}
+.note--question { background: var(--accent-wash); }
+
+/* Pushpin, reduced to a single accent square */
+.note-pin {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  transform: translateX(-50%) rotate(45deg);
+  transition: transform var(--t-mid) var(--e-spring);
+}
+.note:hover .note-pin { transform: translateX(-50%) rotate(135deg); }
+
+.note-photo {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  margin-bottom: .85rem;
+}
+.note-photo img { width: 100%; height: 100%; object-fit: cover; }
+.note-photo--empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  background: var(--paper-200);
+  color: var(--text-faint);
+  font-size: 0.75rem;
+}
+
+.note-caption,
+.note-message {
+  font-size: .92rem;
+  line-height: 1.6;
+  color: var(--ink-800);
+}
+.note-message { min-height: 4.2em; }
+
+.note-meta {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  margin-top: 1rem;
+  padding-top: .65rem;
+  border-top: 1px solid var(--line);
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+.note-author { font-weight: 600; color: var(--ink-900); }
+.note-time { font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: .06em; }
+.note-replies {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+
+.note-status {
+  position: absolute;
+  top: .5rem;
+  left: .55rem;
+  padding: .12rem .4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  z-index: 2;
+}
+.note-status.is-public { background: var(--accent); color: var(--paper-000); }
+.note-status.is-pending { background: var(--paper-200); color: var(--text-muted); border: 1px solid var(--line); }
+.note-status.is-flagged { background: var(--navy-900); color: var(--paper-000); }
+
+.note-remove {
+  position: absolute;
+  top: .5rem;
+  right: .55rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  color: var(--text-faint);
+  z-index: 2;
+  transition: color var(--t-mid) var(--e-out), border-color var(--t-mid) var(--e-out);
+}
+.note-remove:hover { color: var(--ink-900); border-color: var(--navy-900); }

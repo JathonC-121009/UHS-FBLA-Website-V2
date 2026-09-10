@@ -1,92 +1,141 @@
 import { useNavigate } from 'react-router-dom'
+import Masthead from '../components/Masthead.jsx'
+import Icon from '../components/Icon.jsx'
 import './Contact.css'
 
 // Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
   label: 'Contact',
   order: 60,
-  title: 'Urbana FBLA — Contact',
+  title: 'Urbana FBLA, Contact',
 }
+
+const DETAILS = [
+  {
+    icon: 'mail',
+    label: 'Chapter email',
+    value: 'uhsfbla2@gmail.com',
+    href: 'mailto:uhsfbla2@gmail.com',
+  },
+  {
+    icon: 'pin',
+    label: 'Where we meet',
+    value: 'Urbana High School, 3471 Campus Drive, Ijamsville, MD',
+  },
+  {
+    icon: 'school',
+    label: 'Faculty advisor',
+    value: 'Travis Zimmerman',
+    href: 'mailto:Travis.Zimmerman@fcps.org',
+    note: 'Travis.Zimmerman@fcps.org',
+  },
+  {
+    icon: 'camera',
+    label: 'Instagram',
+    value: '@urbanafbla',
+    href: 'https://www.instagram.com/urbanafbla',
+  },
+]
 
 export default function Contact() {
   const navigate = useNavigate()
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // Original static site posted to Netlify and redirected to /thank-you.html.
+    // The original static site posted to Netlify and redirected to /thank-you.
     navigate('/thank-you')
   }
 
   return (
     <>
-      <div className="page-hero">
-        <p className="page-hero-label">Get in Touch</p>
-        <h1>Contact <span>Us</span></h1>
-        <p>Questions? We'd love to hear from you.</p>
-      </div>
+      <Masthead
+        eyebrow="Get in touch"
+        title={<>Talk to the <em>chapter</em></>}
+        lede="Have a question about joining, competing, or an event? Send it here and an officer will get back to you."
+        meta={[
+          { label: 'Reply time', value: 'Within a school week' },
+          { label: 'Meetings', value: 'Open to all students' },
+        ]}
+      />
 
       <section className="contact-section">
         <div className="contact-layout">
+          <div className="contact-details" data-reveal-group>
+            <p className="eyebrow" data-reveal="fade">Direct lines</p>
 
-          <div className="fi">
-            <p className="section-label">Reach Out</p>
-            <h2 className="section-title">Contact Info</h2>
-            <div className="divider"></div>
-
-            <div className="cinfo-item">
-              <div className="cinfo-icon">📧</div>
-              <div>
-                <div className="cinfo-label">Email</div>
-                <div className="cinfo-value"><a href="mailto:uhsfbla2@gmail.com">uhsfbla2@gmail.com</a></div>
-              </div>
-            </div>
-            <div className="cinfo-item">
-              <div className="cinfo-icon">📍</div>
-              <div>
-                <div className="cinfo-label">Location</div>
-                <div className="cinfo-value">Urbana High School<br />3471 Campus Dr, Ijamsville, MD</div>
-              </div>
-            </div>
-            <div className="cinfo-item">
-              <div className="cinfo-icon">👨‍🏫</div>
-              <div>
-                <div className="cinfo-label">Faculty Advisor</div>
-                <div className="cinfo-value">Travis Zimmermann<br /><a href="mailto:Travis.Zimmerman@fcps.org">Travis.Zimmerman@fcps.org</a></div>
-              </div>
-            </div>
-            <div className="cinfo-item">
-              <div className="cinfo-icon">📸</div>
-              <div>
-                <div className="cinfo-label">Social Media</div>
-                <div className="cinfo-value"><a href="https://www.instagram.com/urbanafbla">@urbanafbla</a></div>
-              </div>
-            </div>
+            <ul className="detail-list">
+              {DETAILS.map((item) => (
+                <li className="detail-row edge" key={item.label} data-reveal>
+                  <span className="detail-icon"><Icon name={item.icon} size={18} /></span>
+                  <div>
+                    <p className="detail-label">{item.label}</p>
+                    {item.href ? (
+                      <a className="detail-value" href={item.href} target={item.href.startsWith('http') ? '_blank' : undefined} rel="noreferrer">
+                        {item.value}
+                      </a>
+                    ) : (
+                      <p className="detail-value">{item.value}</p>
+                    )}
+                    {item.note && <p className="detail-note">{item.note}</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          <div className="form-card fi">
-            <h3>Send a Message</h3>
-            <form name="contact" method="POST" data-netlify="true" action="/thank-you" onSubmit={handleSubmit}>
+          <div className="contact-form-panel" data-reveal="right">
+            <header className="form-head">
+              <p className="eyebrow">Send a message</p>
+              <h2 className="section-title">Write to us</h2>
+            </header>
+
+            <form
+              name="contact"
+              method="POST"
+              data-netlify="true"
+              action="/thank-you"
+              onSubmit={handleSubmit}
+              className="contact-form"
+            >
               <input type="hidden" name="form-name" value="contact" />
+
               <div className="form-row">
-                <div className="form-group"><label>First Name</label><input type="text" name="first-name" placeholder="Jane" /></div>
-                <div className="form-group"><label>Last Name</label><input type="text" name="last-name" placeholder="Smith" /></div>
+                <div className="field">
+                  <label htmlFor="first-name">First name</label>
+                  <input id="first-name" type="text" name="first-name" placeholder="Jane" />
+                </div>
+                <div className="field">
+                  <label htmlFor="last-name">Last name</label>
+                  <input id="last-name" type="text" name="last-name" placeholder="Smith" />
+                </div>
               </div>
-              <div className="form-group"><label>Email Address</label><input type="email" name="email" placeholder="you@email.com" /></div>
-              <div className="form-group">
-                <label>Subject</label>
-                <select name="subject" defaultValue="I want to join FBLA">
-                  <option>I want to join FBLA</option>
-                  <option>Question about an event</option>
+
+              <div className="field">
+                <label htmlFor="email">Email</label>
+                <input id="email" type="email" name="email" placeholder="you@email.com" />
+              </div>
+
+              <div className="field">
+                <label htmlFor="subject">Subject</label>
+                <select id="subject" name="subject" defaultValue="Joining FBLA">
+                  <option>Joining FBLA</option>
+                  <option>A question about an event</option>
                   <option>Competition information</option>
-                  <option>General question</option>
-                  <option>Other</option>
+                  <option>Something else</option>
                 </select>
               </div>
-              <div className="form-group"><label>Message</label><textarea name="message" placeholder="Write your message here..."></textarea></div>
-              <button type="submit" className="btn btn-navy btn-block">Send Message →</button>
+
+              <div className="field">
+                <label htmlFor="message">Message</label>
+                <textarea id="message" name="message" placeholder="What can we help with?" />
+              </div>
+
+              <button type="submit" className="btn btn-primary btn-block">
+                Send message
+                <Icon name="arrow" className="arrow" />
+              </button>
             </form>
           </div>
-
         </div>
       </section>
     </>

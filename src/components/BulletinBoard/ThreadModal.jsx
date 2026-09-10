@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import useAuth from '../../hooks/useAuth.js'
 import { usePostThread } from '../../hooks/usePosts.js'
+import Icon from '../Icon.jsx'
+import Portal from '../Portal.jsx'
 import { timeAgo, AUTHOR_FALLBACK } from './bulletinUtils.js'
 import './Modal.css'
 import './ThreadModal.css'
 
 /**
- * Full post detail + reply thread, opened from a pinned note.
- * Replies and the reply form auto-use the signed-in user — no name field.
+ * The full post and its reply thread, opened from a note on the board.
+ * Replies use the signed-in account, so there is no name field.
  */
 export default function ThreadModal({ post, onClose, onReplySaved }) {
   const { user, isOfficerOrAdviser, openAuthModal } = useAuth()
@@ -38,13 +40,14 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
       if (saved) onReplySaved?.(post.id)
       setMessage('')
     } catch {
-      /* surface nothing — the live thread still shows any replies that made it */
+      /* Nothing to surface: the live thread still shows replies that saved. */
     } finally {
       setBusy(false)
     }
   }
 
   return (
+    <Portal>
     <div className="bulletin-overlay" onMouseDown={onClose}>
       <div
         className="bulletin-modal thread-card"
@@ -54,7 +57,7 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
         onMouseDown={(e) => e.stopPropagation()}
       >
         <button className="bulletin-modal-close" onClick={onClose} aria-label="Close">
-          ✕
+          <Icon name="close" size={16} />
         </button>
 
         {post.type === 'photo' ? (
@@ -62,7 +65,7 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
             <img className="thread-photo" src={post.imageUrl} alt={post.caption || 'Photo post'} />
           ) : (
             <div className="thread-photo-empty">
-              <span>🖼️</span>
+              <Icon name="image" size={22} />
               <span>No image attached</span>
             </div>
           )
@@ -74,7 +77,7 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
           <span className="thread-author">{post.author || AUTHOR_FALLBACK}</span>
           <span className="thread-time">{timeAgo(post.createdAt)}</span>
           {isOwnerOrModerator && (
-            <span className={`thread-status ${post.status === 'visible' ? 'thread-status--public' : post.autoFlagged ? 'thread-status--flagged' : 'thread-status--pending'}`}>
+            <span className={`thread-status ${post.status === 'visible' ? 'is-public' : post.autoFlagged ? 'is-flagged' : 'is-pending'}`}>
               {post.status === 'visible' ? 'Public' : post.autoFlagged ? 'Under review' : 'Pending review'}
             </span>
           )}
@@ -82,10 +85,10 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
         {post.caption && <p className="thread-caption">{post.caption}</p>}
 
         <div className="thread-replies">
-          {loading && <p className="thread-state">Loading replies…</p>}
+          {loading && <p className="thread-state">Loading replies</p>}
           {!loading && error && <p className="thread-state thread-error">{error}</p>}
           {!loading && !error && replies.length === 0 && (
-            <p className="thread-state">No replies yet — start the conversation.</p>
+            <p className="thread-state">No replies yet. Start the conversation.</p>
           )}
           {replies.map((r) => (
             <div className="thread-reply" key={r.id}>
@@ -99,7 +102,7 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
                     aria-label="Remove reply"
                     onClick={() => removeReply(r.id)}
                   >
-                    🗑️
+                    <Icon name="trash" size={13} />
                   </button>
                 )}
               </div>
@@ -113,22 +116,23 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Write a reply…"
+              placeholder="Write a reply"
               rows={2}
             />
-            <button type="submit" className="btn btn-navy" disabled={busy || !message.trim()}>
-              {busy ? 'Posting…' : 'Reply'}
+            <button type="submit" className="btn btn-primary" disabled={busy || !message.trim()}>
+              {busy ? 'Posting' : 'Reply'}
             </button>
           </form>
         ) : (
           <div className="thread-signin">
-            <p>Sign in to join the discussion.</p>
-            <button type="button" className="btn btn-gold" onClick={openAuthModal}>
-              Sign In
+            <p>Sign in with your school account to reply.</p>
+            <button type="button" className="btn btn-accent" onClick={openAuthModal}>
+              Sign in
             </button>
           </div>
         )}
       </div>
     </div>
+    </Portal>
   )
 }

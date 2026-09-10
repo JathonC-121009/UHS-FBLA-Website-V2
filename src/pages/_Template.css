@@ -1,30 +1,27 @@
 /* ============================================================================
-   PAGE TEMPLATE STYLES — copy alongside _Template.jsx.
+   PAGE TEMPLATE STYLES. Copy alongside _Template.jsx.
 
-   Replace every `.route-template` below with your page's slug, e.g. a page
-   file named MyPage.jsx uses `.route-my-page`.
+   Replace every `.route-template` below with your page's slug: a page file
+   named MyPage.jsx uses `.route-my-page`.
 
    KEEP EVERY RULE SCOPED. `.route-<slug> .thing { }` guarantees your styles
-   only ever apply to your page, so you can never break someone else's.
+   only ever reach your page, so you can never break someone else's.
    ========================================================================= */
 
-/* Per-page overrides of the global variables from src/index.css. Anything you
-   set here applies to THIS page only — including the shared navbar, footer,
-   hero and buttons. Uncomment what you need. */
+/* Per-page overrides of the global tokens in src/index.css. Anything set here
+   applies to THIS page only, the shared navbar, footer and masthead included.
+   Uncomment what you need. */
 .route-template {
-  /* --body-bg: var(--white); */
-  /* --nav-bg: #001a4d; */
-  /* --footer-bg: #001a4d; */
-  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--cobalt)); */
-  /* --hero-title-color: var(--white); */
-  /* --hero-accent-color: var(--gold); */
-  /* --title-color: var(--navy); */
-  /* --divider-color: var(--gold); */
+  /* --surface: var(--paper-000); */
+  /* --accent: #b8801a; */
 }
 
-/* You can also target shared elements directly, still page-scoped: */
-/* .route-template nav { box-shadow: none; } */
-/* .route-template .page-hero { padding: 6rem 2rem; } */
+/* Shared elements can be targeted directly, still page-scoped: */
+/* .route-template .nav { border-bottom-color: transparent; } */
+/* .route-template .masthead { padding-block: 8rem; } */
 
-.route-template .tpl-section { background: var(--white); padding: 4rem 2rem; }
-.route-template .tpl-wrap { max-width: 1080px; margin: 0 auto; }
+.route-template .tpl-section {
+  background: var(--surface);
+  padding: clamp(3rem, 7vw, 5rem) var(--gutter);
+}
+.route-template .tpl-wrap { max-width: var(--shell); margin: 0 auto; }

@@ -1,80 +1,225 @@
 /* ============================================================================
-   RESOURCES PAGE STYLES — scoped under .route-resources
+   RESOURCES
+   Scoped under `.route-resources`. A sticky tab strip with a sliding
+   indicator, a filter row, and a dense grid of event folders.
    ========================================================================= */
 
-.route-resources { }
+.route-resources .resources-section {
+  background: var(--surface);
+  padding: 0 var(--gutter) clamp(4rem, 9vw, 6.5rem);
+}
+.route-resources .resources-wrap { max-width: var(--shell); margin: 0 auto; }
 
-.route-resources .resources-section { background: var(--off-white); padding: 3.5rem 2rem; }
-.route-resources .resources-wrap { max-width: 1080px; margin: 0 auto; }
+/* --- Tabs ---------------------------------------------------------------- */
 
-.route-resources .resources-top { display: grid; grid-template-columns: 1fr 320px 320px; gap: 1.5rem; align-items: start; }
-@media (max-width: 980px) {
-  .route-resources .resources-top { grid-template-columns: 1fr; }
+.route-resources .tabs {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 20;
+  display: flex;
+  gap: .25rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+  padding-top: .5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.route-resources .tab {
+  position: relative;
+  padding: 1rem .9rem;
+  font-size: .86rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: color var(--t-mid) var(--e-out);
+}
+.route-resources .tab:hover { color: var(--ink-900); }
+.route-resources .tab.is-active { color: var(--ink-900); font-weight: 600; }
+.route-resources .tab-indicator { bottom: -1px; }
+
+.route-resources .panel { animation: panel-in .5s var(--e-out) both; }
+@keyframes panel-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: none; }
 }
 
-/* Events column */
-.route-resources .resources-events .events-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2rem; }
-@media (max-width: 820px) {
-  .route-resources .resources-events .events-grid { grid-template-columns: 1fr; }
-}
-.route-resources .resource-card { background: var(--white); border-radius: 10px; border: 1px solid var(--border); padding: 1rem; display: block; color: inherit; text-decoration: none; transition: transform .22s, box-shadow .22s; }
-.route-resources .resource-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(10, 46, 127, .06); }
-.route-resources .rc-title { font-size: 1.68rem; font-weight: 700; color: var(--navy); margin-bottom: 1.25rem; }
-.route-resources .rc-desc { font-size: .86rem; color: var(--muted); line-height: 1.45;}
-.route-resources .rc-divider { border: none; border-top: 2px solid var(--gold); margin: 1rem 0; margin-right: 21rem;}
+/* --- Panel head ---------------------------------------------------------- */
 
-/* Connect column */
-.route-resources .resources-connect { display: flex; flex-direction: column; gap: 1rem; }
-.route-resources .resources-connect .btn { margin-top: .5rem; }
+.route-resources .panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+.route-resources .panel-head .section-intro { margin-top: .75rem; }
 
-/* Guide column */
-.route-resources .resources-guide .site-list { list-style: none; margin-top: .5rem; display: flex; flex-direction: column; gap: .6rem; padding-left: 0; }
-.route-resources .resources-guide .site-list a { color: var(--navy); font-weight: 600; text-decoration: none; }
-.route-resources .resources-guide .site-list a:hover { color: var(--blue); }
-.route-resources .resources-guide .site-list li { font-size: .92rem; color: var(--muted); }
+.route-resources .search {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-width: 260px;
+  padding: .7rem .9rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  color: var(--text-faint);
+  transition: border-color var(--t-mid) var(--e-out);
+}
+.route-resources .search:focus-within { border-color: var(--navy-900); color: var(--accent); }
+.route-resources .search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: .92rem;
+  color: var(--text);
+}
+.route-resources .search input::placeholder { color: var(--text-faint); }
 
-/* Page hero small tweaks if needed */
-.route-resources .page-hero { text-align: center; padding: 2.4rem 2rem; }
-.route-resources .page-hero p { color: var(--hero-text-color); margin-top: .35rem; }
-.route-resources .page-hero h1 {
-  font-size: clamp(2.8rem, 6.5vw, 4.4rem);
-  line-height: 1.03;
-  color: var(--hero-title-color);
+/* --- Filter chips -------------------------------------------------------- */
+
+.route-resources .type-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.route-resources .chip {
+  padding: .45rem .85rem;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition:
+    color var(--t-mid) var(--e-out),
+    border-color var(--t-mid) var(--e-out),
+    background var(--t-mid) var(--e-out),
+    transform var(--t-fast) var(--e-spring);
+}
+.route-resources .chip:hover { border-color: var(--navy-900); color: var(--ink-900); }
+.route-resources .chip.is-active {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: var(--paper-000);
+}
+.route-resources .type-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
 }
 
-/* slightly larger section titles to match hero scale */
-.route-resources .section-title { font-size: clamp(1.8rem, 3.8vw, 2.6rem); }
+/* --- Event grid ---------------------------------------------------------- */
 
-/* Tabs */
-.route-resources .tabs { margin-top: 1.5rem; }
-.route-resources .tabs-nav {
-  position: sticky; top: 0; z-index: 20;
-  display: flex; gap: .5rem; margin-bottom: 1rem; flex-wrap: wrap;
-  background: transparent; border: none; border-radius: 0; padding: .35rem 0 .9rem; box-shadow: none;
-}
-.route-resources .tab-btn {
-  background: transparent; border: none; padding: .55rem .9rem; border-radius: 8px; cursor: pointer; font-weight: 700; color: var(--navy); position: relative; transition: color .18s, transform .18s; font-size: 1.05rem;
-}
-.route-resources .tab-btn:hover { color: var(--gold); }
-.route-resources .tab-btn.active { color: var(--gold); }
-.route-resources .tab-btn.active::after {
-  content: '';
-  position: absolute; left: 12px; right: 12px; bottom: -8px; height: 4px; background: var(--gold); border-radius: 4px;
-}
-.route-resources .tabs-content { background: transparent; }
-.route-resources .resources-search-wrap { margin: 1rem 0 1.5rem; }
-.route-resources .resources-search {
-  width: 100%; max-width: 420px; padding: .8rem 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--white); color: var(--navy); font-size: 1rem;
-}
-.route-resources .resources-search:focus { outline: 2px solid rgba(244, 171, 25, .4); border-color: var(--gold); }
-.route-resources .no-results { margin-top: 1rem; color: var(--muted); font-size: 1rem; }
-
-.route-resources .resources-events .events-grid {
+.route-resources .event-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
 }
-@media (max-width: 820px) {
-  .route-resources .resources-events .events-grid { grid-template-columns: 1fr; }
+.route-resources .event-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  min-height: 112px;
+  padding: 1.1rem 1.25rem 1rem;
+  background: var(--paper-000);
+  text-decoration: none;
+  transition: background var(--t-mid) var(--e-out);
+}
+.route-resources .event-card:hover { background: var(--surface); }
+.route-resources .event-type {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.route-resources .event-name {
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.28;
+  letter-spacing: -.01em;
+  color: var(--navy-900);
+}
+.route-resources .event-open {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--t-mid) var(--e-out), transform var(--t-mid) var(--e-out);
+}
+.route-resources .event-card:hover .event-open,
+.route-resources .event-card:focus-visible .event-open { opacity: 1; transform: none; }
+
+.route-resources .empty {
+  padding: 3rem 0;
+  text-align: center;
+  color: var(--text-muted);
 }
 
+/* --- Connect ------------------------------------------------------------- */
+
+.route-resources .connect-card {
+  max-width: 620px;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+}
+.route-resources .connect-card .section-title { margin-top: .5rem; }
+.route-resources .connect-card .btn { margin-top: 1.75rem; }
+
+/* --- Site guide ---------------------------------------------------------- */
+
+.route-resources .sitemap {
+  list-style: none;
+  margin-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+.route-resources .sitemap a {
+  display: grid;
+  grid-template-columns: 3rem 10rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.15rem .5rem;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--ink-900);
+  transition: padding-left var(--t-mid) var(--e-out), background var(--t-mid) var(--e-out);
+}
+.route-resources .sitemap a:hover { padding-left: 1.1rem; background: var(--paper-000); }
+.route-resources .sitemap-index {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+.route-resources .sitemap-name { font-weight: 600; }
+.route-resources .sitemap-note { color: var(--text-muted); font-size: .9rem; }
+.route-resources .sitemap .arrow {
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity var(--t-mid) var(--e-out), transform var(--t-mid) var(--e-out);
+}
+.route-resources .sitemap a:hover .arrow { opacity: 1; transform: translateX(4px); }
+
+@media (max-width: 820px) {
+  .route-resources .tabs { overflow-x: auto; }
+  .route-resources .search { width: 100%; }
+  .route-resources .sitemap a { grid-template-columns: 2.5rem minmax(0, 1fr); }
+  .route-resources .sitemap-note { grid-column: 2; }
+  .route-resources .sitemap .arrow { display: none; }
+}

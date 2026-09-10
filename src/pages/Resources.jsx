@@ -1,25 +1,58 @@
+import { useMemo, useRef, useState } from 'react'
+import Masthead from '../components/Masthead.jsx'
+import Icon from '../components/Icon.jsx'
+import { useIndicator } from '../hooks/useMotion.js'
 import './Resources.css'
-import { useState } from 'react'
 
+// Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
-  label: 'Resources',   // navbar text — delete this line to hide it from the nav
-  order: 30,           // navbar position; lower numbers come first
-  title: 'Urbana FBLA — Resources',  // browser tab title
-  // path: 'custom-url',  // optional: override the URL (defaults to the slug)
-  // index: true,         // optional: make this the "/" home page
+  label: 'Resources',
+  order: 30,
+  title: 'Urbana FBLA, Resources',
 }
+
+const TABS = [
+  { key: 'events', label: 'Competitive events' },
+  { key: 'connect', label: 'FBLA Connect' },
+  { key: 'guide', label: 'Site guide' },
+]
+
+const TYPES = {
+  o: 'Objective test',
+  p: 'Presentation',
+  r: 'Role play',
+  c: 'Chapter award',
+  d: 'Production',
+}
+
+const TYPE_FILTERS = [
+  { key: 'all', label: 'All' },
+  { key: 'o', label: 'Objective test' },
+  { key: 'p', label: 'Presentation' },
+  { key: 'r', label: 'Role play' },
+  { key: 'd', label: 'Production' },
+  { key: 'c', label: 'Chapter award' },
+]
+
+const SITE_MAP = [
+  { path: '/', name: 'Home', note: 'Chapter record, mission, and where to start.' },
+  { path: '/events', name: 'Events', note: 'The live chapter calendar, month by month.' },
+  { path: '/resources', name: 'Resources', note: 'Event folders, FBLA Connect, this guide.' },
+  { path: '/points', name: 'Points', note: 'Member point standings, total and monthly.' },
+  { path: '/officers', name: 'Officers', note: 'Chapter officers, state officers, advisor.' },
+  { path: '/gallery', name: 'Gallery', note: 'Photos from conferences and chapter events.' },
+  { path: '/bulletin', name: 'Bulletin board', note: 'Member posts, questions, and replies.' },
+  { path: '/contact', name: 'Contact', note: 'Reach the officer team or the advisor.' },
+]
 
 export default function Resources() {
   const [active, setActive] = useState('events')
   const [searchTerm, setSearchTerm] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const tabsRef = useRef(null)
 
-  const typeMessages = {
-    o: 'Objective Testing Event',
-    p: 'Presentation Event',
-    r: 'Role Play Event',
-    c: 'Chapter Event',
-    d: 'Production Event'
-  }
+  // The underline slides between tabs rather than blinking on and off.
+  useIndicator(tabsRef, '.tab.is-active', [active])
 
   const events = [
     { name: 'Accounting', url: 'https://drive.google.com/drive/folders/1T877gdscLJuhtAGUaAZX-CBTKFRiBOmr', type: 'o' },
@@ -93,89 +126,154 @@ export default function Resources() {
     { name: 'Website Design', url: 'https://drive.google.com/drive/folders/1QXw0w2LCXqeXInHwguXPwgPa_YAW26fu', type: 'p' }
   ]
 
-  const filteredEvents = events.filter((evt) =>
-    evt.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
-  )
+  const filtered = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    return events.filter(
+      (evt) =>
+        (typeFilter === 'all' || evt.type === typeFilter) &&
+        (!term || evt.name.toLowerCase().includes(term)),
+    )
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchTerm, typeFilter])
 
   return (
-    <div>
-      <section className="page-hero">
-        <p className="page-hero-label">Urbana FBLA</p>
-        <h1>Resources</h1>
-        <p>Competitive Event Resources, FBLA Connect, and a Guide to the Website!</p>
-      </section>
+    <>
+      <Masthead
+        eyebrow="Member resources"
+        title={<>Everything you need to <em>compete</em></>}
+        lede="Study folders for every event we compete in, plus links to the national FBLA site and the rest of this one."
+        meta={[
+          { label: 'Events listed', value: String(events.length) },
+          { label: 'Hosted on', value: 'Google Drive' },
+        ]}
+      />
 
       <section className="resources-section">
         <div className="resources-wrap">
-          <div className="tabs">
-            <nav className="tabs-nav" role="tablist" aria-label="Resources tabs">
-              <button type="button" className={`tab-btn ${active === 'events' ? 'active' : ''}`} onClick={() => setActive('events')} role="tab" aria-selected={active === 'events' ? 'true' : 'false'}>Competitive Events</button>
-              <button type="button" className={`tab-btn ${active === 'connect' ? 'active' : ''}`} onClick={() => setActive('connect')} role="tab" aria-selected={active === 'connect' ? 'true' : 'false'}>FBLA Connect</button>
-              <button type="button" className={`tab-btn ${active === 'guide' ? 'active' : ''}`} onClick={() => setActive('guide')} role="tab" aria-selected={active === 'guide' ? 'true' : 'false'}>Website Guide</button>
-            </nav>
+          <div className="tabs" role="tablist" aria-label="Resource sections" ref={tabsRef}>
+            {TABS.map((tab) => (
+              <button
+                key={tab.key}
+                type="button"
+                role="tab"
+                aria-selected={active === tab.key}
+                className={`tab press${active === tab.key ? ' is-active' : ''}`}
+                onClick={() => setActive(tab.key)}
+              >
+                {tab.label}
+              </button>
+            ))}
+            <span className="indicator tab-indicator" aria-hidden="true" />
+          </div>
 
-            <div className="tabs-content">
-              {active === 'events' && (
-                <div className="resources-events">
-                  <h2 className="section-title">Competitive Events</h2>
-                  <p className="section-intro">Click an event to open the Urbana FBLA resource folder on Google Drive.</p>
-
-                  <div className="resources-search-wrap">
-                    <input
-                      type="text"
-                      className="resources-search"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search events..."
-                      aria-label="Search competitive events"
-                    />
-                  </div>
-
-                  <div className="events-grid">
-                    {filteredEvents.map((evt) => (
-                      <a key={evt.name} className="resource-card" href={evt.url || 'https://drive.google.com'} target="_blank" rel="noreferrer">
-                        <div className="rc-body">
-                          <h3 className="rc-title">{evt.name}</h3>
-                          <hr className="rc-divider" />
-                          <p className="rc-desc">{typeMessages[evt.type]}</p>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-
-                  {filteredEvents.length === 0 && (
-                    <p className="no-results">No events match your search.</p>
-                  )}
+          {active === 'events' && (
+            <div className="panel" key="events">
+              <div className="panel-head">
+                <div>
+                  <h2 className="section-title">Competitive events</h2>
+                  <p className="section-intro">
+                    Each card opens the chapter folder for that event: past topics,
+                    rubrics, and notes from members who placed.
+                  </p>
                 </div>
-              )}
 
-              {active === 'connect' && (
-                <div className="resources-connect">
-                  <h2 className="section-title">FBLA Connect</h2>
-                  <p className="section-intro">Official FBLA community and announcements.</p>
-                  <a className="btn btn-gold" href="https://connect.fbla.org/" target="_blank" rel="noreferrer">FBLA Connect</a>
-                </div>
-              )}
+                <label className="search">
+                  <Icon name="search" size={16} />
+                  <input
+                    type="search"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search events"
+                    aria-label="Search competitive events"
+                  />
+                </label>
+              </div>
 
-              {active === 'guide' && (
-                <div className="resources-guide">
-                  <h2 className="section-title">Website Guide</h2>
-                  <p className="section-intro">Quick directory of the site and what each page contains.</p>
-                  <ul className="site-list">
-                    <li><a href="/">Home</a> — Overview and upcoming highlights.</li>
-                    <li><a href="/events">Events</a> — Calendar and meeting/competition listings.</li>
-                    <li><a href="/gallery">Gallery</a> — Photos from FBLA activities.</li>
-                    <li><a href="/officers">Officers</a> — Current officer bios and contact info.</li>
-                    <li><a href="/contact">Contact</a> — How to reach advisors and leadership.</li>
-                    <li><a href="/thank-you">Thank You</a> — Acknowledgements and sponsors.</li>
-                    <li><a href="/resources">Resources</a> — This page (event guides, FBLA Connect, site guide).</li>
-                  </ul>
-                </div>
+              <div className="type-filters" role="group" aria-label="Filter by event format">
+                {TYPE_FILTERS.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    className={`chip press${typeFilter === option.key ? ' is-active' : ''}`}
+                    aria-pressed={typeFilter === option.key}
+                    onClick={() => setTypeFilter(option.key)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+                <span className="type-count">
+                  {filtered.length} of {events.length}
+                </span>
+              </div>
+
+              <div className="event-grid" data-reveal-group>
+                {filtered.map((evt) => (
+                  <a
+                    key={evt.name}
+                    className="event-card edge"
+                    href={evt.url || 'https://drive.google.com'}
+                    target="_blank"
+                    rel="noreferrer"
+                    data-reveal="scale"
+                  >
+                    <span className="event-type">{TYPES[evt.type]}</span>
+                    <h3 className="event-name">{evt.name}</h3>
+                    <span className="event-open">
+                      Open folder
+                      <Icon name="external" size={13} />
+                    </span>
+                  </a>
+                ))}
+              </div>
+
+              {filtered.length === 0 && (
+                <p className="empty">Nothing matches that search. Try a shorter word.</p>
               )}
             </div>
-          </div>
+          )}
+
+          {active === 'connect' && (
+            <div className="panel" key="connect">
+              <div className="connect-card" data-reveal>
+                <p className="eyebrow">National platform</p>
+                <h2 className="section-title">FBLA Connect</h2>
+                <p className="section-intro">
+                  Connect is where national FBLA posts competitive event guidelines,
+                  deadlines, and conference announcements. Sign in with the account tied
+                  to your membership.
+                </p>
+                <a className="btn btn-primary" href="https://connect.fbla.org/" target="_blank" rel="noreferrer">
+                  Open FBLA Connect
+                  <Icon name="external" size={14} />
+                </a>
+              </div>
+            </div>
+          )}
+
+          {active === 'guide' && (
+            <div className="panel" key="guide">
+              <h2 className="section-title">What is on this site</h2>
+              <p className="section-intro">
+                Eight pages, each doing one job. Members get a little more on two of them
+                once signed in.
+              </p>
+
+              <ol className="sitemap" data-reveal-group>
+                {SITE_MAP.map((entry, i) => (
+                  <li key={entry.path} data-reveal>
+                    <a href={entry.path}>
+                      <span className="sitemap-index">{String(i + 1).padStart(2, '0')}</span>
+                      <span className="sitemap-name">{entry.name}</span>
+                      <span className="sitemap-note">{entry.note}</span>
+                      <Icon name="arrow" size={14} className="arrow" />
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
         </div>
       </section>
-    </div>
+    </>
   )
 }

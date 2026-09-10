@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import Masthead from '../components/Masthead.jsx'
+import Icon from '../components/Icon.jsx'
+import Portal from '../components/Portal.jsx'
+import { sharedExpand, useIndicator } from '../hooks/useMotion.js'
 import './Gallery.css'
 
 // Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
   label: 'Gallery',
   order: 50,
-  title: 'Urbana FBLA — Gallery',
+  title: 'Urbana FBLA, Gallery',
 }
 
 /* ---------------------------------------------------------------------------
@@ -14,7 +18,7 @@ export const meta = {
    Nothing in this file lists individual photos. The page asks Cloudinary for
    the contents of the `gallery` folder at load time, so adding, removing or
    re-foldering images in the Cloudinary Media Library updates the site on the
-   next refresh — no code change, no redeploy.
+   next refresh. No code change, no redeploy.
 
    Each image's caption is the subfolder it sits in:
 
@@ -24,9 +28,9 @@ export const meta = {
    Those subfolders also become the filter chips above the grid, in the order
    of their most recent upload, so a brand-new album lands first.
 
-   ── ONE-TIME CLOUDINARY SETUP (needed once, then never again) ──────────────
+   ONE-TIME CLOUDINARY SETUP (needed once, then never again)
 
-   A browser can't call Cloudinary's Admin API — that needs an API secret,
+   A browser cannot call Cloudinary's Admin API, which needs an API secret
    which can't live in frontend code. The public, key-free equivalent is the
    client-side resource list, and it works by tag:
 
@@ -37,7 +41,7 @@ export const meta = {
 
      1. Settings -> Security -> "Restricted media types":
         UNCHECK "Resource list". (This only exposes public_id/size/folder for
-        assets carrying the tag below — the images are already public.)
+        assets carrying the tag below. The images are already public.)
 
      2. Tag everything in the gallery folder with `gallery` (the GALLERY_TAG
         below). In the Media Library: open the folder, Select All, "Add tag".
@@ -57,7 +61,7 @@ const GALLERY_TAG = 'gallery'
 const LIST_URL = `https://res.cloudinary.com/${CLOUD_NAME}/image/list/${GALLERY_TAG}.json`
 
 /* ---------------------------------------------------------------------------
-   FALLBACK — the last known contents of the gallery folder, baked in so the
+   FALLBACK: the last known contents of the gallery folder, baked in so the
    page still renders if Cloudinary is unreachable or resource listing is off.
    This list is a safety net, NOT the source of truth: it does not need to be
    kept up to date, and captions here come from the filename parser rather than
@@ -117,8 +121,8 @@ function folderOf(resource) {
 }
 
 // "Only use the things inside the gallery folder." A resource whose folder we
-// genuinely can't read is kept — it carried the gallery tag, which is the only
-// signal available in that case.
+// genuinely cannot read is kept, since it carried the gallery tag, which is the
+// only signal available in that case.
 function inGalleryFolder(folder) {
   if (!folder) return true
   const lower = folder.toLowerCase()
@@ -143,7 +147,7 @@ function contextCaption(resource) {
   return custom.album || custom.caption || custom.alt || ''
 }
 
-// Any tag other than the marker one — tagging a photo "Fall Kickoff" captions
+// Any tag other than the marker one. Tagging a photo "Fall Kickoff" captions
 // it that way even if the folder never reaches us.
 function tagCaption(resource) {
   const tags = Array.isArray(resource.tags) ? resource.tags : []
@@ -159,7 +163,7 @@ function publicIdOf(path) {
   return file.replace(CLD_SUFFIX, '')
 }
 
-// Trailing frame number identifies the shot, not the shoot: "...-DAY1-24" -> 24
+// A trailing frame number identifies the shot, not the shoot: "...-DAY1-24" -> 24
 function frameOf(id) {
   const match = /-(\d+)$/.exec(id)
   return match ? match[1] : null
@@ -173,23 +177,23 @@ function titleToken(token) {
 }
 
 // Last resort: read the shoot out of the filename. "SLC-2026-DAY1-24" becomes
-// "SLC 2026 — Day 1". Only reached for photos that are neither in a subfolder
-// nor tagged nor captioned.
+// "SLC 2026, Day 1". Only reached for photos that are neither in a subfolder,
+// nor tagged, nor captioned.
 function captionFromFilename(id) {
   const parts = id.replace(/-\d+$/, '').split(/[-_]/)
   const dayIndex = parts.findIndex((part) => /^DAY\d+$/i.test(part))
   const head = (dayIndex === -1 ? parts : parts.slice(0, dayIndex)).map(titleToken).join(' ')
-  const day = dayIndex === -1 ? '' : ` — Day ${parts[dayIndex].replace(/\D/g, '')}`
+  const day = dayIndex === -1 ? '' : `, Day ${parts[dayIndex].replace(/\D/g, '')}`
   return `${head}${day}`.trim() || 'Urbana FBLA'
 }
 
-/* --- Resource -> photo ---------------------------------------------------- */
+/* --- Resource to photo ---------------------------------------------------- */
 
 const cloudinary = (path, transform) =>
   `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${transform}/${path}`
 
 // `album` is what the caption, the filter chips and the lightbox all read from.
-// `event` is the small gold line above the caption: the folders *between*
+// `event` is the small accent line above the caption: the folders between
 // gallery/ and the photo's own folder, so "gallery/2026/SLC" reads
 // "2026 / SLC". A one-level-deep folder simply has no event line.
 function albumFor(resource, id) {
@@ -229,7 +233,7 @@ function buildPhoto({ src, w, h, album, sortKey }) {
   }
 }
 
-// A Cloudinary list entry -> a photo, or null if it isn't a gallery image.
+// A Cloudinary list entry becomes a photo, or null if it is not a gallery image.
 function photoFromResource(resource) {
   if (!resource || !resource.public_id || !resource.format || !resource.version) return null
   if (!inGalleryFolder(folderOf(resource))) return null
@@ -286,6 +290,10 @@ export default function Gallery() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [index, setIndex] = useState(-1)
+  // Rect of the tile that opened the lightbox, so the full frame can grow
+  // out of the thumbnail instead of appearing on top of it.
+  const originRect = useRef(null)
+  const filtersRef = useRef(null)
 
   useEffect(() => {
     let cancelled = false
@@ -306,7 +314,7 @@ export default function Gallery() {
         // here so the fix is obvious to whoever opens the console next.
         console.warn(
           `[gallery] Live Cloudinary list unavailable (${err.message}); showing the ` +
-            'built-in fallback. Enable Settings → Security → Restricted media types → ' +
+            'built-in fallback. Enable Settings, Security, Restricted media types, ' +
             `"Resource list" and tag the gallery folder "${GALLERY_TAG}".`
         )
         setPhotos(FALLBACK_GALLERY)
@@ -334,10 +342,17 @@ export default function Gallery() {
     [photos]
   )
 
+  useIndicator(filtersRef, '.gallery-filter.is-active', [filter, photos.length])
+
   const visible = useMemo(
     () => (filter === 'all' ? photos : photos.filter((photo) => photo.album.key === filter)),
     [filter, photos]
   )
+
+  const openPhoto = (i, element) => {
+    originRect.current = element?.getBoundingClientRect() ?? null
+    setIndex(i)
+  }
 
   const current = index >= 0 ? visible[index] : null
 
@@ -380,33 +395,25 @@ export default function Gallery() {
 
   return (
     <>
-      <div className="page-hero">
-        <p className="page-hero-label">Our Moments</p>
-        <h1>Photo <span>Gallery</span></h1>
-        <p>Conferences, competition and the people behind Urbana FBLA.</p>
-      </div>
+      <Masthead
+        eyebrow="Photographs"
+        title={<>The <em>year</em> so far</>}
+        lede="Photos from conferences, competition days, and everything in between."
+        meta={[
+          { label: 'Photographs', value: loading ? 'Loading' : String(photos.length) },
+        ]}
+      />
 
       <section className="gallery-section">
         <div className="gallery-wrap">
-          <div className="gallery-intro fi">
-            <p className="section-label">2026–2027 Season</p>
-            <h2 className="section-title">Moments From the Year</h2>
-            <div className="divider"></div>
-            <p className="section-intro">
-              Every album we&apos;ve shot this year, straight from the chapter photo
-              library. Hover any photo for its caption, or select one to open the
-              full-size view.
-            </p>
-          </div>
-
-          {/* Deliberately not a `.fi` element: the chips arrive after the shared
-              fade-in observer has already run, so this animates on its own. */}
-          <div className="gallery-filters" role="group" aria-label="Filter photos by album">
+          {/* Album filters. Deliberately outside the reveal system: the chips
+              arrive with the photo list, so they animate on their own. */}
+          <div className="gallery-filters" role="group" aria-label="Filter photos by album" ref={filtersRef}>
             {filters.map((option) => (
               <button
                 key={option.key}
                 type="button"
-                className={`gallery-filter${filter === option.key ? ' active' : ''}`}
+                className={`gallery-filter press${filter === option.key ? ' is-active' : ''}`}
                 aria-pressed={filter === option.key}
                 onClick={() => setFilter(option.key)}
               >
@@ -414,26 +421,27 @@ export default function Gallery() {
                 <span className="gallery-filter-count">{option.count}</span>
               </button>
             ))}
+            <span className="indicator gallery-indicator" aria-hidden="true" />
           </div>
 
           <div className="gallery-grid" aria-busy={loading}>
             {loading
               ? SKELETONS.map((i) => (
                   <div
-                    className="gallery-item skeleton"
+                    className="gallery-item is-skeleton"
                     key={`skeleton-${i}`}
                     style={{ '--stagger': `${i * 60}ms` }}
                     aria-hidden="true"
                   />
                 ))
               : visible.map((photo, i) => (
-                  // Keying on the filter replays the stagger animation when it changes.
+                  // Keying on the filter replays the stagger when it changes.
                   <button
                     type="button"
-                    className={`gallery-item${photo.portrait ? ' tall' : ''}`}
+                    className={`gallery-item${photo.portrait ? ' is-tall' : ''}`}
                     key={`${filter}-${photo.id}`}
-                    style={{ '--stagger': `${Math.min(i, 12) * 40}ms` }}
-                    onClick={() => setIndex(i)}
+                    style={{ '--stagger': `${Math.min(i, 12) * 45}ms` }}
+                    onClick={(e) => openPhoto(i, e.currentTarget)}
                     aria-label={`Open ${photo.alt}`}
                   >
                     <img src={photo.thumb} alt={photo.alt} loading="lazy" decoding="async" />
@@ -444,59 +452,65 @@ export default function Gallery() {
                       <span className="gallery-caption-label">{photo.album.label}</span>
                     </span>
                     <span className="gallery-zoom" aria-hidden="true">
-                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                        <circle cx="11" cy="11" r="7" />
-                        <path d="M20 20l-4.2-4.2M11 8.5v5M8.5 11h5" />
-                      </svg>
+                      <Icon name="zoom" size={16} />
                     </span>
                   </button>
                 ))}
           </div>
 
           {!loading && !visible.length && (
-            <p className="gallery-empty">No photos in this album yet — check back soon.</p>
+            <p className="gallery-empty">Nothing in this album yet. Check back after the next conference.</p>
           )}
         </div>
       </section>
 
-      {/* Lightbox */}
       {current && (
+        <Portal>
         <div
-          className="lightbox open"
+          className="lightbox"
           role="dialog"
           aria-modal="true"
           aria-label={current.alt}
           onClick={() => setIndex(-1)}
         >
-          <button className="lb-close" onClick={() => setIndex(-1)} aria-label="Close">✕</button>
+          <button className="lb-close press" onClick={() => setIndex(-1)} aria-label="Close">
+            <Icon name="close" size={18} />
+          </button>
 
           <button
-            className="lb-nav prev"
+            className="lb-nav press"
             aria-label="Previous photo"
             onClick={(e) => { e.stopPropagation(); step(-1) }}
           >
-            ‹
+            <Icon name="chevronLeft" size={20} />
           </button>
 
-          <figure className="lb-figure" onClick={(e) => e.stopPropagation()}>
+          <figure
+            className="lb-figure"
+            onClick={(e) => e.stopPropagation()}
+            ref={(node) => sharedExpand(node, originRect.current)}
+          >
             <img src={current.full} alt={current.alt} />
             <figcaption className="lb-caption">
+              <span className="lb-counter">
+                {String(index + 1).padStart(2, '0')} / {String(visible.length).padStart(2, '0')}
+              </span>
+              <span className="lb-caption-label">{current.album.label}</span>
               {current.album.event && (
                 <span className="lb-caption-event">{current.album.event}</span>
               )}
-              <span className="lb-caption-label">{current.album.label}</span>
-              <span className="lb-counter">{index + 1} / {visible.length}</span>
             </figcaption>
           </figure>
 
           <button
-            className="lb-nav next"
+            className="lb-nav press"
             aria-label="Next photo"
             onClick={(e) => { e.stopPropagation(); step(1) }}
           >
-            ›
+            <Icon name="chevronRight" size={20} />
           </button>
         </div>
+        </Portal>
       )}
     </>
   )

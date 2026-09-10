@@ -1,14 +1,14 @@
 /**
- * Page registry — auto-discovers every page in src/pages/.
+ * Page registry: auto-discovers every page in src/pages/.
  *
  * Nobody should have to edit this file to add, rename, remove, or restyle a
  * page. Vite's import.meta.glob picks up every `src/pages/*.jsx` file at build
  * time, and each page describes itself with a `meta` export:
  *
  *   export const meta = {
- *     label: 'Events',                  // nav text — omit to hide from the nav
+ *     label: 'Events',                  // nav text; omit to hide from the nav
  *     order: 20,                        // nav position (low numbers first)
- *     title: 'Urbana FBLA — Events',    // browser tab title
+ *     title: 'Urbana FBLA, Events',     // browser tab title
  *     path: 'events',                   // optional; defaults to the slug
  *     slug: 'events',                   // optional; defaults from the filename
  *     index: true,                      // optional; makes this the "/" page
@@ -28,7 +28,7 @@ const toSlug = (name) => name.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase
 export const pages = Object.entries(modules)
   .filter(([path, mod]) => {
     if (typeof mod.default === 'function') return true
-    console.warn(`[pageRegistry] ${path} has no default-exported component — skipped.`)
+    console.warn(`[pageRegistry] ${path} has no default-exported component, skipped.`)
     return false
   })
   .map(([path, mod]) => {
@@ -44,9 +44,9 @@ export const pages = Object.entries(modules)
       isIndex,
       routePath,                                  // what <Route path> gets
       path: isIndex ? '/' : `/${routePath}`,      // what <NavLink to> gets
-      label: meta.label ?? null,                  // null = not shown in the nav
+      label: meta.label ?? null,                  // null means hidden from the nav
       order: meta.order ?? 999,
-      title: meta.title ?? `Urbana FBLA — ${name}`,
+      title: meta.title ?? `Urbana FBLA, ${name}`,
       Component: mod.default,
     }
   })

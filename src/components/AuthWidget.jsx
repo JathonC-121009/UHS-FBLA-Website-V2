@@ -40,15 +40,15 @@ export default function AuthWidget() {
     }
   }
 
-  // The sign-in / profile-setup modals are NOT rendered here — AuthModal is
-  // mounted exactly once from App.jsx and driven by the shared
-  // authModalOpen / openAuthModal / closeAuthModal context values.
+  // The sign-in modal is not rendered here. AuthModal mounts exactly once
+  // from App.jsx, driven by the shared authModalOpen, openAuthModal and
+  // closeAuthModal context values.
   return (
     <div className="auth-widget" ref={rootRef}>
       {loading ? (
         <span className="auth-loading" aria-label="Checking sign-in status" />
       ) : user ? (
-        /* ------- Signed in with avatar + dropdown ------- */
+        /* Signed in: initials button with a dropdown */
         <>
           <button
             className="auth-avatar"
@@ -61,18 +61,19 @@ export default function AuthWidget() {
           </button>
           {menuOpen && (
             <div className="auth-menu" role="menu">
-              <div className="auth-menu-name">{user.displayName || 'Signed in'}</div>
-              <div className="auth-menu-email">{user.email}</div>
-              <button className="auth-signout" onClick={handleSignOut} role="menuitem">
-                Sign Out
+              <p className="auth-menu-label">Signed in as</p>
+              <p className="auth-menu-name">{user.displayName || 'Member'}</p>
+              <p className="auth-menu-email">{user.email}</p>
+              <button className="auth-signout press" onClick={handleSignOut} role="menuitem">
+                Sign out
               </button>
             </div>
           )}
         </>
       ) : (
-        /* ------- Signed out: button that opens the Step 1 modal ------- */
-        <button className="btn btn-gold auth-signin" onClick={openAuthModal}>
-          Sign In
+        /* Signed out: opens the shared sign-in modal */
+        <button className="btn btn-accent auth-signin" onClick={openAuthModal}>
+          Sign in
         </button>
       )}
     </div>

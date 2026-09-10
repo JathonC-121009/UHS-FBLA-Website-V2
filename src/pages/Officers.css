@@ -1,37 +1,89 @@
 /* ============================================================================
-   OFFICERS PAGE STYLES — this file owns the look of "/officers" and nothing
-   else. Every rule is scoped under `.route-officers` (set on <body> by
-   Layout), so nothing here leaks to other pages, and you can restyle the
-   shared navbar/footer/hero for this page only:
-       .route-officers nav { background: #000; }
-       .route-officers { --hero-bg: #000; }
+   OFFICERS
+   Scoped under `.route-officers`. A roster grid of square portraits in
+   rounded frames. Portraits are shown in full colour: the photos are the
+   point of the page.
    ========================================================================= */
 
-/* Page-level variable overrides (see src/index.css for the full list) */
-.route-officers {
-  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+.route-officers .officers-section {
+  background: var(--surface);
+  padding: var(--space-section) var(--gutter);
+}
+.route-officers .officers-wrap { max-width: var(--shell); margin: 0 auto; }
+
+.route-officers .block-head {
+  padding-bottom: 1rem;
+  margin-bottom: var(--space-block);
+  border-bottom: 2px solid var(--line);
+}
+.route-officers .block-head .section-title { margin-top: .4rem; }
+.route-officers .block-head--spaced { margin-top: var(--space-section); }
+
+.route-officers .officers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: clamp(1.25rem, 2.5vw, 1.75rem);
+}
+/* Sections with only one or two people use the same track width as the full
+   grid, so their cards line up with the row above instead of stretching. */
+.route-officers .officers-grid--narrow {
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+.route-officers .officers-grid--narrow > * { max-width: 240px; }
+
+.route-officers .officer { position: relative; }
+.route-officers .officer-photo {
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--paper-200);
+  border: 1px solid var(--line);
+  transition: border-color var(--t-mid) var(--e-out), box-shadow var(--t-mid) var(--e-out);
+}
+.route-officers .officer:hover .officer-photo {
+  border-color: var(--blue-600);
+  box-shadow: 0 6px 18px rgba(10, 46, 127, .13);
+}
+.route-officers .officer-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  transform: scale(1.01);
+  transition: transform .6s var(--e-out);
+}
+.route-officers .officer:hover .officer-photo img { transform: scale(1.045); }
+.route-officers .officer-index {
+  position: absolute;
+  top: .5rem;
+  left: .5rem;
+  padding: .18rem .42rem;
+  border-radius: 4px;
+  background: rgba(10, 46, 127, .82);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  color: var(--paper-000);
 }
 
-.route-officers .officers-section { background: var(--white); padding: 4rem 2rem; }
-.route-officers .officers-wrap { max-width: 1080px; margin: 0 auto; }
-.route-officers .officers-intro { margin-bottom: 2.5rem; }
-.route-officers .state-block { margin-top: 3rem; }
-.route-officers .state-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; align-items: start; max-width: 420px; }
-.route-officers .state-grid .officer-card { background: var(--off-white); border-color: var(--border); }
-.route-officers .state-grid .officer-card .officer-photo { background: linear-gradient(135deg, var(--navy), var(--blue)); }
-.route-officers .state-grid .officer-card .officer-role { color: var(--cobalt); background: rgba(34, 106, 221, .1); }
-.route-officers .advisor-block { margin-top: 3rem; }
-.route-officers .advisor-wrap { max-width: 200px; }
-.route-officers .officers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 1.5rem; }
-.route-officers .officer-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; text-align: center; transition: transform .22s, box-shadow .22s; }
-.route-officers .officer-card:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(10, 46, 127, .12); border-color: var(--cobalt); }
-.route-officers .officer-photo { width: 100%; aspect-ratio: 1; background: linear-gradient(135deg, var(--navy), var(--blue)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; color: rgba(255, 255, 255, .15); overflow: hidden; }
-.route-officers .officer-photo img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
-.route-officers .officer-info { padding: 1rem .85rem 1.1rem; }
-.route-officers .officer-role { font-size: .68rem; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--cobalt); background: rgba(34, 106, 221, .1); display: inline-block; padding: .2rem .6rem; border-radius: 4px; }
-.route-officers .officer-name { font-weight: 700; font-size: 1rem; color: var(--navy); margin-top: .4rem; }
-.route-officers .officer-grade { font-size: .8rem; color: var(--muted); margin-top: .2rem; }
+.route-officers .officer-name {
+  margin-top: .85rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  color: var(--navy-900);
+}
+.route-officers .officer-role {
+  margin-top: .15rem;
+  font-size: .9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+.route-officers .officer:hover .officer-role { color: var(--blue-700); }
 
-/* Advisor gold variant */
-.route-officers .officer-card.advisor .officer-photo { background: linear-gradient(135deg, #7a5a00, var(--gold)); }
-.route-officers .officer-card.advisor .officer-role { color: #7a5a00; background: rgba(244, 171, 25, .15); }
+@media (max-width: 520px) {
+  .route-officers .officers-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route-officers .officers-grid--narrow { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

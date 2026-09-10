@@ -1,136 +1,157 @@
-import './Points.css'
-import { useState, useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import Masthead from '../components/Masthead.jsx'
+import Icon from '../components/Icon.jsx'
+import { useIndicator } from '../hooks/useMotion.js'
 import { fetchStudentData } from '../services/sheetsService'
+import './Points.css'
 
+// Route + nav settings for this page. See src/pageRegistry.js.
 export const meta = {
-  label: 'Points',   // navbar text — delete this line to hide it from the nav
-  order: 31,           // navbar position; lower numbers come first
-  title: 'Urbana FBLA — Points',  // browser tab title
-  // path: 'custom-url',  // optional: override the URL (defaults to the slug)
-  // index: true,         // optional: make this the "/" home page
+  label: 'Points',
+  order: 31,
+  title: 'Urbana FBLA, Points',
 }
 
+const BOARDS = [
+  { key: 'total', label: 'All time' },
+  { key: 'monthly', label: 'This month' },
+]
+
 export default function Points() {
-  const [leaderboardType, setLeaderboardType] = useState('total')
+  const [board, setBoard] = useState('total')
   const [searchTerm, setSearchTerm] = useState('')
   const [students, setStudents] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const switcherRef = useRef(null)
 
-  // Fetch student data from Google Sheets on mount
+  useIndicator(switcherRef, '.switch.is-active', [board])
+
   useEffect(() => {
-    const loadData = async () => {
+    let cancelled = false
+
+    const load = async () => {
       try {
         setLoading(true)
         setError(null)
         const data = await fetchStudentData()
-        setStudents(data)
+        // Give every member a stable id up front. Rows are keyed by it, so a
+        // row keeps its identity when the board is re-sorted, and two members
+        // sharing a name still get distinct keys.
+        if (!cancelled) setStudents(data.map((s, i) => ({ ...s, id: `${i}-${s.name}` })))
       } catch (err) {
         console.error('Failed to load student data:', err)
-        setError('Unable to load student data. Please make sure you are logged in to Google.')
+        if (!cancelled) setError('Standings are unavailable right now. Sign in to your school Google account and reload.')
       } finally {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       }
     }
 
-    loadData()
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [])
 
-  // Get sorted students based on leaderboard type
-  const sortedStudents = [...students].sort((a, b) => {
-    const pointsA = leaderboardType === 'total' ? a.totalPoints : a.monthlyPoints
-    const pointsB = leaderboardType === 'total' ? b.totalPoints : b.monthlyPoints
-    return pointsB - pointsA
-  })
+  // Rank once, then filter, so a search never renumbers the board.
+  const ranked = useMemo(() => {
+    const points = (student) => (board === 'total' ? student.totalPoints : student.monthlyPoints)
+    return [...students]
+      .sort((a, b) => points(b) - points(a))
+      .map((student, i) => ({ ...student, rank: i + 1, points: points(student) }))
+  }, [students, board])
 
-  // Filter students based on search
-  const displayedStudents = searchTerm.trim()
-    ? sortedStudents.filter((s) =>
-        s.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
-      )
-    : sortedStudents
+  const leader = ranked[0]?.points || 0
 
-  // Determine medal class based on rank
-  const getMedalClass = (index) => {
-    if (index === 0) return 'medal-gold'
-    if (index === 1) return 'medal-silver'
-    if (index === 2) return 'medal-bronze'
-    return ''
-  }
+  const visible = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase()
+    if (!term) return ranked
+    return ranked.filter((student) => student.name.toLowerCase().includes(term))
+  }, [ranked, searchTerm])
 
   return (
     <>
-      <div className="page-hero">
-        <p className="page-hero-label">Urbana FBLA</p>
-        <h1>Point <span>Leaderboard</span></h1>
-        <p>See who's standing out in Urbana FBLA!</p>
-      </div>
+      <Masthead
+        eyebrow="Standings"
+        title={<>Member <em>points</em></>}
+        lede="You earn points for going to meetings, competing, volunteering, and showing up to chapter events. Officers update the board as points come in."
+        meta={[
+          { label: 'Members ranked', value: loading ? 'Loading' : String(students.length) },
+          { label: 'Board', value: board === 'total' ? 'All time' : 'This month' },
+        ]}
+      />
 
       <section className="points-section">
         <div className="points-wrap">
-          {loading && <p className="loading-state">Loading student data...</p>}
-          {error && <p className="error-state">{error}</p>}
-          {!loading && !error && students.length === 0 && (
-            <p className="empty-state">No student data available.</p>
+          <div className="board-controls">
+            <div className="switcher" role="tablist" aria-label="Leaderboard range" ref={switcherRef}>
+              {BOARDS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={board === option.key}
+                  className={`switch press${board === option.key ? ' is-active' : ''}`}
+                  onClick={() => setBoard(option.key)}
+                >
+                  {option.label}
+                </button>
+              ))}
+              <span className="indicator switch-indicator" aria-hidden="true" />
+            </div>
+
+            <label className="search">
+              <Icon name="search" size={16} />
+              <input
+                type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Find a member"
+                aria-label="Search for a member"
+              />
+            </label>
+          </div>
+
+          {loading && (
+            <div className="board-skeleton" aria-hidden="true">
+              {Array.from({ length: 8 }, (_, i) => (
+                <div className="skeleton-row" key={i} style={{ '--reveal-i': i }} />
+              ))}
+            </div>
           )}
+
+          {!loading && error && <p className="board-state board-state--error">{error}</p>}
+
+          {!loading && !error && students.length === 0 && (
+            <p className="board-state">No points have been recorded yet this year.</p>
+          )}
+
           {!loading && !error && students.length > 0 && (
             <>
-              {/* Leaderboard Header with Search and Switcher */}
-              <div className="leaderboard-header">
-            <h2 className="leaderboard-title">
-              {leaderboardType === 'total' ? 'Total Points' : 'Points This Month'}
-            </h2>
-            <input
-              type="text"
-              className="header-search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search for a student..."
-              aria-label="Search for student name"
-            />
-            <div className="switcher-group">
-              <button
-                className={`switcher-btn ${leaderboardType === 'total' ? 'active' : ''}`}
-                onClick={() => setLeaderboardType('total')}
-              >
-                Total Points
-              </button>
-              <button
-                className={`switcher-btn ${leaderboardType === 'monthly' ? 'active' : ''}`}
-                onClick={() => setLeaderboardType('monthly')}
-              >
-                This Month
-              </button>
-            </div>
-          </div>
-
-          {/* Leaderboard */}
-          <div className="leaderboard">
-            <div className="leaderboard-row header-row">
-              <div className="rank-col">Rank</div>
-              <div className="name-col">Name</div>
-              <div className="points-col">Points</div>
-            </div>
-            {displayedStudents.map((student) => {
-              const actualIndex = sortedStudents.findIndex(s => s.name === student.name)
-              return (
-                <div
-                  key={student.name}
-                  className={`leaderboard-row ${getMedalClass(actualIndex)}`}
-                >
-                  <div className="rank-col">#{actualIndex + 1}</div>
-                  <div className="name-col">{student.name}</div>
-                  <div className="points-col">
-                    {leaderboardType === 'total' ? student.totalPoints : student.monthlyPoints}
-                  </div>
+              <div className="board" data-reveal-group>
+                <div className="board-head">
+                  <span>Rank</span>
+                  <span>Member</span>
+                  <span>Points</span>
                 </div>
-              )
-            })}
-          </div>
 
-          {displayedStudents.length === 0 && searchTerm && (
-            <p className="no-results">No students found matching "{searchTerm}".</p>
-          )}
+                {visible.map((student) => (
+                  <div
+                    className={`board-row${student.rank <= 3 ? ` is-top rank-${student.rank}` : ''}`}
+                    key={student.id}
+                    data-reveal="fade"
+                    style={{ '--share': leader ? student.points / leader : 0 }}
+                  >
+                    <span className="board-rank">{String(student.rank).padStart(2, '0')}</span>
+                    <span className="board-name">{student.name}</span>
+                    <span className="board-points">{student.points}</span>
+                  </div>
+                ))}
+              </div>
+
+              {visible.length === 0 && (
+                <p className="board-state">No member matches that name.</p>
+              )}
             </>
           )}
         </div>

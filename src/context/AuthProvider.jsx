@@ -11,12 +11,12 @@ export const AuthContext = createContext(null)
 
 /**
  * Map a Firebase error to a friendly message. Returns null for errors that
- * are normal user behavior (closing the Google popup) — those stay silent.
+ * are normal user behavior (closing the Google popup). Those stay silent.
  */
 function getFriendlyAuthError(err) {
   const code = err?.code
   if (code === 'auth/popup-closed-by-user' || code === 'auth/cancelled-popup-request') {
-    // User closed the popup — normal behavior, nothing to surface.
+    // The user closed the popup: normal behavior, nothing to surface.
     return null
   }
   return 'Sign-in failed. Please try again.'
@@ -33,8 +33,8 @@ export default function AuthProvider({ children }) {
   // The signed-in user's profile doc (users/{uid}); null until fetched.
   const [profile, setProfile] = useState(null)
 
-  // Sign-in modal visibility. Lives here (not in AuthWidget) so any page —
-  // e.g. the Bulletin Board — can open the same Google sign-in modal.
+  // Sign-in modal visibility. It lives here, not in AuthWidget, so that any
+  // page (the bulletin board, for one) can open the same Google sign-in modal.
   const [authModalOpen, setAuthModalOpen] = useState(false)
   const openAuthModal = () => setAuthModalOpen(true)
   const closeAuthModal = () => setAuthModalOpen(false)
@@ -49,7 +49,7 @@ export default function AuthProvider({ children }) {
    *
    * Called after every successful Google sign-in AND on every auth-state
    * change (page reload included). Idempotent: if a profile doc already
-   * exists it is NEVER rewritten — so an admin-assigned `role` and the
+   * exists it is NEVER rewritten, so an admin-assigned `role` and the
    * original `createdAt` survive repeat calls across sessions.
    */
   const ensureUserProfile = async (fbUser) => {
@@ -62,13 +62,13 @@ export default function AuthProvider({ children }) {
           email: fbUser.email,
         })
       }
-      // Always refresh the in-memory profile — role may have been assigned
+      // Always refresh the in-memory profile: a role may have been assigned
       // in the console since the last read, and the doc is now guaranteed
       // to exist for signed-in users.
       const fresh = await getUserProfile(fbUser.uid)
       setProfile(fresh)
     } catch {
-      // Rules may not be deployed yet — never block sign-in on a failure.
+      // Rules may not be deployed yet, and a failure must never block sign-in.
       setProfile(null)
     }
   }

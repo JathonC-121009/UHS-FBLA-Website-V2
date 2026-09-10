@@ -1,24 +1,25 @@
 import { useState, useEffect } from 'react'
 import useAuth from '../hooks/useAuth.js'
+import Icon from './Icon.jsx'
 import './AuthModal.css'
 
 /**
- * The single Google-only sign-in modal for the whole app.
+ * The single Google sign-in dialog for the whole app.
  *
- * Rendered exactly once, from App.jsx — NOT from AuthWidget, which mounts
- * twice (desktop row + mobile menu) and would otherwise duplicate the modal's
- * DOM ids and state, with the two copies fighting over the shared
- * authModalOpen context value. Driven entirely by AuthProvider's existing
- * authModalOpen / openAuthModal / closeAuthModal.
+ * Rendered exactly once, from App.jsx, and never from AuthWidget: that widget
+ * mounts twice (desktop row and mobile menu) and two copies would duplicate
+ * the dialog's DOM ids while fighting over the same authModalOpen context
+ * value. Everything here is driven by AuthProvider's authModalOpen,
+ * openAuthModal and closeAuthModal.
  *
- * Shows when the modal was opened while signed out — from the navbar button
- * or a page trigger like the Bulletin Board's "+ New Post" or reply prompts.
- * School-domain gating is enforced in AuthProvider.signIn: a rejected Google
- * account is signed straight back out, signIn() returns undefined, and the
- * modal naturally stays open with the authError banner visible.
+ * It appears when the modal is opened while signed out, either from the navbar
+ * button or from a page trigger such as the board's new post and reply
+ * prompts. School domain gating happens in AuthProvider.signIn: a rejected
+ * Google account is signed straight back out, signIn() resolves undefined, and
+ * the dialog stays open with the error banner visible.
  *
- * Profile creation is automatic (see ensureUserProfile in AuthProvider) —
- * there is no second step and no user-editable fields.
+ * Profile creation is automatic (see ensureUserProfile in AuthProvider), so
+ * there is no second step and no editable fields.
  */
 export default function AuthModal() {
   const { user, authError, authModalOpen, closeAuthModal, signIn } = useAuth()
@@ -27,7 +28,7 @@ export default function AuthModal() {
   const [showError, setShowError] = useState(false)
   const [busy, setBusy] = useState(false)
 
-  // Dismiss the context error banner automatically a few seconds after it appears.
+  // Clear the error banner a few seconds after it appears.
   useEffect(() => {
     if (!authError) {
       setShowError(false)
@@ -52,8 +53,8 @@ export default function AuthModal() {
     setBusy(true)
     try {
       const fbUser = await signIn()
-      // signIn() resolves undefined for a domain-rejected account — the
-      // modal stays open and shows the rejection via authError instead.
+      // signIn() resolves undefined for a domain-rejected account, so the
+      // dialog stays open and shows the rejection through authError instead.
       if (fbUser) closeAuthModal()
     } finally {
       setBusy(false)
@@ -73,11 +74,15 @@ export default function AuthModal() {
           onMouseDown={(e) => e.stopPropagation()}
         >
           <button className="auth-modal-close" onClick={closeAuthModal} aria-label="Close">
-            ✕
+            <Icon name="close" size={16} />
           </button>
 
-          <h3>Sign in to Urbana FBLA</h3>
-          <p className="auth-modal-sub">Join member discussions and chapter features.</p>
+          <p className="eyebrow">Members</p>
+          <h3>Sign in</h3>
+          <p className="auth-modal-sub">
+            Use your school Google account to post on the board and reply to other
+            members.
+          </p>
 
           {banner && (
             <div className="auth-error" role="alert">
@@ -85,8 +90,8 @@ export default function AuthModal() {
             </div>
           )}
 
-          <button className="btn btn-navy btn-block" onClick={handleGoogle} disabled={busy}>
-            {busy ? 'Working…' : 'Continue with Google'}
+          <button className="btn btn-primary btn-block" onClick={handleGoogle} disabled={busy}>
+            {busy ? 'Opening Google' : 'Continue with Google'}
           </button>
         </div>
       </div>

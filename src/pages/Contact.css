@@ -1,51 +1,96 @@
 /* ============================================================================
-   CONTACT PAGE STYLES — this file owns the look of "/contact" and nothing
-   else. Every rule is scoped under `.route-contact` (set on <body> by
-   Layout), so nothing here leaks to other pages, and you can restyle the
-   shared navbar/footer/hero for this page only:
-       .route-contact nav { background: #000; }
-       .route-contact { --hero-bg: #000; }
+   CONTACT
+   Scoped under `.route-contact`. Contact index on the left, a single bordered
+   form panel on the right. Field styling comes from `.field` in index.css.
    ========================================================================= */
 
-/* Page-level variable overrides (see src/index.css for the full list) */
-.route-contact {
-  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+.route-contact .contact-section {
+  background: var(--surface);
+  padding: clamp(3rem, 7vw, 5rem) var(--gutter) clamp(4rem, 9vw, 6.5rem);
+}
+.route-contact .contact-layout {
+  display: grid;
+  grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+  gap: clamp(2rem, 5vw, 4.5rem);
+  align-items: start;
+  max-width: var(--shell);
+  margin: 0 auto;
 }
 
-/* Form controls */
-.route-contact .form-group { margin-bottom: 1.25rem; }
-.route-contact .form-group label { display: block; font-size: .78rem; font-weight: 600; color: var(--navy); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .4rem; }
-.route-contact .form-group input,
-.route-contact .form-group textarea,
-.route-contact .form-group select { width: 100%; padding: .72rem 1rem; border: 1.5px solid var(--border); border-radius: 7px; font-family: var(--body-font); font-size: .95rem; color: var(--black); background: var(--off-white); outline: none; transition: border-color .2s, background .2s; }
-.route-contact .form-group input:focus,
-.route-contact .form-group textarea:focus,
-.route-contact .form-group select:focus { border-color: var(--blue); background: var(--white); }
-.route-contact .form-group textarea { resize: vertical; min-height: 120px; }
+.route-contact .detail-list {
+  list-style: none;
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+.route-contact .detail-row {
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+  padding: 1.4rem .5rem;
+  border-bottom: 1px solid var(--line);
+  transition: padding-left var(--t-mid) var(--e-out), background var(--t-mid) var(--e-out);
+}
+.route-contact .detail-row:hover { padding-left: 1rem; background: var(--paper-000); }
+.route-contact .detail-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  color: var(--accent);
+  transition: border-color var(--t-mid) var(--e-out), background var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
+}
+.route-contact .detail-row:hover .detail-icon {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: var(--accent-ink);
+}
+.route-contact .detail-label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.route-contact .detail-value {
+  display: inline-block;
+  margin-top: .3rem;
+  font-size: .98rem;
+  font-weight: 500;
+  color: var(--ink-900);
+  line-height: 1.5;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
+}
+a.detail-value:hover { color: var(--accent); border-bottom-color: var(--accent); }
+.route-contact .detail-note {
+  margin-top: .15rem;
+  font-size: .82rem;
+  color: var(--text-muted);
+}
+
+.route-contact .contact-form-panel {
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+.route-contact .form-head {
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.route-contact .form-head .section-title { margin-top: .5rem; font-size: var(--step-2); }
+
+.route-contact .contact-form { display: flex; flex-direction: column; gap: 1.25rem; }
 .route-contact .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-@media (max-width: 500px) {
+.route-contact .contact-form .btn { margin-top: .5rem; }
+
+@media (max-width: 880px) {
+  .route-contact .contact-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 520px) {
   .route-contact .form-row { grid-template-columns: 1fr; }
 }
-
-.route-contact .contact-section { background: var(--white); padding: 4rem 2rem; }
-.route-contact .contact-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 4rem; align-items: start; max-width: 1080px; margin: 0 auto; }
-@media (max-width: 768px) {
-  .route-contact .contact-layout { grid-template-columns: 1fr; gap: 2.5rem; }
-}
-.route-contact .cinfo-item { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: 1.75rem; }
-.route-contact .cinfo-icon { width: 46px; height: 46px; min-width: 46px; background: var(--navy); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
-.route-contact .cinfo-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: .3rem; }
-.route-contact .cinfo-value { font-weight: 600; font-size: .97rem; color: var(--navy); line-height: 1.4; }
-.route-contact .cinfo-value a { color: var(--cobalt); text-decoration: none; }
-.route-contact .cinfo-value a:hover { text-decoration: underline; }
-.route-contact .form-card { background: var(--off-white); border: 1px solid var(--border); border-radius: 14px; padding: 2rem; }
-.route-contact .form-card h3 { font-weight: 700; font-size: 1.2rem; color: var(--navy); margin-bottom: 1.5rem; }
-
-.route-contact .join-section { background: var(--navy); padding: 4rem 2rem; text-align: center; }
-.route-contact .join-section h2 { font-weight: 700; font-size: clamp(1.5rem, 3.5vw, 2.2rem); color: var(--white); margin-bottom: .75rem; }
-.route-contact .join-section p { color: rgba(255, 255, 255, .6); max-width: 520px; margin: 0 auto 2rem; font-size: .97rem; line-height: 1.7; }
-.route-contact .join-steps { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; max-width: 800px; margin: 0 auto 2.5rem; }
-.route-contact .join-step { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .1); border-radius: 12px; padding: 1.5rem 1.25rem; flex: 1; min-width: 180px; max-width: 220px; text-align: center; }
-.route-contact .join-num { font-size: 2rem; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: .6rem; }
-.route-contact .join-stitle { font-weight: 600; font-size: .9rem; color: var(--white); margin-bottom: .3rem; }
-.route-contact .join-sdesc { font-size: .8rem; color: rgba(255, 255, 255, .5); line-height: 1.5; }

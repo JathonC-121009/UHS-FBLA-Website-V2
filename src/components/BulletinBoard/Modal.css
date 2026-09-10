@@ -1,33 +1,62 @@
-/* Shared modal chrome for the Bulletin Board (thread / new post / archive).
-   Imported by each modal component; classes are namespaced (.bulletin-*) so
-   they never collide with other pages. */
+/* Shared dialog chrome for the bulletin board (thread, new post, archive).
+   Imported by each modal component; the classes are namespaced `.bulletin-*`
+   so they never collide with another page. */
 
 .bulletin-overlay {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(10, 46, 127, .55);
-  display: flex; align-items: center; justify-content: center;
-  padding: 1.5rem;
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: rgba(11, 13, 17, .82);
+  animation: bulletin-overlay-in .28s var(--e-out) both;
 }
+@keyframes bulletin-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
 .bulletin-modal {
   position: relative;
-  background: var(--off-white);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 2rem;
-  max-width: 640px; width: 100%;
-  max-height: 88vh; overflow-y: auto;
-  box-shadow: 0 22px 60px rgba(10, 46, 127, .28);
+  width: 100%;
+  max-width: 620px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  background: var(--paper-100);
+  border: 1px solid var(--line-strong);
+  animation: bulletin-modal-in .45s var(--e-out) both;
 }
+@keyframes bulletin-modal-in {
+  from { opacity: 0; transform: translate3d(0, 16px, 0) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
 .bulletin-modal h3 {
-  font-weight: 700; font-size: 1.2rem; color: var(--navy); margin-bottom: 1.2rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  color: var(--ink-900);
+  margin-bottom: 1.25rem;
 }
+
 .bulletin-modal-close {
-  position: absolute; top: .8rem; right: .9rem;
-  background: none; border: none; cursor: pointer;
-  font-size: 1.15rem; color: var(--muted); line-height: 1; padding: .2rem;
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  transition: border-color var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
 }
-.bulletin-modal-close:hover { color: var(--navy); }
+.bulletin-modal-close:hover { border-color: var(--navy-900); color: var(--ink-900); }
 
 @media (max-width: 520px) {
-  .bulletin-modal { padding: 1.4rem; }
+  .bulletin-overlay { align-items: flex-end; padding: 0; }
+  .bulletin-modal { max-height: 90vh; }
 }

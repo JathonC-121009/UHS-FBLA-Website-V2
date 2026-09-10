@@ -1,7 +1,7 @@
 /**
  * Get upcoming events from the Google Calendar API.
  *
- * This is the primary event source — Google Calendar first, Firestore cache
+ * This is the primary event source: Google Calendar first, Firestore cache
  * second (cacheEventsToFirestore is a write-through cache, not the read path).
  */
 

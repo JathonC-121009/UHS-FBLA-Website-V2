@@ -1,32 +1,31 @@
 /* ============================================================================
-   BULLETIN PAGE STYLES — this file owns the look of "/bulletin" and nothing
-   else. Every rule is scoped under `.route-bulletin` (set on <body> by
-   Layout), so nothing here leaks to other pages.
-   ========================================================================== */
+   BULLETIN
+   Scoped under `.route-bulletin`. The board component brings its own styling;
+   this file owns the page frame and the toolbar above it.
+   ========================================================================= */
 
-/* Page-level variable overrides (see src/index.css for the full list) */
-.route-bulletin {
-  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+.route-bulletin .bulletin-section {
+  background: var(--surface);
+  padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) clamp(4rem, 9vw, 6.5rem);
 }
+.route-bulletin .bulletin-wrap { max-width: var(--shell); margin: 0 auto; }
 
-.route-bulletin .bulletin-section { background: var(--off-white); padding: 3.5rem 2rem 5rem; }
-.route-bulletin .bulletin-wrap { max-width: 1080px; margin: 0 auto; }
-
-/* Toolbar: New Post / Archived / Clear board */
 .route-bulletin .bulletin-toolbar {
-  display: flex; flex-wrap: wrap; align-items: center; gap: .8rem;
-  margin-bottom: 1.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .6rem;
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--line);
 }
-.route-bulletin .bulletin-toolbar .bulletin-clear { margin-left: auto; }
-.route-bulletin .bulletin-toolbar .bulletin-clear:disabled { opacity: .55; cursor: not-allowed; transform: none; }
-
-/* Secondary/outline button (tokens only, no new colors) */
-.route-bulletin .bulletin-outline {
-  background: transparent; color: var(--navy); border-color: var(--navy);
+.route-bulletin .bulletin-toolbar .btn-ghost.is-active {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: var(--paper-000);
 }
-.route-bulletin .bulletin-outline:hover { background: rgba(10, 46, 127, .06); }
-.route-bulletin .bulletin-outline.active { background: var(--navy); color: var(--white); }
+.route-bulletin .bulletin-clear { margin-left: auto; }
 
 @media (max-width: 640px) {
-  .route-bulletin .bulletin-toolbar .bulletin-clear { margin-left: 0; }
+  .route-bulletin .bulletin-clear { margin-left: 0; }
 }

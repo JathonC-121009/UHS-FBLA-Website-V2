@@ -74,7 +74,7 @@ export async function addPost(post) {
   const data = {
     type: post.type,
     // Defensive fallback: the UI layer attaches the real author, but Firestore
-    // rejects `undefined` outright — never let a missing author reach addDoc.
+    // rejects `undefined` outright, so never let a missing author reach addDoc.
     author: post.author || AUTHOR_FALLBACK,
     authorUid,
     imageUrl: post.imageUrl || null,
@@ -154,7 +154,7 @@ export async function addReply(postId, reply) {
   return { id: ref.id, ...data }
 }
 
-/** Soft-remove a post: sets removed=true + removedAt — never a hard delete. */
+/** Soft-remove a post: sets removed=true and removedAt, never a hard delete. */
 export async function removePost(postId) {
   await updateDoc(doc(db, POSTS_COL, postId), {
     removed: true,
@@ -177,7 +177,7 @@ export async function removeReply(postId, replyId) {
 /**
  * Soft-remove every currently-active post in ONE batched write (single
  * timestamp for the whole batch). NOTE: writeBatch commits cap at 500
- * operations — a chapter board with 500+ active posts is not anticipated;
+ * operations. A chapter board with 500+ active posts is not anticipated;
  * chunking into batches of ~400 would be needed if it ever is.
  */
 export async function clearBoard() {
@@ -200,13 +200,13 @@ export async function clearBoard() {
 /**
  * Paginated view of removed posts, newest-removed first.
  *
- * Firestore pagination is CURSOR-based (startAfter + limit) — "jump to
+ * Firestore pagination is CURSOR-based (startAfter plus limit), so "jump to
  * arbitrary page N" is not natively supported. Callers should cache the
  * returned cursors as they page forward (see useArchivedPosts) so instant
  * Previous navigation works.
  *
  * `lastVisibleCursor` is the raw DocumentSnapshot of the last post on the
- * page — exactly what startAfter() needs for the next page. (It is not
+ * page, exactly what startAfter() needs for the next page. (It is not
  * JSON-serializable; persisting page state across a page reload would need a
  * serializable cursor instead.)
  *
@@ -233,7 +233,7 @@ export async function getArchivedPosts({ pageSize = 30, cursor = null } = {}) {
     // Fetch visible and own-pending archived posts, merge in memory.
     // NOTE: cursor-based pagination doesn't work across two merged queries
     // (Firestore cursors are bound to a specific query). Using in-memory
-    // pagination instead — acceptable for a small chapter board.
+    // pagination instead, which is acceptable for a small chapter board.
     const fetchLimit = cursor ? pageSize + 1 : pageSize * 3
 
     const visibleQ = query(
