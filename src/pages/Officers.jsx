@@ -21,16 +21,16 @@ const CHAPTER_OFFICERS = [
 ]
 
 const NATIONAL_OFFICERS = [
-  { role: 'National Secretary', name: 'Charis Roussel', subtitle: 'State President', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
+  { role: 'National Secretary', name: 'Charis Roussel', subtitle: 'State Vice President', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
 ]
 
 const STATE_OFFICERS = [
-  { role: 'State President', name: 'Charis Roussel', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
+  { role: 'State Vice President', name: 'Charis Roussel', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
   { role: 'State Reporter and Historian', name: 'Hannah Cho', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948475/Hannah_Cho_onkvkd.jpg' },
 ]
 
 const ADVISOR = {
-  role: 'Chapter Advisor',
+  role: 'Chapter Adviser',
   name: 'Travis Zimmerman',
   img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948570/03_Zimmerman_Travis_UHS_1x1_1_vxlwbn.jpg',
 }
@@ -107,7 +107,7 @@ export default function Officers() {
 
           <header className="block-head block-head--spaced">
             <p className="eyebrow" data-reveal="fade">04 / Faculty</p>
-            <h2 className="section-title" data-reveal>Advisor</h2>
+            <h2 className="section-title" data-reveal>Adviser</h2>
           </header>
 
           <div className="officers-grid officers-grid--narrow" data-reveal-group>

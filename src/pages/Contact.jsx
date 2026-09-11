@@ -24,7 +24,7 @@ const DETAILS = [
   },
   {
     icon: 'school',
-    label: 'Faculty advisor',
+    label: 'Faculty adviser',
     value: 'Travis Zimmerman',
     href: 'mailto:Travis.Zimmerman@fcps.org',
     note: 'Travis.Zimmerman@fcps.org',

@@ -39,10 +39,10 @@ const SITE_MAP = [
   { path: '/events', name: 'Events', note: 'The live chapter calendar, month by month.' },
   { path: '/resources', name: 'Resources', note: 'Event folders, FBLA Connect, this guide.' },
   { path: '/points', name: 'Points', note: 'Member point standings, total and monthly.' },
-  { path: '/officers', name: 'Officers', note: 'Chapter officers, state officers, advisor.' },
+  { path: '/officers', name: 'Officers', note: 'Chapter officers, state officers, adviser.' },
   { path: '/gallery', name: 'Gallery', note: 'Photos from conferences and chapter events.' },
   { path: '/bulletin', name: 'Bulletin board', note: 'Member posts, questions, and replies.' },
-  { path: '/contact', name: 'Contact', note: 'Reach the officer team or the advisor.' },
+  { path: '/contact', name: 'Contact', note: 'Reach the officer team or the adviser.' },
 ]
 
 export default function Resources() {
