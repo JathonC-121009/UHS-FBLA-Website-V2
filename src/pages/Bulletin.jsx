@@ -79,6 +79,10 @@ export default function Bulletin() {
         ]}
       />
 
+      <div className="coming-soon-banner" role="status">
+        <h2>Coming soon!</h2>
+      </div>
+
       <section className="bulletin-section">
         <div className="bulletin-wrap">
           <div className="bulletin-toolbar" data-reveal="fade">

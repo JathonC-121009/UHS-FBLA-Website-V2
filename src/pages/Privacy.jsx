@@ -128,7 +128,7 @@ export default function Privacy() {
   return (
     <LegalLayout
       title="Privacy policy"
-      effective="[DATE]"
+      effective="September 10, 2026"
       sections={SECTIONS}
       intro={
         <p>

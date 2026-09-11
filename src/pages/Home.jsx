@@ -24,7 +24,7 @@ const RECORD = [
   },
   {
     title: 'Two state officers',
-    body: 'Charis Roussel is Maryland FBLA State President, and Hannah Cho is State Reporter and Historian.',
+    body: 'Charis Roussel is Maryland FBLA State President and National Secretary, and Hannah Cho is State Reporter and Historian.',
   },
   {
     title: 'Fifty members at Nationals',

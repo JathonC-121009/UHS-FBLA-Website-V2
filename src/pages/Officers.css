@@ -81,6 +81,13 @@
   color: var(--text-muted);
   line-height: 1.45;
 }
+.route-officers .officer-subtitle {
+  margin-top: .1rem;
+  font-size: .8rem;
+  font-weight: 400;
+  color: var(--text-faint);
+  line-height: 1.4;
+}
 .route-officers .officer:hover .officer-role { color: var(--blue-700); }
 
 @media (max-width: 520px) {

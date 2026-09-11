@@ -125,7 +125,7 @@ export default function Terms() {
   return (
     <LegalLayout
       title="Terms of service"
-      effective="[DATE]"
+      effective="September 10, 2026"
       sections={SECTIONS}
       intro={
         <p>

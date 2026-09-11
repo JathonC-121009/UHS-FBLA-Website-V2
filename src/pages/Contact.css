@@ -4,6 +4,21 @@
    form panel on the right. Field styling comes from `.field` in index.css.
    ========================================================================= */
 
+.route-contact .coming-soon-banner {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3.5rem) var(--gutter);
+  background: var(--navy-900);
+  text-align: center;
+}
+.route-contact .coming-soon-banner h2 {
+  font-family: var(--font-display);
+  font-size: var(--step-3, 2rem);
+  font-weight: 400;
+  letter-spacing: -.02em;
+  color: var(--gold);
+}
+
 .route-contact .contact-section {
   background: var(--surface);
   padding: clamp(3rem, 7vw, 5rem) var(--gutter) clamp(4rem, 9vw, 6.5rem);

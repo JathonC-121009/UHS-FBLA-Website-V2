@@ -4,6 +4,21 @@
    this file owns the page frame and the toolbar above it.
    ========================================================================= */
 
+.route-bulletin .coming-soon-banner {
+  max-width: var(--shell);
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3.5rem) var(--gutter);
+  background: var(--navy-900);
+  text-align: center;
+}
+.route-bulletin .coming-soon-banner h2 {
+  font-family: var(--font-display);
+  font-size: var(--step-3, 2rem);
+  font-weight: 400;
+  letter-spacing: -.02em;
+  color: var(--gold);
+}
+
 .route-bulletin .bulletin-section {
   background: var(--surface);
   padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) clamp(4rem, 9vw, 6.5rem);

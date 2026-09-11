@@ -20,6 +20,10 @@ const CHAPTER_OFFICERS = [
   { role: 'Regional VP Liaison', name: 'Sruthi Madhusoothanan', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948485/Sruthi_Madhusoothanan_awk2bb.jpg' },
 ]
 
+const NATIONAL_OFFICERS = [
+  { role: 'National Secretary', name: 'Charis Roussel', subtitle: 'State President', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
+]
+
 const STATE_OFFICERS = [
   { role: 'State President', name: 'Charis Roussel', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948471/Charis_Roussel_sp4jyr.jpg' },
   { role: 'State Reporter and Historian', name: 'Hannah Cho', img: 'https://res.cloudinary.com/dmgisz0pf/image/upload/f_auto,q_auto,w_400/v1777948475/Hannah_Cho_onkvkd.jpg' },
@@ -40,6 +44,7 @@ function OfficerCard({ officer, index }) {
       </div>
       <h3 className="officer-name">{officer.name}</h3>
       <p className="officer-role">{officer.role}</p>
+      {officer.subtitle && <p className="officer-subtitle">{officer.subtitle}</p>}
     </article>
   )
 }
@@ -53,7 +58,7 @@ export default function Officers() {
         lede="Eleven students run the chapter, from competition prep and finances to communications and every event on the calendar."
         meta={[
           { label: 'Term', value: '2026 / 2027' },
-          { label: 'Officers', value: '9 chapter, 2 state' },
+          { label: 'Officers', value: '9 chapter, 2 state, 1 national' },
         ]}
       />
 
@@ -86,7 +91,22 @@ export default function Officers() {
           </div>
 
           <header className="block-head block-head--spaced">
-            <p className="eyebrow" data-reveal="fade">03 / Faculty</p>
+            <p className="eyebrow" data-reveal="fade">03 / National</p>
+            <h2 className="section-title" data-reveal>National officers</h2>
+            <p className="section-intro" data-reveal>
+              Members who hold a national FBLA position represent every chapter
+              in the country.
+            </p>
+          </header>
+
+          <div className="officers-grid officers-grid--narrow" data-reveal-group>
+            {NATIONAL_OFFICERS.map((officer) => (
+              <OfficerCard officer={officer} key={officer.name + officer.role} />
+            ))}
+          </div>
+
+          <header className="block-head block-head--spaced">
+            <p className="eyebrow" data-reveal="fade">04 / Faculty</p>
             <h2 className="section-title" data-reveal>Advisor</h2>
           </header>
 

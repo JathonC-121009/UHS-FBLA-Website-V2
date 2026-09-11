@@ -80,7 +80,7 @@ export default function AuthModal() {
           <p className="eyebrow">Members</p>
           <h3>Sign in</h3>
           <p className="auth-modal-sub">
-            Use your school Google account to post on the board and reply to other
+            Use your Google account to post on the board and reply to other
             members.
           </p>
 
