@@ -1,24 +1,25 @@
 /* ============================================================================
-   PAGE TEMPLATE — copy this file to add a new page.
+   PAGE TEMPLATE. Copy this file to add a new page.
 
-   1. Copy `_Template.jsx`  -> `MyPage.jsx`   and `_Template.css` -> `MyPage.css`
+   1. Copy `_Template.jsx` to `MyPage.jsx`, and `_Template.css` to `MyPage.css`.
    2. In MyPage.jsx: rename the component, fix the CSS import, edit `meta`.
    3. In MyPage.css: replace every `.route-template` with `.route-my-page`
-      (the slug is the filename in kebab-case: MyPage -> my-page).
+      (the slug is the filename in kebab-case, so MyPage becomes my-page).
 
-   That's it. The route and the navbar link appear automatically — App.jsx,
-   Navbar.jsx, Layout.jsx and index.css do NOT need to be touched.
+   That is all. The route and the navbar link appear on their own: App.jsx,
+   Navbar.jsx, Layout.jsx and index.css never need editing.
 
    Files beginning with `_` are skipped by the page registry, so this template
    never becomes a real route.
    ========================================================================= */
 
+import Masthead from '../components/Masthead.jsx'
 import './_Template.css'
 
 export const meta = {
-  label: 'Template',   // navbar text — delete this line to hide it from the nav
-  order: 90,           // navbar position; lower numbers come first
-  title: 'Urbana FBLA — Template',  // browser tab title
+  label: 'Template',   // navbar text; delete this line to hide it from the nav
+  order: 90,           // navbar position, lower numbers first
+  title: 'Urbana FBLA, Template',  // browser tab title
   // path: 'custom-url',  // optional: override the URL (defaults to the slug)
   // index: true,         // optional: make this the "/" home page
 }
@@ -26,22 +27,23 @@ export const meta = {
 export default function Template() {
   return (
     <>
-      {/* Shared hero — styled in index.css, recolorable per page in your CSS */}
-      <div className="page-hero">
-        <p className="page-hero-label">Small Label</p>
-        <h1>Page <span>Title</span></h1>
-        <p>One line of supporting text.</p>
-      </div>
+      {/* Shared page header. Props only, styled in index.css. */}
+      <Masthead
+        eyebrow="Small label"
+        title={<>Page <em>title</em></>}
+        lede="One line explaining what this page is for."
+        meta={[{ label: 'Metadata', value: 'Optional' }]}
+      />
 
       <section className="tpl-section">
         <div className="tpl-wrap">
-          {/* `fi` = fade in on scroll. Only put it on content that is rendered
-              right away — content added later by a click won't be observed. */}
-          <div className="fi">
-            <p className="section-label">Section Label</p>
-            <h2 className="section-title">Section Title</h2>
-            <div className="divider"></div>
-            <p className="section-intro">Body copy goes here.</p>
+          {/* `data-reveal` animates an element in when it scrolls into view.
+              Wrap a group in `data-reveal-group` to stagger its children.
+              Values: up (default), fade, left, right, scale, clip. */}
+          <div data-reveal-group>
+            <p className="eyebrow" data-reveal="fade">Section label</p>
+            <h2 className="section-title" data-reveal>Section title</h2>
+            <p className="section-intro" data-reveal>Body copy goes here.</p>
           </div>
         </div>
       </section>

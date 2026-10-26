@@ -5,6 +5,14 @@ dist/
 .env.*
 !.env.example
 
+# Firebase
+functions/node_modules/
+functions/*.json
+!functions/package.json
+!functions/package-lock.json
+functions/.env*
+.firebaserc
+
 .vscode/
 .idea/
 coverage/

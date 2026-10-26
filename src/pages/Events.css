@@ -1,34 +1,335 @@
 /* ============================================================================
-   EVENTS PAGE STYLES — this file owns the look of "/events" and nothing else.
-   Every rule is scoped under `.route-events` (set on <body> by Layout), so
-   nothing here leaks to other pages, and you can restyle the shared
-   navbar/footer/hero for this page only:
-       .route-events nav { background: #000; }
-       .route-events { --hero-bg: #000; }
+   EVENTS
+   Scoped under `.route-events`. The calendar is drawn with hairlines rather
+   than cards: one border per cell, category colour carried on a 2px edge, and
+   a detail card that grows out of the chip you clicked.
    ========================================================================= */
 
-/* Page-level variable overrides (see src/index.css for the full list) */
 .route-events {
-  /* --hero-bg: linear-gradient(120deg, var(--navy), var(--blue)); */
+  --cat-meeting: #2f4a6d;
+  --cat-competition: #a5731a;
+  --cat-workshop: #2f6a4a;
+  --cat-social: #6d3f63;
+  --cat-deadline: #9b3b2a;
+  --cell-min: 118px;
 }
 
-.route-events .events-section { background: var(--off-white); padding: 4rem 2rem; }
-.route-events .events-wrap { max-width: 1080px; margin: 0 auto; }
-.route-events .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
-.route-events .event-card { background: var(--white); border-radius: 12px; border: 1px solid var(--border); overflow: hidden; transition: transform .22s, box-shadow .22s; }
-.route-events .event-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(10, 46, 127, .1); }
-.route-events .event-header { background: var(--navy); padding: 1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
-.route-events .event-date { text-align: center; min-width: 52px; }
-.route-events .event-month { font-size: .65rem; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; color: rgba(255, 255, 255, .6); }
-.route-events .event-day { font-size: 2.2rem; font-weight: 700; color: var(--gold); line-height: 1; }
-.route-events .event-hinfo { flex: 1; }
-.route-events .event-badge { display: inline-block; font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: .2rem .55rem; border-radius: 4px; margin-bottom: .3rem; }
-.route-events .t-meeting { background: var(--cobalt); color: white; }
-.route-events .t-competition { background: var(--gold); color: var(--navy); }
-.route-events .t-community { background: #2a9d3f; color: white; }
-.route-events .t-social { background: #9b2fe0; color: white; }
-.route-events .t-deadline { background: #e05c2f; color: white; }
-.route-events .event-htitle { font-weight: 600; font-size: .95rem; color: var(--white); line-height: 1.3; }
-.route-events .event-body { padding: 1.1rem 1.25rem; }
-.route-events .event-detail { font-size: .84rem; color: var(--muted); display: flex; align-items: center; gap: .4rem; margin-bottom: .35rem; }
-.route-events .event-desc { font-size: .88rem; color: var(--black); line-height: 1.55; margin-top: .75rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+.route-events .events-section {
+  background: var(--surface);
+  padding: clamp(2.5rem, 6vw, 4rem) var(--gutter) clamp(4rem, 9vw, 6.5rem);
+}
+.route-events .events-wrap { max-width: var(--shell); margin: 0 auto; }
+
+/* --- Calendar chrome ----------------------------------------------------- */
+
+.route-events .calendar {
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+}
+
+.route-events .calendar-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--navy-900);
+  color: var(--paper-000);
+}
+.route-events .calendar-month {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1;
+  letter-spacing: -.02em;
+  animation: month-in .45s var(--e-out) both;
+}
+@keyframes month-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.route-events .calendar-actions { display: flex; align-items: center; gap: .5rem; }
+.route-events .month-btn,
+.route-events .today-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border: 1px solid var(--line-ink);
+  color: rgba(255, 255, 255, .8);
+  transition: border-color var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out), background var(--t-mid) var(--e-out);
+}
+.route-events .month-btn { width: 36px; }
+.route-events .today-btn {
+  padding: 0 .9rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.route-events .month-btn:hover,
+.route-events .today-btn:hover {
+  border-color: var(--accent-ink);
+  color: var(--ink-900);
+  background: var(--accent-ink);
+}
+
+/* --- Grid ---------------------------------------------------------------- */
+
+.route-events .calendar-body { animation: month-slide .5s var(--e-out) both; }
+.route-events .calendar-body[data-direction='back'] { animation-name: month-slide-back; }
+@keyframes month-slide {
+  from { opacity: 0; transform: translate3d(14px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes month-slide-back {
+  from { opacity: 0; transform: translate3d(-14px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.route-events .weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--line);
+}
+.route-events .weekdays span {
+  padding: .75rem .6rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.route-events .days {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.route-events .day {
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+  min-height: var(--cell-min);
+  padding: .55rem .5rem .7rem;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  transition: background var(--t-mid) var(--e-out);
+  animation: cell-in .45s var(--e-out) both;
+  animation-delay: calc(var(--cell, 0) * 9ms);
+}
+@keyframes cell-in {
+  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  to { opacity: 1; transform: none; }
+}
+.route-events .day:nth-child(7n) { border-right: 0; }
+.route-events .days > .day:nth-last-child(-n + 7) { border-bottom: 0; }
+.route-events .day:hover { background: var(--surface); }
+.route-events .day.is-empty { background: var(--paper-200); }
+.route-events .day.is-empty:hover { background: var(--paper-200); }
+
+.route-events .day-number {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: .06em;
+  color: var(--text-faint);
+}
+.route-events .day.is-today { box-shadow: inset 0 2px 0 var(--accent); }
+.route-events .day.is-today .day-number { color: var(--ink-900); font-weight: 600; }
+.route-events .day-today {
+  padding: .05rem .3rem;
+  background: var(--accent);
+  color: var(--paper-000);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+/* --- Event chips --------------------------------------------------------- */
+
+.route-events .chip {
+  --cat: var(--cat-meeting);
+  display: block;
+  width: 100%;
+  padding: .28rem .4rem .28rem .5rem;
+  border-left: 2px solid var(--cat);
+  background: color-mix(in srgb, var(--cat) 9%, transparent);
+  color: var(--ink-800);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background var(--t-mid) var(--e-out), transform var(--t-fast) var(--e-spring), color var(--t-mid) var(--e-out);
+}
+.route-events .chip:hover { background: var(--cat); color: var(--paper-000); transform: translateX(2px); }
+.route-events .chip:active { transform: scale(.97); }
+.route-events .chip--meeting { --cat: var(--cat-meeting); }
+.route-events .chip--competition { --cat: var(--cat-competition); }
+.route-events .chip--workshop { --cat: var(--cat-workshop); }
+.route-events .chip--social { --cat: var(--cat-social); }
+.route-events .chip--deadline { --cat: var(--cat-deadline); }
+
+.route-events .day-more {
+  align-self: flex-start;
+  margin-top: .1rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid transparent;
+  transition: color var(--t-mid) var(--e-out), border-color var(--t-mid) var(--e-out);
+}
+.route-events .day-more:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* --- States and legend --------------------------------------------------- */
+
+.route-events .calendar-state {
+  padding: 4rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+.route-events .calendar-state--error { color: var(--cat-deadline); }
+
+.route-events .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  list-style: none;
+  margin-top: 1.25rem;
+}
+.route-events .legend li {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.route-events .legend-key { width: 14px; height: 2px; background: var(--cat-meeting); }
+.route-events .legend-key--competition { background: var(--cat-competition); }
+.route-events .legend-key--workshop { background: var(--cat-workshop); }
+.route-events .legend-key--social { background: var(--cat-social); }
+.route-events .legend-key--deadline { background: var(--cat-deadline); }
+
+/* --- Detail card --------------------------------------------------------- */
+
+.route-events .event-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: rgba(11, 13, 17, .82);
+  animation: overlay-in .3s var(--e-out) both;
+}
+@keyframes overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
+.route-events .event-detail {
+  --cat: var(--cat-meeting);
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: clamp(1.5rem, 4vw, 2.25rem);
+  background: var(--paper-100);
+  border: 1px solid var(--line-strong);
+  border-top: 3px solid var(--cat);
+}
+.route-events .event-detail--meeting { --cat: var(--cat-meeting); }
+.route-events .event-detail--competition { --cat: var(--cat-competition); }
+.route-events .event-detail--workshop { --cat: var(--cat-workshop); }
+.route-events .event-detail--social { --cat: var(--cat-social); }
+.route-events .event-detail--deadline { --cat: var(--cat-deadline); }
+
+.route-events .event-close {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  transition: border-color var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
+}
+.route-events .event-close:hover { border-color: var(--navy-900); color: var(--ink-900); }
+
+.route-events .event-category {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--cat);
+}
+.route-events .event-title {
+  margin: .6rem 2rem .25rem 0;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-2);
+  line-height: 1.08;
+  letter-spacing: -.02em;
+  color: var(--ink-900);
+}
+
+.route-events .event-meta { margin-top: 1.5rem; }
+.route-events .event-meta > div {
+  padding: 1rem 0;
+  border-top: 1px solid var(--line);
+}
+.route-events .event-meta dt {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.route-events .event-meta dd {
+  margin-top: .4rem;
+  font-size: .95rem;
+  color: var(--ink-800);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.route-events .event-description { white-space: pre-wrap; color: var(--text-muted); }
+
+/* --- Responsive ---------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .route-events { --cell-min: 96px; }
+  .route-events .calendar-bar { flex-wrap: wrap; }
+  .route-events .calendar-month { order: -1; width: 100%; }
+  .route-events .calendar-actions { margin-left: auto; }
+  .route-events .chip { font-size: 0.75rem; }
+}
+
+@media (max-width: 560px) {
+  .route-events { --cell-min: 78px; }
+  .route-events .day { padding: .4rem .3rem .5rem; }
+  .route-events .chip {
+    padding: .22rem .25rem;
+    font-size: 0;
+    height: 6px;
+    border-left-width: 0;
+    background: var(--cat);
+  }
+  .route-events .day-today { display: none; }
+  .route-events .event-overlay { align-items: flex-end; padding: 0; }
+  .route-events .event-detail { max-width: none; max-height: 88vh; }
+}

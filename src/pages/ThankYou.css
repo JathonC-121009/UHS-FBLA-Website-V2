@@ -1,22 +1,64 @@
 /* ============================================================================
-   THANK YOU PAGE STYLES — this file owns the look of "/thank-you" and nothing
-   else. Every rule is scoped under `.route-thank-you` (set on <body> by
-   Layout), so nothing here leaks to other pages, and you can restyle the
-   shared navbar/footer for this page only:
-       .route-thank-you nav { background: #000; }
+   THANK YOU
+   Scoped under `.route-thank-you`. One centred confirmation on the ink field.
    ========================================================================= */
 
-/* Page-level variable overrides (see src/index.css for the full list) */
-.route-thank-you {
-  /* --body-bg: var(--off-white); */
+.route-thank-you .thanks {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--nav-h));
+  padding: clamp(3rem, 10vw, 6rem) var(--gutter);
+  background: var(--navy-900);
+  color: var(--paper-000);
+  overflow: hidden;
+}
+.route-thank-you .thanks-grid {
+  position: absolute;
+  inset: -25% 0;
+  background-image:
+    linear-gradient(to right, var(--line-ink) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--line-ink) 1px, transparent 1px);
+  background-size: clamp(80px, 9vw, 132px) clamp(80px, 9vw, 132px);
+  opacity: .5;
+  transform: translate3d(0, var(--parallax, 0px), 0);
+  pointer-events: none;
 }
 
-.route-thank-you .thankyou-section { min-height: 70vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4rem 2rem; }
-.route-thank-you .thankyou-box { max-width: 520px; }
-.route-thank-you .thankyou-box .checkmark { font-size: 3.5rem; margin-bottom: 1.25rem; }
-.route-thank-you .thankyou-box .label { font-size: .72rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--cobalt); margin-bottom: .5rem; }
-.route-thank-you .thankyou-box h1 { font-weight: 700; font-size: 2.2rem; color: var(--navy); margin-bottom: .75rem; }
-.route-thank-you .thankyou-box .divider { width: 48px; height: 4px; background: var(--gold); border-radius: 2px; margin: .75rem auto 1.5rem; }
-.route-thank-you .thankyou-box p { color: var(--muted); font-size: .97rem; line-height: 1.7; margin-bottom: 2rem; }
-.route-thank-you .thankyou-box .btn { background: var(--navy); color: var(--white); border-color: var(--navy); }
-.route-thank-you .thankyou-box .btn:hover { background: var(--blue); transform: translateY(-2px); }
+.route-thank-you .thanks-inner {
+  position: relative;
+  max-width: 46ch;
+}
+.route-thank-you .thanks-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 1.75rem;
+  border: 1px solid var(--accent-ink);
+  color: var(--accent-ink);
+}
+.route-thank-you .thanks-title {
+  margin-top: 1rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-4);
+  line-height: .95;
+  letter-spacing: -.025em;
+}
+.route-thank-you .thanks-body {
+  margin-top: 1.25rem;
+  color: rgba(255, 255, 255, .62);
+  line-height: 1.7;
+}
+.route-thank-you .thanks-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  margin-top: 2.25rem;
+}
+
+/* The footer would repeat the ink field, so it keeps its own top hairline. */
+.route-thank-you .site-footer { border-top-color: var(--line-ink-strong); }

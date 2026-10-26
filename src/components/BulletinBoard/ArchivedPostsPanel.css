@@ -1,0 +1,43 @@
+/* Archive panel: the same notes, drained of colour, with a tag and a pager. */
+
+.archived-card { max-width: 780px; }
+.archived-sub { color: var(--text-muted); font-size: .88rem; margin-bottom: 1.5rem; }
+
+.archived-list {
+  columns: 220px;
+  column-gap: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+.archived-note { position: relative; break-inside: avoid; }
+.archived-note .note { filter: grayscale(1); opacity: .85; }
+.archived-note:hover .note { filter: none; opacity: 1; }
+
+.archived-tag {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  padding: .18rem .45rem;
+  background: var(--navy-900);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  z-index: 3;
+}
+
+.archived-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--line);
+}
+.archived-page {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}

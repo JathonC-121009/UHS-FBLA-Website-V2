@@ -1,0 +1,225 @@
+/* ============================================================================
+   RESOURCES
+   Scoped under `.route-resources`. A sticky tab strip with a sliding
+   indicator, a filter row, and a dense grid of event folders.
+   ========================================================================= */
+
+.route-resources .resources-section {
+  background: var(--surface);
+  padding: 0 var(--gutter) clamp(4rem, 9vw, 6.5rem);
+}
+.route-resources .resources-wrap { max-width: var(--shell); margin: 0 auto; }
+
+/* --- Tabs ---------------------------------------------------------------- */
+
+.route-resources .tabs {
+  position: sticky;
+  top: var(--nav-h);
+  z-index: 20;
+  display: flex;
+  gap: .25rem;
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+  padding-top: .5rem;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.route-resources .tab {
+  position: relative;
+  padding: 1rem .9rem;
+  font-size: .86rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+  transition: color var(--t-mid) var(--e-out);
+}
+.route-resources .tab:hover { color: var(--ink-900); }
+.route-resources .tab.is-active { color: var(--ink-900); font-weight: 600; }
+.route-resources .tab-indicator { bottom: -1px; }
+
+.route-resources .panel { animation: panel-in .5s var(--e-out) both; }
+@keyframes panel-in {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+/* --- Panel head ---------------------------------------------------------- */
+
+.route-resources .panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+.route-resources .panel-head .section-intro { margin-top: .75rem; }
+
+.route-resources .search {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-width: 260px;
+  padding: .7rem .9rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  color: var(--text-faint);
+  transition: border-color var(--t-mid) var(--e-out);
+}
+.route-resources .search:focus-within { border-color: var(--navy-900); color: var(--accent); }
+.route-resources .search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: .92rem;
+  color: var(--text);
+}
+.route-resources .search input::placeholder { color: var(--text-faint); }
+
+/* --- Filter chips -------------------------------------------------------- */
+
+.route-resources .type-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.75rem;
+  border-bottom: 1px solid var(--line);
+}
+.route-resources .chip {
+  padding: .45rem .85rem;
+  border: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition:
+    color var(--t-mid) var(--e-out),
+    border-color var(--t-mid) var(--e-out),
+    background var(--t-mid) var(--e-out),
+    transform var(--t-fast) var(--e-spring);
+}
+.route-resources .chip:hover { border-color: var(--navy-900); color: var(--ink-900); }
+.route-resources .chip.is-active {
+  background: var(--navy-900);
+  border-color: var(--navy-900);
+  color: var(--paper-000);
+}
+.route-resources .type-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+
+/* --- Event grid ---------------------------------------------------------- */
+
+.route-resources .event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.route-resources .event-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  min-height: 112px;
+  padding: 1.1rem 1.25rem 1rem;
+  background: var(--paper-000);
+  text-decoration: none;
+  transition: background var(--t-mid) var(--e-out);
+}
+.route-resources .event-card:hover { background: var(--surface); }
+.route-resources .event-type {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.route-resources .event-name {
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.28;
+  letter-spacing: -.01em;
+  color: var(--navy-900);
+}
+.route-resources .event-open {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--t-mid) var(--e-out), transform var(--t-mid) var(--e-out);
+}
+.route-resources .event-card:hover .event-open,
+.route-resources .event-card:focus-visible .event-open { opacity: 1; transform: none; }
+
+.route-resources .empty {
+  padding: 3rem 0;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* --- Connect ------------------------------------------------------------- */
+
+.route-resources .connect-card {
+  max-width: 620px;
+  padding: clamp(1.75rem, 4vw, 2.75rem);
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+}
+.route-resources .connect-card .section-title { margin-top: .5rem; }
+.route-resources .connect-card .btn { margin-top: 1.75rem; }
+
+/* --- Site guide ---------------------------------------------------------- */
+
+.route-resources .sitemap {
+  list-style: none;
+  margin-top: 2rem;
+  border-top: 1px solid var(--line);
+}
+.route-resources .sitemap a {
+  display: grid;
+  grid-template-columns: 3rem 10rem minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: baseline;
+  padding: 1.15rem .5rem;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--ink-900);
+  transition: padding-left var(--t-mid) var(--e-out), background var(--t-mid) var(--e-out);
+}
+.route-resources .sitemap a:hover { padding-left: 1.1rem; background: var(--paper-000); }
+.route-resources .sitemap-index {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+}
+.route-resources .sitemap-name { font-weight: 600; }
+.route-resources .sitemap-note { color: var(--text-muted); font-size: .9rem; }
+.route-resources .sitemap .arrow {
+  color: var(--text-faint);
+  opacity: 0;
+  transition: opacity var(--t-mid) var(--e-out), transform var(--t-mid) var(--e-out);
+}
+.route-resources .sitemap a:hover .arrow { opacity: 1; transform: translateX(4px); }
+
+@media (max-width: 820px) {
+  .route-resources .tabs { overflow-x: auto; }
+  .route-resources .search { width: 100%; }
+  .route-resources .sitemap a { grid-template-columns: 2.5rem minmax(0, 1fr); }
+  .route-resources .sitemap-note { grid-column: 2; }
+  .route-resources .sitemap .arrow { display: none; }
+}

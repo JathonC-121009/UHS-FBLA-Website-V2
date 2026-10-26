@@ -1,0 +1,30 @@
+/* Board surface: a hairline frame around a scrolling pinboard. The texture is
+   a single repeating dot, drawn in CSS, rather than an image. */
+
+.board-frame {
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  padding: .6rem;
+}
+
+.board-surface {
+  height: clamp(440px, 60vh, 660px);
+  overflow-y: auto;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  background-color: var(--paper-200);
+  background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
+  background-size: 22px 22px;
+  border: 1px solid var(--line);
+}
+
+.board-notes {
+  columns: 250px;
+  column-gap: 1.25rem;
+}
+
+.board-state {
+  padding: 4rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .95rem;
+}

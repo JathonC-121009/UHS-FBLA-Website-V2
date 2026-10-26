@@ -1,0 +1,72 @@
+/* Sign-in dialog. Mounted once from App.jsx. */
+
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2rem);
+  background: rgba(11, 13, 17, .82);
+  animation: auth-overlay-in .28s var(--e-out) both;
+}
+@keyframes auth-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+
+.auth-modal {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: clamp(1.75rem, 4vw, 2.25rem);
+  background: var(--paper-100);
+  border: 1px solid var(--line-strong);
+  border-top: 3px solid var(--accent);
+  animation: auth-modal-in .45s var(--e-out) both;
+}
+@keyframes auth-modal-in {
+  from { opacity: 0; transform: translate3d(0, 16px, 0) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.auth-modal h3 {
+  margin-top: .5rem;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--step-3);
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--ink-900);
+}
+.auth-modal-sub {
+  margin: .75rem 0 1.75rem;
+  color: var(--text-muted);
+  font-size: .9rem;
+  line-height: 1.6;
+}
+.auth-modal-close {
+  position: absolute;
+  top: .9rem;
+  right: .9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  transition: border-color var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
+}
+.auth-modal-close:hover { border-color: var(--navy-900); color: var(--ink-900); }
+
+.auth-error {
+  margin-bottom: 1.25rem;
+  padding: .7rem .9rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line-strong);
+  border-left: 2px solid var(--accent);
+  font-size: .82rem;
+  line-height: 1.5;
+  color: var(--ink-900);
+}

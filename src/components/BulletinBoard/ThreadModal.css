@@ -1,0 +1,140 @@
+/* Thread view: the post itself, then replies, then the reply form. */
+
+.thread-photo {
+  width: 100%;
+  max-height: 360px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+.thread-photo-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  aspect-ratio: 16 / 9;
+  background: var(--paper-200);
+  border: 1px solid var(--line);
+  color: var(--text-faint);
+  font-size: .85rem;
+}
+.thread-question {
+  padding: 1.25rem 1.35rem;
+  background: var(--accent-wash);
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: var(--step-2);
+  line-height: 1.2;
+  color: var(--ink-900);
+}
+
+.thread-head {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-top: 1.1rem;
+}
+.thread-author { font-weight: 600; font-size: .92rem; color: var(--ink-900); }
+.thread-time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+.thread-status {
+  margin-left: auto;
+  padding: .15rem .45rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+.thread-status.is-public { background: var(--accent); color: var(--paper-000); }
+.thread-status.is-pending { background: var(--paper-200); color: var(--text-muted); border: 1px solid var(--line); }
+.thread-status.is-flagged { background: var(--navy-900); color: var(--paper-000); }
+
+.thread-caption {
+  margin-top: .6rem;
+  font-size: .95rem;
+  line-height: 1.65;
+  color: var(--ink-800);
+}
+
+.thread-replies {
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}
+.thread-state {
+  padding: 1.5rem 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: .9rem;
+}
+.thread-error { color: var(--ink-900); }
+
+.thread-reply {
+  padding: 1rem .25rem;
+  border-bottom: 1px solid var(--line);
+  animation: reply-in .45s var(--e-out) both;
+}
+@keyframes reply-in {
+  from { opacity: 0; transform: translate3d(0, 8px, 0); }
+  to { opacity: 1; transform: none; }
+}
+.thread-reply-head {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin-bottom: .3rem;
+}
+.thread-reply-author { font-size: .82rem; font-weight: 600; color: var(--ink-900); }
+.thread-reply-time {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.07em;
+  color: var(--text-faint);
+}
+.thread-reply-text { font-size: .92rem; line-height: 1.65; color: var(--ink-800); }
+.thread-remove {
+  margin-left: auto;
+  display: flex;
+  color: var(--text-faint);
+  transition: color var(--t-mid) var(--e-out);
+}
+.thread-remove:hover { color: var(--ink-900); }
+
+.thread-reply-form {
+  display: flex;
+  align-items: flex-end;
+  gap: .75rem;
+  margin-top: 1.5rem;
+}
+.thread-reply-form textarea {
+  flex: 1;
+  min-height: 60px;
+  padding: .75rem .9rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+  font-family: inherit;
+  font-size: .93rem;
+  color: var(--text);
+  outline: none;
+  resize: vertical;
+  transition: border-color var(--t-mid) var(--e-out);
+}
+.thread-reply-form textarea:focus { border-color: var(--navy-900); }
+
+.thread-signin {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line);
+}
+.thread-signin p { color: var(--text-muted); font-size: .92rem; }

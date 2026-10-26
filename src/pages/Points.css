@@ -1,0 +1,174 @@
+/* ============================================================================
+   POINTS
+   Scoped under `.route-points`. The board is a table with tabular figures and
+   a quiet gold bar behind each row showing its share of the leader's total.
+   ========================================================================= */
+
+.route-points .points-section {
+  background: var(--surface);
+  padding: var(--space-section) var(--gutter);
+}
+/* Full content width, matching the masthead above and the footer below. The
+   board used to be capped at 900px and left-aligned inside the wrapper, which
+   left a wide empty strip down the right of the page and put the board's left
+   edge out of line with every other block. */
+.route-points .points-wrap { max-width: var(--shell); margin: 0 auto; }
+
+/* --- Controls ------------------------------------------------------------ */
+
+.route-points .board-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--line);
+}
+.route-points .switcher { position: relative; display: flex; gap: .25rem; }
+.route-points .switch {
+  padding: .6rem .9rem;
+  font-size: .98rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: color var(--t-mid) var(--e-out);
+}
+.route-points .switch:hover { color: var(--navy-900); }
+.route-points .switch.is-active { color: var(--navy-900); font-weight: 700; }
+.route-points .switch-indicator { bottom: -1rem; }
+
+.route-points .search {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-width: 240px;
+  padding: .6rem .9rem;
+  background: var(--paper-000);
+  border: 1px solid var(--line-strong);
+  border-radius: 5px;
+  color: var(--text-faint);
+  transition: border-color var(--t-mid) var(--e-out), box-shadow var(--t-mid) var(--e-out);
+}
+.route-points .search:focus-within {
+  border-color: var(--blue-600);
+  box-shadow: 0 0 0 3px var(--blue-wash);
+  color: var(--blue-700);
+}
+.route-points .search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: none;
+  font-size: 1rem;
+}
+
+/* --- Board --------------------------------------------------------------- */
+
+.route-points .board { border-top: 1px solid var(--line); }
+.route-points .board-head,
+.route-points .board-row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) 6rem;
+  gap: 1rem;
+  align-items: center;
+  padding: .9rem .75rem;
+  border-bottom: 1px solid var(--line);
+}
+.route-points .board-head {
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+}
+.route-points .board-head span:last-child { text-align: right; }
+
+.route-points .board-row {
+  position: relative;
+  transition: background var(--t-mid) var(--e-out);
+}
+/* Share-of-leader bar, drawn behind the row content */
+.route-points .board-row::before {
+  content: '';
+  position: absolute;
+  inset: 1px auto 1px 0;
+  width: calc(var(--share, 0) * 100%);
+  background: var(--accent-wash);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  animation: bar-grow .9s var(--e-out) forwards;
+  animation-delay: calc(var(--reveal-i, 0) * 40ms);
+  pointer-events: none;
+}
+@keyframes bar-grow { to { transform: scaleX(1); } }
+
+.route-points .board-row:hover { background: var(--paper-000); }
+.route-points .board-rank {
+  position: relative;
+  font-size: .88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+.route-points .board-name {
+  position: relative;
+  font-weight: 500;
+  color: var(--ink-900);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.route-points .board-points {
+  position: relative;
+  text-align: right;
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--navy-900);
+}
+
+/* Top three: gold rank, heavier name, thicker left edge */
+.route-points .board-row.is-top { box-shadow: inset 3px 0 0 var(--gold); }
+.route-points .board-row.is-top .board-rank { color: var(--accent); }
+.route-points .board-row.is-top .board-name { font-weight: 700; }
+.route-points .board-row.rank-1 .board-points { color: var(--accent); }
+
+/* --- States -------------------------------------------------------------- */
+
+.route-points .board-state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+.route-points .board-state--error {
+  color: var(--ink-900);
+  border: 1px solid var(--line-strong);
+  border-left: 3px solid var(--gold);
+  border-radius: 5px;
+  background: var(--paper-000);
+  text-align: left;
+  padding: 1.25rem 1.4rem;
+}
+
+.route-points .board-skeleton { border-top: 1px solid var(--line); }
+.route-points .skeleton-row {
+  height: 52px;
+  border-bottom: 1px solid var(--line);
+  background: linear-gradient(100deg, var(--surface) 20%, var(--paper-300) 40%, var(--surface) 60%);
+  background-size: 300% 100%;
+  animation: points-shimmer 1.5s linear infinite;
+  animation-delay: calc(var(--reveal-i, 0) * 90ms);
+}
+@keyframes points-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -150% 0; }
+}
+
+@media (max-width: 560px) {
+  .route-points .board-head,
+  .route-points .board-row { grid-template-columns: 2.5rem minmax(0, 1fr) 4.5rem; padding: .85rem .5rem; }
+  .route-points .search { width: 100%; }
+}

@@ -6,67 +6,156 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isSchoolAccount() {
-      return isSignedIn()
-        && (request.auth.token.email.endsWith('@fcps.org')
-            || request.auth.token.email.endsWith('@my.fcps.org'));
-    }
-
     function isOwner(uid) {
       return isSignedIn() && request.auth.uid == uid;
     }
 
-    match /posts/{postId} {
-      allow read: if true;
+    // Moderator = signed-in user whose own users/{uid} profile doc has role
+    // 'officer' or 'adviser'. Role is assigned ONLY by the site owner in the
+    // Firebase Console (admin access bypasses rules) — it is never settable
+    // through client code (see the users/{uid} hasOnly() lists below).
+    function isModerator() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', null) in ['officer', 'adviser'];
+    }
 
-      allow create: if isSchoolAccount()
+    match /posts/{postId} {
+      // Visible posts are publicly readable. Pending posts are readable only
+      // by the post's own author or a moderator (officer/adviser).
+      allow read: if resource.data.status == 'visible'
+        || isOwner(resource.data.authorUid)
+        || isModerator();
+
+      // Only signed-in users may create posts; photo posts are rejected.
+      // Status must match the author's role: moderators set 'visible',
+      // everyone else must set 'pending'.
+      allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.author is string
         && request.resource.data.author.size() > 0
         && request.resource.data.createdAt is string
-        && request.resource.data.type in ['photo', 'question'];
+        && request.resource.data.type == 'question'
+        && request.resource.data.status in ['pending', 'visible']
+        && ((isModerator() && request.resource.data.status == 'visible')
+            || (!isModerator() && request.resource.data.status == 'pending'));
 
       // Owner may update only caption, message, and/or imageUrl
-      allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
+      allow update: if isOwner(resource.data.authorUid) && isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['caption', 'message', 'imageUrl']);
 
-      // Any school-domain user may increment replyCount by exactly +1
-      allow update: if isSchoolAccount()
+      // Any signed-in user may increment replyCount by exactly +1
+      allow update: if isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['replyCount'])
         && request.resource.data.replyCount == resource.data.replyCount + 1;
 
-      // Replies are NOT cascade-deleted yet; this is a known, deferred gap.
-      allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
+      // Soft-remove only: the post's own author, OR a moderator (officer/advisor
+      // per their users/{uid} role), may set exactly the {removed, removedAt}
+      // fields. This is a separate branch from the content-edit rule above —
+      // the author can still edit their content AND remove their own post.
+      allow update: if isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
+        && (isOwner(resource.data.authorUid) || isModerator());
+
+      // Moderator may flip a pending post to visible
+      allow update: if isModerator()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'visible';
+
+      // Hard delete is intentionally disabled — soft-remove via {removed,
+      // removedAt} is the ONLY removal mechanism, for both authors and
+      // officers/advisers, so removed content stays visible in the Archived
+      // Posts view instead of being destroyed. (Falls through to the catch-all
+      // deny below.)
     }
 
     match /replies/{replyId} {
-      allow read: if true;
+      // Visible replies are publicly readable. Pending replies are readable
+      // only by the reply's own author or a moderator.
+      allow read: if resource.data.status == 'visible'
+        || isOwner(resource.data.authorUid)
+        || isModerator();
 
-      allow create: if isSchoolAccount()
+      // Signed-in users may create replies; status must match the author's role.
+      allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.postId is string
         && request.resource.data.author is string
         && request.resource.data.author.size() > 0
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
-        && request.resource.data.createdAt is string;
+        && request.resource.data.createdAt is string
+        && request.resource.data.status in ['pending', 'visible']
+        && ((isModerator() && request.resource.data.status == 'visible')
+            || (!isModerator() && request.resource.data.status == 'pending'));
 
       // Owner may update only the message field
-      allow update: if isOwner(resource.data.authorUid) && isSchoolAccount()
+      allow update: if isOwner(resource.data.authorUid) && isSignedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['message']);
 
-      allow delete: if isOwner(resource.data.authorUid) && isSchoolAccount();
+      // Soft-remove only: the reply's own author, OR a moderator, may set
+      // exactly the {removed, removedAt} fields.
+      allow update: if isSignedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
+        && (isOwner(resource.data.authorUid) || isModerator());
+
+      // Moderator may flip a pending reply to visible
+      allow update: if isModerator()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status == 'visible';
+
+      // Hard delete is intentionally disabled — soft-remove via {removed,
+      // removedAt} is the ONLY removal mechanism, for both authors and
+      // officers/advisers, so removed content stays visible in the Archived
+      // Posts view instead of being destroyed. (Falls through to the catch-all
+      // deny below. A removed parent post does NOT cascade to replies; removed
+      // replies are just hidden, which resolves the old cascade gap by making
+      // it moot.)
+    }
+
+    match /contactMessages/{messageId} {
+      // Public contact form: anyone, signed in or not, may send a message.
+      // The field list must stay in sync with src/services/contactService.js.
+      allow create: if request.resource.data.keys().hasOnly(
+          ['firstName', 'lastName', 'email', 'subject', 'message', 'authorUid', 'createdAt', 'handled'])
+        && request.resource.data.firstName is string
+        && request.resource.data.firstName.size() > 0
+        && request.resource.data.firstName.size() <= 80
+        && request.resource.data.lastName is string
+        && request.resource.data.lastName.size() > 0
+        && request.resource.data.lastName.size() <= 80
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.email.size() <= 200
+        && request.resource.data.subject is string
+        && request.resource.data.subject.size() > 0
+        && request.resource.data.subject.size() <= 120
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 2000
+        && request.resource.data.createdAt is string
+        && request.resource.data.handled == false
+        && request.resource.data.authorUid == (isSignedIn() ? request.auth.uid : null);
+
+      // Messages are read and managed in the Firebase console, never by the
+      // client — a public-writable inbox must not also be publicly readable.
+      allow read, update, delete: if false;
     }
 
     match /users/{uid} {
       // Users can only read/write their own profile doc — the doc ID is the uid.
       allow read: if request.auth.uid == uid;
 
+      // Account creation is Google-only in the app (see AuthProvider);
+      // any signed-in user may mint a profile doc. `role` is intentionally
+      // absent from BOTH hasOnly() lists below: it is admin-assigned only
+      // (site owner in the Firebase Console) and must never be writable by
+      // the user themselves through the app.
       allow create: if request.auth.uid == uid
-        && request.resource.data.keys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'createdAt']);
 
       allow update: if request.auth.uid == uid
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'gradeLevel', 'createdAt']);
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'email', 'createdAt']);
 
       // delete is intentionally not allowed
     }

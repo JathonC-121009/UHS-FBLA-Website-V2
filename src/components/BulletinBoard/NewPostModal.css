@@ -1,0 +1,39 @@
+/* New post form: a two-way type switch above fields that reuse the global
+   `.field` styling from index.css. */
+
+.npm-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  margin-bottom: 1.5rem;
+  background: var(--line);
+  border: 1px solid var(--line);
+}
+.npm-toggle button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  padding: .8rem 1rem;
+  background: var(--paper-000);
+  color: var(--text-muted);
+  font-size: .85rem;
+  font-weight: 500;
+  transition: background var(--t-mid) var(--e-out), color var(--t-mid) var(--e-out);
+}
+.npm-toggle button:hover { color: var(--ink-900); }
+.npm-toggle button.active { background: var(--navy-900); color: var(--paper-000); }
+
+.npm-error {
+  padding: .75rem 1rem;
+  margin-bottom: 1.25rem;
+  background: var(--paper-000);
+  border: 1px solid var(--accent);
+  border-left-width: 2px;
+  color: var(--ink-900);
+  font-size: .88rem;
+}
+
+.npm-form { display: flex; flex-direction: column; gap: 1.25rem; }
+.npm-form .npm-group { margin: 0; }
+.npm-form textarea { min-height: 130px; }
