@@ -2,12 +2,13 @@ import { useState } from 'react'
 import Masthead from '../components/Masthead.jsx'
 import Icon from '../components/Icon.jsx'
 import useAuth from '../hooks/useAuth.js'
-import { usePosts } from '../hooks/usePosts.js'
+import { usePosts, usePendingCount } from '../hooks/usePosts.js'
 import { AUTHOR_FALLBACK } from '../components/BulletinBoard/bulletinUtils.js'
 import Board from '../components/BulletinBoard/Board.jsx'
 import ThreadModal from '../components/BulletinBoard/ThreadModal.jsx'
 import NewPostModal from '../components/BulletinBoard/NewPostModal.jsx'
 import ArchivedPostsPanel from '../components/BulletinBoard/ArchivedPostsPanel.jsx'
+import ReviewPanel from '../components/BulletinBoard/ReviewPanel.jsx'
 import './Bulletin.css'
 
 // Route + nav settings for this page. See src/pageRegistry.js.
@@ -19,11 +20,15 @@ export const meta = {
 
 export default function Bulletin() {
   const { user, profile, isOfficerOrAdviser, openAuthModal } = useAuth()
-  const { posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount } = usePosts()
+  const {
+    posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount, showApprovedPost, dropPost,
+  } = usePosts()
+  const [pendingCount, setPendingCount] = usePendingCount(isOfficerOrAdviser)
 
   const [openPost, setOpenPost] = useState(null)
   const [newPostOpen, setNewPostOpen] = useState(false)
   const [archivedOpen, setArchivedOpen] = useState(false)
+  const [reviewOpen, setReviewOpen] = useState(false)
   const [clearing, setClearing] = useState(false)
 
   // The author of a post, and any officer or adviser, may soft-remove it.
@@ -65,6 +70,7 @@ export default function Bulletin() {
       ...post,
       author: profile?.displayName || user?.displayName || AUTHOR_FALLBACK,
     })
+    if (isOfficerOrAdviser) setPendingCount((n) => (n ?? 0) + 1)
   }
 
   return (
@@ -72,16 +78,12 @@ export default function Bulletin() {
       <Masthead
         eyebrow="Members"
         title={<>The chapter <em>board</em></>}
-        lede="Ask a question, post a photo, or answer someone else's. Sign in to post; anyone can read."
+        lede="Ask a question or answer someone else's. Sign in to post; anyone can read. An officer or adviser checks every post before it goes up."
         meta={[
           { label: 'On the board', value: loading ? 'Loading' : String(posts.length) },
           { label: 'Posting', value: user ? 'Signed in' : 'Sign in required' },
         ]}
       />
-
-      <div className="coming-soon-banner" role="status">
-        <h2>Coming soon!</h2>
-      </div>
 
       <section className="bulletin-section">
         <div className="bulletin-wrap">
@@ -97,6 +99,17 @@ export default function Bulletin() {
             >
               Archive
             </button>
+            {isOfficerOrAdviser && (
+              <button
+                type="button"
+                className={`btn btn-ghost bulletin-review${reviewOpen ? ' is-active' : ''}`}
+                onClick={() => setReviewOpen(true)}
+              >
+                <Icon name="check" size={14} />
+                Review posts
+                {pendingCount > 0 && <span className="bulletin-review-count">{pendingCount}</span>}
+              </button>
+            )}
             {isOfficerOrAdviser && (
               <button
                 type="button"
@@ -123,9 +136,18 @@ export default function Bulletin() {
       </section>
 
       {openPost && (
-        <ThreadModal post={openPost} onClose={() => setOpenPost(null)} onReplySaved={bumpReplyCount} />
+        <ThreadModal post={openPost} onClose={() => setOpenPost(null)} />
       )}
       {newPostOpen && <NewPostModal onCreate={handleCreatePost} onClose={() => setNewPostOpen(false)} />}
+      {reviewOpen && isOfficerOrAdviser && (
+        <ReviewPanel
+          onClose={() => setReviewOpen(false)}
+          onPostApproved={showApprovedPost}
+          onPostDiscarded={dropPost}
+          onReplyApproved={bumpReplyCount}
+          onCountChange={setPendingCount}
+        />
+      )}
       {archivedOpen && (
         <ArchivedPostsPanel
           onClose={() => setArchivedOpen(false)}

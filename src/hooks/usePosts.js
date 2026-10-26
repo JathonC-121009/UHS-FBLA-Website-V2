@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import {
   addPost, getPosts, getReplies, addReply as addReplySvc,
   removePost as removePostSvc, removeReply as removeReplySvc,
-  clearBoard as clearBoardSvc, getArchivedPosts,
+  clearBoard as clearBoardSvc, getArchivedPosts, deleteArchivedPost,
+  getPendingPosts, getPendingReplies, approvePost, discardPost, approveReply, discardReply,
 } from '../services/postsService.js'
 
 export function usePosts() {
@@ -30,6 +31,21 @@ export function usePosts() {
     setPosts((prev) => [saved, ...prev])
   }, [])
 
+  // Called by the review dashboard after it approves a post, so the post goes
+  // up on the board (or flips from Pending to Public for its author) at once.
+  const showApprovedPost = useCallback((post) => {
+    const approved = { ...post, status: 'visible' }
+    setPosts((prev) =>
+      [approved, ...prev.filter((p) => p.id !== post.id)]
+        .sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')),
+    )
+  }, [])
+
+  // Called after a post is discarded, in case it was the reviewer's own.
+  const dropPost = useCallback((postId) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId))
+  }, [])
+
   const removePost = useCallback(async (postId) => {
     await removePostSvc(postId)
     setPosts((prev) => prev.filter((p) => p.id !== postId))
@@ -48,7 +64,10 @@ export function usePosts() {
     )
   }, [])
 
-  return { posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount }
+  return {
+    posts, loading, error, createPost, removePost, clearBoard, bumpReplyCount,
+    showApprovedPost, dropPost, reload: load,
+  }
 }
 
 export function usePostThread(postId) {
@@ -142,6 +161,13 @@ export function useArchivedPosts({ pageSize = 30 } = {}) {
     setPage((cur) => Math.max(0, cur - 1))
   }, [])
 
+  // Permanent delete (officers and advisers). Drops the post from every cached
+  // page so it disappears at once; later pages shift by one on the next fetch.
+  const deletePost = useCallback(async (postId) => {
+    await deleteArchivedPost(postId)
+    setPagesCache((prev) => prev.map((pagePosts) => pagePosts?.filter((p) => p.id !== postId)))
+  }, [])
+
   return {
     posts: pagesCache[page] ?? [],
     page,
@@ -149,7 +175,69 @@ export function useArchivedPosts({ pageSize = 30 } = {}) {
     hasPrevPage: page > 0,
     nextPage,
     prevPage,
+    deletePost,
     loading,
     error,
   }
+}
+
+/**
+ * The officer/adviser review queue: every pending post and reply. Approving or
+ * discarding takes the item out of the queue straight away.
+ */
+export function useReviewQueue() {
+  const [posts, setPosts] = useState([])
+  const [replies, setReplies] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const load = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      const [pendingPosts, pendingReplies] = await Promise.all([getPendingPosts(), getPendingReplies()])
+      setPosts(pendingPosts)
+      setReplies(pendingReplies)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { load() }, [load])
+
+  const decidePost = useCallback(async (post, approve) => {
+    await (approve ? approvePost(post.id) : discardPost(post.id))
+    setPosts((prev) => prev.filter((p) => p.id !== post.id))
+  }, [])
+
+  const decideReply = useCallback(async (reply, approve) => {
+    await (approve ? approveReply(reply.postId, reply.id) : discardReply(reply.id))
+    setReplies((prev) => prev.filter((r) => r.id !== reply.id))
+  }, [])
+
+  return { posts, replies, loading, error, reload: load, decidePost, decideReply }
+}
+
+/**
+ * How many posts and replies are waiting for review, for the badge on the
+ * toolbar's Review button. Only fetches when `enabled` (officers and advisers).
+ */
+export function usePendingCount(enabled) {
+  const [count, setCount] = useState(null)
+
+  useEffect(() => {
+    if (!enabled) {
+      setCount(null)
+      return undefined
+    }
+    let cancelled = false
+    Promise.all([getPendingPosts(), getPendingReplies()])
+      .then(([p, r]) => { if (!cancelled) setCount(p.length + r.length) })
+      .catch(() => { if (!cancelled) setCount(null) })
+    return () => { cancelled = true }
+  }, [enabled])
+
+  return [count, setCount]
 }

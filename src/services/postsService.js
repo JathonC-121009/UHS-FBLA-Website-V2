@@ -1,5 +1,5 @@
 import {
-  getDocs, getDoc, addDoc, updateDoc, doc, collection,
+  getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc, collection,
   query, orderBy, where, increment, limit, startAfter, writeBatch,
 } from 'firebase/firestore'
 import { db, auth } from '../firebaseConfig.js'
@@ -24,37 +24,31 @@ async function isModerator(uid) {
 
 export async function getPosts() {
   const currentUid = auth.currentUser?.uid
-  const moderator = currentUid ? await isModerator(currentUid) : false
 
-  let docs
-  if (moderator) {
-    const q = query(collection(db, POSTS_COL), orderBy('createdAt', 'desc'))
-    const snap = await getDocs(q)
-    docs = snap.docs
-  } else {
-    const visibleQ = query(
+  // Everyone, officers and advisers included, sees public posts plus their own
+  // pending ones. Other people's pending posts live in the review dashboard.
+  const visibleQ = query(
+    collection(db, POSTS_COL),
+    where('status', '==', 'visible'),
+    orderBy('createdAt', 'desc'),
+  )
+  const visibleSnap = await getDocs(visibleQ)
+  const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
+
+  if (currentUid) {
+    const ownPendingQ = query(
       collection(db, POSTS_COL),
-      where('status', '==', 'visible'),
+      where('authorUid', '==', currentUid),
+      where('status', '==', 'pending'),
       orderBy('createdAt', 'desc'),
     )
-    const visibleSnap = await getDocs(visibleQ)
-    const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
-
-    if (currentUid) {
-      const ownPendingQ = query(
-        collection(db, POSTS_COL),
-        where('authorUid', '==', currentUid),
-        where('status', '==', 'pending'),
-        orderBy('createdAt', 'desc'),
-      )
-      const ownPendingSnap = await getDocs(ownPendingQ)
-      ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
-    }
-
-    docs = [...byId.values()].sort((a, b) =>
-      (b.data().createdAt || '').localeCompare(a.data().createdAt || ''),
-    )
+    const ownPendingSnap = await getDocs(ownPendingQ)
+    ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
   }
+
+  const docs = [...byId.values()].sort((a, b) =>
+    (b.data().createdAt || '').localeCompare(a.data().createdAt || ''),
+  )
 
   return docs
     .filter((d) => !d.data().removed)
@@ -69,8 +63,8 @@ export async function addPost(post) {
   const createdAt = new Date().toISOString()
   const authorUid = auth.currentUser?.uid
 
-  const moderator = await isModerator(authorUid)
-
+  // Every post starts pending, officers' and advisers' included. It goes public
+  // only when an officer or adviser approves it in the review dashboard.
   const data = {
     type: post.type,
     // Defensive fallback: the UI layer attaches the real author, but Firestore
@@ -80,7 +74,7 @@ export async function addPost(post) {
     imageUrl: post.imageUrl || null,
     caption: post.caption || null,
     message: post.message || null,
-    status: moderator ? 'visible' : 'pending',
+    status: 'pending',
     replyCount: 0,
     createdAt,
   }
@@ -90,43 +84,32 @@ export async function addPost(post) {
 
 export async function getReplies(postId) {
   const currentUid = auth.currentUser?.uid
-  const moderator = currentUid ? await isModerator(currentUid) : false
 
-  let docs
-  if (moderator) {
-    const q = query(
+  // Same split as getPosts: public replies plus the reader's own pending ones.
+  const visibleQ = query(
+    collection(db, REPLIES_COL),
+    where('postId', '==', postId),
+    where('status', '==', 'visible'),
+    orderBy('createdAt', 'asc'),
+  )
+  const visibleSnap = await getDocs(visibleQ)
+  const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
+
+  if (currentUid) {
+    const ownPendingQ = query(
       collection(db, REPLIES_COL),
       where('postId', '==', postId),
+      where('authorUid', '==', currentUid),
+      where('status', '==', 'pending'),
       orderBy('createdAt', 'asc'),
     )
-    const snap = await getDocs(q)
-    docs = snap.docs
-  } else {
-    const visibleQ = query(
-      collection(db, REPLIES_COL),
-      where('postId', '==', postId),
-      where('status', '==', 'visible'),
-      orderBy('createdAt', 'asc'),
-    )
-    const visibleSnap = await getDocs(visibleQ)
-    const byId = new Map(visibleSnap.docs.map((d) => [d.id, d]))
-
-    if (currentUid) {
-      const ownPendingQ = query(
-        collection(db, REPLIES_COL),
-        where('postId', '==', postId),
-        where('authorUid', '==', currentUid),
-        where('status', '==', 'pending'),
-        orderBy('createdAt', 'asc'),
-      )
-      const ownPendingSnap = await getDocs(ownPendingQ)
-      ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
-    }
-
-    docs = [...byId.values()].sort((a, b) =>
-      (a.data().createdAt || '').localeCompare(b.data().createdAt || ''),
-    )
+    const ownPendingSnap = await getDocs(ownPendingQ)
+    ownPendingSnap.docs.forEach((d) => byId.set(d.id, d))
   }
+
+  const docs = [...byId.values()].sort((a, b) =>
+    (a.data().createdAt || '').localeCompare(b.data().createdAt || ''),
+  )
 
   return docs
     .filter((d) => !d.data().removed)
@@ -137,20 +120,17 @@ export async function addReply(postId, reply) {
   const createdAt = new Date().toISOString()
   const authorUid = auth.currentUser?.uid
 
-  const moderator = await isModerator(authorUid)
-
+  // Every reply starts pending, like posts. The parent post's replyCount is
+  // bumped in approveReply, so the badge only counts replies people can see.
   const data = {
     postId,
     author: reply.author,
     authorUid,
     message: reply.message,
-    status: moderator ? 'visible' : 'pending',
+    status: 'pending',
     createdAt,
   }
   const ref = await addDoc(collection(db, REPLIES_COL), data)
-  await updateDoc(doc(db, POSTS_COL, postId), {
-    replyCount: increment(1),
-  })
   return { id: ref.id, ...data }
 }
 
@@ -175,13 +155,14 @@ export async function removeReply(postId, replyId) {
 }
 
 /**
- * Soft-remove every currently-active post in ONE batched write (single
- * timestamp for the whole batch). NOTE: writeBatch commits cap at 500
- * operations. A chapter board with 500+ active posts is not anticipated;
- * chunking into batches of ~400 would be needed if it ever is.
+ * Soft-remove every public post in ONE batched write (single timestamp for the
+ * whole batch). Only 'visible' posts are touched: pending posts stay pending in
+ * the review queue. NOTE: writeBatch commits cap at 500 operations. A chapter
+ * board with 500+ public posts is not anticipated; chunking into batches of
+ * ~400 would be needed if it ever is.
  */
 export async function clearBoard() {
-  const q = query(collection(db, POSTS_COL))
+  const q = query(collection(db, POSTS_COL), where('status', '==', 'visible'))
   const snap = await getDocs(q)
   const removedAt = new Date().toISOString()
   const batch = writeBatch(db)
@@ -195,6 +176,27 @@ export async function clearBoard() {
   if (writes > 0) {
     await batch.commit()
   }
+}
+
+/**
+ * Permanently delete a post and every reply on it. Replies go first, one
+ * request each, so a failure part way leaves the post in place to try again.
+ * firestore.rules allows this only for officers and advisers, and only on a
+ * post that is archived or still pending.
+ */
+async function deletePostAndReplies(postId) {
+  const repliesSnap = await getDocs(
+    query(collection(db, REPLIES_COL), where('postId', '==', postId)),
+  )
+  for (const r of repliesSnap.docs) {
+    await deleteDoc(r.ref)
+  }
+  await deleteDoc(doc(db, POSTS_COL, postId))
+}
+
+/** Permanently delete an archived post and its replies. Cannot be undone. */
+export async function deleteArchivedPost(postId) {
+  await deletePostAndReplies(postId)
 }
 
 /**
@@ -281,34 +283,56 @@ export async function getArchivedPosts({ pageSize = 30, cursor = null } = {}) {
   }
 }
 
+// The review queue. Officers and advisers only (firestore.rules lets nobody
+// else read other people's pending documents). Sorted in JS, oldest first, so
+// these single-field queries need no composite index.
+
 export async function getPendingPosts() {
-  const q = query(
-    collection(db, POSTS_COL),
-    where('status', '==', 'pending'),
-    orderBy('createdAt', 'desc'),
-  )
+  const q = query(collection(db, POSTS_COL), where('status', '==', 'pending'))
   const snap = await getDocs(q)
   return snap.docs
     .filter((d) => !d.data().removed)
     .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
 }
 
 export async function getPendingReplies() {
-  const q = query(
-    collection(db, REPLIES_COL),
-    where('status', '==', 'pending'),
-    orderBy('createdAt', 'desc'),
-  )
+  const q = query(collection(db, REPLIES_COL), where('status', '==', 'pending'))
   const snap = await getDocs(q)
-  return snap.docs
+  const replies = snap.docs
     .filter((d) => !d.data().removed)
     .map((d) => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
+
+  // Attach the parent post so a reviewer can see what each reply answers.
+  const parentIds = [...new Set(replies.map((r) => r.postId))]
+  const parents = new Map()
+  await Promise.all(parentIds.map(async (id) => {
+    try {
+      const p = await getDoc(doc(db, POSTS_COL, id))
+      if (p.exists()) parents.set(id, { id: p.id, ...p.data() })
+    } catch {
+      /* A parent the reviewer cannot read just shows without context. */
+    }
+  }))
+  return replies.map((r) => ({ ...r, parentPost: parents.get(r.postId) ?? null }))
 }
 
 export async function approvePost(postId) {
   await updateDoc(doc(db, POSTS_COL, postId), { status: 'visible' })
 }
 
+/** Discard a pending post: permanently deletes it and its replies. */
+export async function discardPost(postId) {
+  await deletePostAndReplies(postId)
+}
+
 export async function approveReply(postId, replyId) {
   await updateDoc(doc(db, REPLIES_COL, replyId), { status: 'visible' })
+  await updateDoc(doc(db, POSTS_COL, postId), { replyCount: increment(1) })
+}
+
+/** Discard a pending reply: permanently deletes it. */
+export async function discardReply(replyId) {
+  await deleteDoc(doc(db, REPLIES_COL, replyId))
 }

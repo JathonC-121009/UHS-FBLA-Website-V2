@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import useAuth from '../../hooks/useAuth.js'
 import { useArchivedPosts } from '../../hooks/usePosts.js'
 import Icon from '../Icon.jsx'
 import Portal from '../Portal.jsx'
@@ -9,9 +10,29 @@ import './ArchivedPostsPanel.css'
 /**
  * Archived (soft-removed) posts, newest removed first, read through the
  * cursor-based useArchivedPosts() hook: next and previous only, 30 per page.
+ * Officers and advisers also get a Delete button that removes a post and its
+ * replies for good.
  */
 export default function ArchivedPostsPanel({ onClose, onOpenPost }) {
-  const { posts, page, hasNextPage, hasPrevPage, nextPage, prevPage, loading, error } = useArchivedPosts()
+  const { posts, page, hasNextPage, hasPrevPage, nextPage, prevPage, deletePost, loading, error } = useArchivedPosts()
+  const { isOfficerOrAdviser } = useAuth()
+  const [deletingId, setDeletingId] = useState(null)
+  const [deleteError, setDeleteError] = useState('')
+
+  const handleDelete = async (post) => {
+    if (!window.confirm(
+      'Permanently delete this post and all of its replies? This cannot be undone.',
+    )) return
+    setDeletingId(post.id)
+    setDeleteError('')
+    try {
+      await deletePost(post.id)
+    } catch {
+      setDeleteError('That post did not delete. Try again.')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   useEffect(() => {
     const onKey = (e) => {
@@ -36,8 +57,13 @@ export default function ArchivedPostsPanel({ onClose, onOpenPost }) {
         </button>
         <h3>Archive</h3>
         <p className="archived-sub">
-          Posts removed from the live board, newest first. Nothing is deleted.
+          Posts removed from the live board, newest first.
+          {isOfficerOrAdviser
+            ? ' Officers and advisers can delete a post here for good.'
+            : ' Nothing is deleted.'}
         </p>
+
+        {deleteError && <p className="thread-state thread-error" role="alert">{deleteError}</p>}
 
         <div className="archived-list">
           {loading && <p className="thread-state">Loading the archive</p>}
@@ -49,6 +75,17 @@ export default function ArchivedPostsPanel({ onClose, onOpenPost }) {
             <div className="archived-note" key={post.id}>
               <Note post={post} onOpen={() => onOpenPost(post)} />
               <span className="archived-tag">Archived</span>
+              {isOfficerOrAdviser && (
+                <button
+                  type="button"
+                  className="archived-delete"
+                  onClick={() => handleDelete(post)}
+                  disabled={deletingId === post.id}
+                >
+                  <Icon name="trash" size={13} />
+                  {deletingId === post.id ? 'Deleting' : 'Delete forever'}
+                </button>
+              )}
             </div>
           ))}
         </div>

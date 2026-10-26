@@ -28,17 +28,15 @@ service cloud.firestore {
         || isModerator();
 
       // Only signed-in users may create posts; photo posts are rejected.
-      // Status must match the author's role: moderators set 'visible',
-      // everyone else must set 'pending'.
+      // Every post starts 'pending', officers' and advisers' included, and
+      // goes public only when a moderator approves it in the review dashboard.
       allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.author is string
         && request.resource.data.author.size() > 0
         && request.resource.data.createdAt is string
         && request.resource.data.type == 'question'
-        && request.resource.data.status in ['pending', 'visible']
-        && ((isModerator() && request.resource.data.status == 'visible')
-            || (!isModerator() && request.resource.data.status == 'pending'));
+        && request.resource.data.status == 'pending';
 
       // Owner may update only caption, message, and/or imageUrl
       allow update: if isOwner(resource.data.authorUid) && isSignedIn()
@@ -57,16 +55,19 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
         && (isOwner(resource.data.authorUid) || isModerator());
 
-      // Moderator may flip a pending post to visible
+      // Moderator may approve a pending post (flip it to visible)
       allow update: if isModerator()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && resource.data.status == 'pending'
         && request.resource.data.status == 'visible';
 
-      // Hard delete is intentionally disabled — soft-remove via {removed,
-      // removedAt} is the ONLY removal mechanism, for both authors and
-      // officers/advisers, so removed content stays visible in the Archived
-      // Posts view instead of being destroyed. (Falls through to the catch-all
-      // deny below.)
+      // Normal removal is a soft-remove via {removed, removedAt}, which moves
+      // the post to the Archive. Only a moderator may permanently delete a
+      // post: one already archived, or one discarded from the review queue
+      // (still pending, or 'rejected' from the earlier discard flow).
+      allow delete: if isModerator()
+        && (resource.data.get('removed', false) == true
+            || resource.data.get('status', null) in ['pending', 'rejected']);
     }
 
     match /replies/{replyId} {
@@ -76,7 +77,7 @@ service cloud.firestore {
         || isOwner(resource.data.authorUid)
         || isModerator();
 
-      // Signed-in users may create replies; status must match the author's role.
+      // Signed-in users may create replies; every reply starts 'pending'.
       allow create: if isSignedIn()
         && request.resource.data.authorUid == request.auth.uid
         && request.resource.data.postId is string
@@ -85,9 +86,7 @@ service cloud.firestore {
         && request.resource.data.message is string
         && request.resource.data.message.size() > 0
         && request.resource.data.createdAt is string
-        && request.resource.data.status in ['pending', 'visible']
-        && ((isModerator() && request.resource.data.status == 'visible')
-            || (!isModerator() && request.resource.data.status == 'pending'));
+        && request.resource.data.status == 'pending';
 
       // Owner may update only the message field
       allow update: if isOwner(resource.data.authorUid) && isSignedIn()
@@ -99,18 +98,21 @@ service cloud.firestore {
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['removed', 'removedAt'])
         && (isOwner(resource.data.authorUid) || isModerator());
 
-      // Moderator may flip a pending reply to visible
+      // Moderator may approve a pending reply (flip it to visible)
       allow update: if isModerator()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && resource.data.status == 'pending'
         && request.resource.data.status == 'visible';
 
-      // Hard delete is intentionally disabled — soft-remove via {removed,
-      // removedAt} is the ONLY removal mechanism, for both authors and
-      // officers/advisers, so removed content stays visible in the Archived
-      // Posts view instead of being destroyed. (Falls through to the catch-all
-      // deny below. A removed parent post does NOT cascade to replies; removed
-      // replies are just hidden, which resolves the old cascade gap by making
-      // it moot.)
+      // A moderator may permanently delete a reply being discarded (pending,
+      // or 'rejected' from the earlier discard flow), or any reply whose parent
+      // post is archived, pending, or already gone, which is how deleting a
+      // post clears out its replies. Otherwise replies are soft-removed.
+      allow delete: if isModerator()
+        && (resource.data.get('status', null) in ['pending', 'rejected']
+            || !exists(/databases/$(database)/documents/posts/$(resource.data.postId))
+            || get(/databases/$(database)/documents/posts/$(resource.data.postId)).data.get('removed', false) == true
+            || get(/databases/$(database)/documents/posts/$(resource.data.postId)).data.get('status', null) in ['pending', 'rejected']);
     }
 
     match /contactMessages/{messageId} {

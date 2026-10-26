@@ -58,10 +58,6 @@ export default function Contact() {
         ]}
       />
 
-      <div className="coming-soon-banner" role="status">
-        <h2>Coming soon!</h2>
-      </div>
-
       <section className="contact-section">
         <div className="contact-layout">
           <div className="contact-details" data-reveal-group>

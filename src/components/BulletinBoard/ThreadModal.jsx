@@ -11,11 +11,13 @@ import './ThreadModal.css'
  * The full post and its reply thread, opened from a note on the board.
  * Replies use the signed-in account, so there is no name field.
  */
-export default function ThreadModal({ post, onClose, onReplySaved }) {
+export default function ThreadModal({ post, onClose }) {
   const { user, isOfficerOrAdviser, openAuthModal } = useAuth()
   const { replies, loading, error, reply, removeReply } = usePostThread(post.id)
   const [message, setMessage] = useState('')
   const [busy, setBusy] = useState(false)
+  // 'sent' after a reply saves (it is pending review), 'error' if it did not.
+  const [replyNotice, setReplyNotice] = useState(null)
 
   const isOwnerOrModerator = !!user && (post.authorUid === user.uid || isOfficerOrAdviser)
 
@@ -34,13 +36,15 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
     const text = message.trim()
     if (!text || !user) return
     setBusy(true)
+    setReplyNotice(null)
     try {
-      const saved = await reply({ author: user.displayName || AUTHOR_FALLBACK, message: text })
-      // Only after the reply actually saved: bump the board's reply-count badge.
-      if (saved) onReplySaved?.(post.id)
+      await reply({ author: user.displayName || AUTHOR_FALLBACK, message: text })
+      // The reply is pending, so the board's reply-count badge is not bumped
+      // here; the review dashboard bumps it when the reply is approved.
       setMessage('')
+      setReplyNotice('sent')
     } catch {
-      /* Nothing to surface: the live thread still shows replies that saved. */
+      setReplyNotice('error')
     } finally {
       setBusy(false)
     }
@@ -95,6 +99,7 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
               <div className="thread-reply-head">
                 <span className="thread-reply-author">{r.author || AUTHOR_FALLBACK}</span>
                 <span className="thread-reply-time">{timeAgo(r.createdAt)}</span>
+                {r.status === 'pending' && <span className="thread-reply-pending">Pending review</span>}
                 {canRemoveReply(r) && (
                   <button
                     type="button"
@@ -111,6 +116,18 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
           ))}
         </div>
 
+        {replyNotice === 'sent' && (
+          <p className="thread-notice" role="status">
+            Your reply was sent to an officer or adviser for verification. Everyone will see it
+            once it is approved.
+          </p>
+        )}
+        {replyNotice === 'error' && (
+          <p className="thread-notice thread-notice--error" role="alert">
+            That reply did not send. Try again.
+          </p>
+        )}
+
         {user ? (
           <form className="thread-reply-form" onSubmit={handleReply}>
             <textarea
@@ -120,7 +137,7 @@ export default function ThreadModal({ post, onClose, onReplySaved }) {
               rows={2}
             />
             <button type="submit" className="btn btn-primary" disabled={busy || !message.trim()}>
-              {busy ? 'Posting' : 'Reply'}
+              {busy ? 'Sending' : 'Reply'}
             </button>
           </form>
         ) : (

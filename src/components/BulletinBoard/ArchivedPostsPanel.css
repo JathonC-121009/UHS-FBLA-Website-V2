@@ -26,6 +26,22 @@
   z-index: 3;
 }
 
+.archived-delete {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  margin: -.5rem 0 1.25rem;
+  padding: .35rem .6rem;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-000);
+  color: var(--ink-900);
+  font-size: .8rem;
+  font-weight: 500;
+  transition: border-color var(--t-mid) var(--e-out), background var(--t-mid) var(--e-out);
+}
+.archived-delete:hover:not(:disabled) { border-color: var(--navy-900); background: var(--paper-200); }
+.archived-delete:disabled { opacity: .5; cursor: not-allowed; }
+
 .archived-nav {
   display: flex;
   align-items: center;

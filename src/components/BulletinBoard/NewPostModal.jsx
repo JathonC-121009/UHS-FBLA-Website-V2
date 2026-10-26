@@ -7,15 +7,18 @@ import './NewPostModal.css'
 /**
  * The new post form. There is no name field: Bulletin.jsx attaches the author
  * in its onCreate handler (profile display name, then Auth display name, then
- * the shared fallback), so it is never asked for here.
+ * the shared fallback), so it is never asked for here. After a post saves, the
+ * form is replaced by a notice that it was sent to an officer or adviser for
+ * review, since every post starts pending.
  */
 export default function NewPostModal({ onCreate, onClose }) {
-  const [type, setType] = useState('photo') // 'photo' | 'question'
+  const [type, setType] = useState('question') // 'photo' | 'question'
   const [imageUrl, setImageUrl] = useState('')
   const [caption, setCaption] = useState('')
   const [message, setMessage] = useState('')
   const [formError, setFormError] = useState('')
   const [busy, setBusy] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
 
   useEffect(() => {
     const onKey = (e) => {
@@ -48,7 +51,7 @@ export default function NewPostModal({ onCreate, onClose }) {
           ? { type: 'photo', imageUrl: imageUrl.trim(), caption: caption.trim() || null }
           : { type: 'question', message: message.trim() },
       )
-      onClose()
+      setSubmitted(true)
     } catch (err) {
       setFormError(err?.message || 'That post did not save. Try again.')
     } finally {
@@ -69,6 +72,20 @@ export default function NewPostModal({ onCreate, onClose }) {
         <button className="bulletin-modal-close" onClick={onClose} aria-label="Close">
           <Icon name="close" size={16} />
         </button>
+        {submitted ? (
+          <div className="npm-sent" role="status">
+            <h3>Sent for review</h3>
+            <p>
+              Your post was sent to an officer or adviser for verification. It will show up on
+              the board for everyone once it is approved. Until then, only you can see it,
+              marked Pending review.
+            </p>
+            <button type="button" className="btn btn-primary btn-block" onClick={onClose} autoFocus>
+              Got it
+            </button>
+          </div>
+        ) : (
+        <>
         <h3>Pin a post</h3>
 
         {formError && (
@@ -136,10 +153,16 @@ export default function NewPostModal({ onCreate, onClose }) {
             </div>
           )}
 
+          <p className="npm-note">
+            Every post is checked by an officer or adviser before it goes public.
+          </p>
+
           <button type="submit" className="btn btn-primary btn-block" disabled={busy}>
-            {busy ? 'Pinning' : 'Pin it'}
+            {busy ? 'Sending' : 'Send for review'}
           </button>
         </form>
+        </>
+        )}
       </div>
     </div>
     </Portal>

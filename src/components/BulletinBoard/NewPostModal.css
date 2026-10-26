@@ -37,3 +37,12 @@
 .npm-form { display: flex; flex-direction: column; gap: 1.25rem; }
 .npm-form .npm-group { margin: 0; }
 .npm-form textarea { min-height: 130px; }
+
+.npm-note { margin-top: -.25rem; color: var(--text-muted); font-size: .85rem; line-height: 1.5; }
+
+.npm-sent p {
+  margin-bottom: 1.5rem;
+  color: var(--ink-800);
+  font-size: .95rem;
+  line-height: 1.65;
+}

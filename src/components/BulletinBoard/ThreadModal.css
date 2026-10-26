@@ -96,6 +96,16 @@
   letter-spacing: 0.07em;
   color: var(--text-faint);
 }
+.thread-reply-pending {
+  padding: .1rem .4rem;
+  background: var(--paper-200);
+  border: 1px solid var(--line);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
 .thread-reply-text { font-size: .92rem; line-height: 1.65; color: var(--ink-800); }
 .thread-remove {
   margin-left: auto;
@@ -104,6 +114,17 @@
   transition: color var(--t-mid) var(--e-out);
 }
 .thread-remove:hover { color: var(--ink-900); }
+
+.thread-notice {
+  margin-top: 1.25rem;
+  padding: .75rem 1rem;
+  background: var(--accent-wash);
+  border-left: 2px solid var(--accent);
+  color: var(--ink-900);
+  font-size: .88rem;
+  line-height: 1.55;
+}
+.thread-notice--error { background: var(--paper-000); border: 1px solid var(--accent); border-left-width: 2px; }
 
 .thread-reply-form {
   display: flex;
